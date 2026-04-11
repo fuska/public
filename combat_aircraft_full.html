@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combat Aircraft Reference</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#0d1117;color:#e6edf3;overflow-x:hidden}
+  h1{text-align:center;padding:36px 20px 6px;font-size:2.2em;color:#58a6ff;letter-spacing:3px;text-transform:uppercase}
+  .subtitle{text-align:center;color:#8b949e;font-size:0.95em;padding-bottom:24px}
+  h2{padding:22px 30px 12px;font-size:1.25em;color:#f0883e;border-bottom:2px solid #21262d;margin:0 20px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;padding:16px 30px 28px}
+
+  /* Small card */
+  .card{background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden;
+         transition:transform 0.18s,box-shadow 0.18s,border-color 0.18s;cursor:pointer;position:relative}
+  .card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(88,166,255,0.25);border-color:#58a6ff}
+  .card-img{width:100%;height:160px;object-fit:cover;background:#1c2128;display:block}
+  .no-img{width:100%;height:160px;background:#1c2128;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;color:#444;font-size:1.8em}
+  .no-img span{font-size:0.38em;margin-top:5px;font-style:italic;color:#333}
+  .card-body{padding:10px 12px}
+  .card-title{font-size:0.9em;font-weight:700;color:#58a6ff;margin-bottom:4px;line-height:1.3}
+  .card-country{font-size:0.74em;color:#8b949e;margin-bottom:2px}
+  .card-role{font-size:0.72em;color:#3fb950;margin-bottom:3px}
+  .card-years{font-size:0.76em;color:#f0883e;font-weight:600}
+  .count{color:#8b949e;font-size:0.8em;font-weight:normal;margin-left:8px}
+
+  /* Backdrop */
+  #backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+             z-index:100;opacity:0;pointer-events:none;transition:opacity 0.25s ease}
+  #backdrop.visible{opacity:1;pointer-events:all}
+
+  /* Detail panel */
+  #detail{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.88);
+           z-index:101;width:min(620px,92vw);background:#161b22;border:1px solid #58a6ff;
+           border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.8);
+           opacity:0;pointer-events:none;
+           transition:opacity 0.28s ease, transform 0.28s cubic-bezier(0.34,1.56,0.64,1)}
+  #detail.visible{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all}
+  #detail-img{width:100%;height:280px;object-fit:cover;background:#0d1117;display:block}
+  #detail-img.hidden{display:none}
+  #detail-no-img{width:100%;height:120px;background:#0d1117;display:none;align-items:center;
+                  justify-content:center;font-size:3em;color:#333}
+  #detail-body{padding:20px 24px 24px}
+  #detail-title{font-size:1.4em;font-weight:800;color:#58a6ff;margin-bottom:6px;line-height:1.2}
+  #detail-meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .meta-tag{font-size:0.78em;padding:3px 10px;border-radius:20px;font-weight:600}
+  .tag-country{background:#21262d;color:#8b949e}
+  .tag-role{background:#1a3a20;color:#3fb950}
+  .tag-years{background:#3a2a10;color:#f0883e}
+  #detail-extract{font-size:0.88em;line-height:1.7;color:#c9d1d9;max-height:180px;
+                   overflow-y:auto;scrollbar-width:thin;scrollbar-color:#30363d #161b22}
+  #detail-extract::-webkit-scrollbar{width:5px}
+  #detail-extract::-webkit-scrollbar-track{background:#161b22}
+  #detail-extract::-webkit-scrollbar-thumb{background:#30363d;border-radius:3px}
+  #detail-footer{margin-top:16px;display:flex;justify-content:space-between;align-items:center}
+  #detail-wiki-link{color:#58a6ff;font-size:0.82em;text-decoration:none;
+                     border:1px solid #30363d;padding:5px 14px;border-radius:6px;
+                     transition:border-color 0.2s,background 0.2s}
+  #detail-wiki-link:hover{border-color:#58a6ff;background:#21262d}
+  #detail-close{color:#8b949e;font-size:0.82em;cursor:pointer;padding:5px 12px;
+                 border:1px solid #30363d;border-radius:6px;background:none;
+                 transition:border-color 0.2s,color 0.2s}
+  #detail-close:hover{border-color:#f0883e;color:#f0883e}
+  #detail-loading{color:#8b949e;font-size:0.85em;font-style:italic;padding:8px 0}
+</style>
+</head>
+<body>
+<h1>✈ Combat Aircraft Reference</h1>
+<p class="subtitle">95 aircraft — hover any card for details from Wikipedia</p>
+<h2>✈ 1st Generation (1944–1953)<span class="count">(11 aircraft)</span></h2>
+<div class="grid">
+  <div class="card" data-wiki="Messerschmitt_Me_262" data-name="Messerschmitt Me 262" data-country="Germany" data-role="1st Gen Jet Fighter" data-years="1944–1945">
+    <div class="no-img" id="ph-Messerschmitt_Me_262">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Messerschmitt Me 262</div>
+      <div class="card-country">🌍 Germany</div>
+      <div class="card-role">1st Gen Jet Fighter</div>
+      <div class="card-years">📅 1944–1945</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Gloster_Meteor" data-name="Gloster Meteor" data-country="UK" data-role="1st Gen Jet Fighter" data-years="1944–1960s">
+    <div class="no-img" id="ph-Gloster_Meteor">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Gloster Meteor</div>
+      <div class="card-country">🌍 UK</div>
+      <div class="card-role">1st Gen Jet Fighter</div>
+      <div class="card-years">📅 1944–1960s</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="De_Havilland_Vampire" data-name="de Havilland Vampire" data-country="UK" data-role="1st Gen Jet Fighter" data-years="1945–1960s">
+    <div class="no-img" id="ph-De_Havilland_Vampire">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">de Havilland Vampire</div>
+      <div class="card-country">🌍 UK</div>
+      <div class="card-role">1st Gen Jet Fighter</div>
+      <div class="card-years">📅 1945–1960s</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Lockheed_P-80_Shooting_Star" data-name="Lockheed P-80 Shooting Star" data-country="USA" data-role="1st Gen Jet Fighter" data-years="1945–1959">
+    <div class="no-img" id="ph-Lockheed_P-80_Shooting_Star">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Lockheed P-80 Shooting Star</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">1st Gen Jet Fighter</div>
+      <div class="card-years">📅 1945–1959</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="North_American_F-86_Sabre" data-name="North American F-86 Sabre" data-country="USA" data-role="1st Gen Jet Fighter" data-years="1949–1994">
+    <div class="no-img" id="ph-North_American_F-86_Sabre">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">North American F-86 Sabre</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">1st Gen Jet Fighter</div>
+      <div class="card-years">📅 1949–1994</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Mikoyan-Gurevich_MiG-15" data-name="MiG-15 Fagot" data-country="USSR/Russia" data-role="1st Gen Jet Fighter" data-years="1949–1990s">
+    <div class="no-img" id="ph-Mikoyan-Gurevich_MiG-15">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">MiG-15 Fagot</div>
+      <div class="card-country">🌍 USSR/Russia</div>
+      <div class="card-role">1st Gen Jet Fighter</div>
+      <div class="card-years">📅 1949–1990s</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Mikoyan-Gurevich_MiG-17" data-name="MiG-17 Fresco" data-country="USSR/Russia" data-role="1st Gen Jet Fighter" data-years="1952–1990s">
+    <div class="no-img" id="ph-Mikoyan-Gurevich_MiG-17">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">MiG-17 Fresco</div>
+      <div class="card-country">🌍 USSR/Russia</div>
+      <div class="card-role">1st Gen Jet Fighter</div>
+      <div class="card-years">📅 1952–1990s</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Hawker_Sea_Hawk" data-name="Hawker Sea Hawk" data-country="UK" data-role="1st Gen Carrier Fighter" data-years="1953–1983">
+    <div class="no-img" id="ph-Hawker_Sea_Hawk">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Hawker Sea Hawk</div>
+      <div class="card-country">🌍 UK</div>
+      <div class="card-role">1st Gen Carrier Fighter</div>
+      <div class="card-years">📅 1953–1983</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Grumman_F9F_Panther" data-name="F9F Panther/Cougar" data-country="USA" data-role="1st Gen Carrier Fighter" data-years="1947–1974">
+    <div class="no-img" id="ph-Grumman_F9F_Panther">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">F9F Panther/Cougar</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">1st Gen Carrier Fighter</div>
+      <div class="card-years">📅 1947–1974</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Dassault_Ouragan" data-name="Dassault Ouragan" data-country="France" data-role="1st Gen Jet Fighter" data-years="1952–1978">
+    <div class="no-img" id="ph-Dassault_Ouragan">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Dassault Ouragan</div>
+      <div class="card-country">🌍 France</div>
+      <div class="card-role">1st Gen Jet Fighter</div>
+      <div class="card-years">📅 1952–1978</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Dassault_Mystère_IV" data-name="Dassault Mystère IV" data-country="France" data-role="1st Gen Jet Fighter" data-years="1955–1982">
+    <div class="no-img" id="ph-Dassault_Mystère_IV">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Dassault Mystère IV</div>
+      <div class="card-country">🌍 France</div>
+      <div class="card-role">1st Gen Jet Fighter</div>
+      <div class="card-years">📅 1955–1982</div>
+    </div>
+  </div>
+</div>
+<h2>✈ 2nd Generation (1955–1970)<span class="count">(17 aircraft)</span></h2>
+<div class="grid">
+  <div class="card" data-wiki="Mikoyan-Gurevich_MiG-19" data-name="MiG-19 Farmer" data-country="USSR/Russia" data-role="2nd Gen Jet Fighter" data-years="1955–1990s">
+    <div class="no-img" id="ph-Mikoyan-Gurevich_MiG-19">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">MiG-19 Farmer</div>
+      <div class="card-country">🌍 USSR/Russia</div>
+      <div class="card-role">2nd Gen Jet Fighter</div>
+      <div class="card-years">📅 1955–1990s</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Mikoyan-Gurevich_MiG-21" data-name="MiG-21 Fishbed" data-country="USSR/Russia" data-role="2nd Gen Jet Fighter" data-years="1959–present">
+    <div class="no-img" id="ph-Mikoyan-Gurevich_MiG-21">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">MiG-21 Fishbed</div>
+      <div class="card-country">🌍 USSR/Russia</div>
+      <div class="card-role">2nd Gen Jet Fighter</div>
+      <div class="card-years">📅 1959–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="North_American_F-100_Super_Sabre" data-name="F-100 Super Sabre" data-country="USA" data-role="2nd Gen Jet Fighter" data-years="1954–1979">
+    <div class="no-img" id="ph-North_American_F-100_Super_Sabre">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">F-100 Super Sabre</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">2nd Gen Jet Fighter</div>
+      <div class="card-years">📅 1954–1979</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="McDonnell_F-101_Voodoo" data-name="F-101 Voodoo" data-country="USA" data-role="2nd Gen Jet Fighter" data-years="1957–1971">
+    <div class="no-img" id="ph-McDonnell_F-101_Voodoo">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">F-101 Voodoo</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">2nd Gen Jet Fighter</div>
+      <div class="card-years">📅 1957–1971</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Convair_F-102_Delta_Dagger" data-name="F-102 Delta Dagger" data-country="USA" data-role="2nd Gen Interceptor" data-years="1956–1976">
+    <div class="no-img" id="ph-Convair_F-102_Delta_Dagger">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">F-102 Delta Dagger</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">2nd Gen Interceptor</div>
+      <div class="card-years">📅 1956–1976</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Lockheed_F-104_Starfighter" data-name="F-104 Starfighter" data-country="USA" data-role="2nd Gen Jet Fighter" data-years="1958–2004">
+    <div class="no-img" id="ph-Lockheed_F-104_Starfighter">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">F-104 Starfighter</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">2nd Gen Jet Fighter</div>
+      <div class="card-years">📅 1958–2004</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Republic_F-105_Thunderchief" data-name="F-105 Thunderchief" data-country="USA" data-role="2nd Gen Strike Fighter" data-years="1958–1984">
+    <div class="no-img" id="ph-Republic_F-105_Thunderchief">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">F-105 Thunderchief</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">2nd Gen Strike Fighter</div>
+      <div class="card-years">📅 1958–1984</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Convair_F-106_Delta_Dart" data-name="F-106 Delta Dart" data-country="USA" data-role="2nd Gen Interceptor" data-years="1959–1988">
+    <div class="no-img" id="ph-Convair_F-106_Delta_Dart">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">F-106 Delta Dart</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">2nd Gen Interceptor</div>
+      <div class="card-years">📅 1959–1988</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="English_Electric_Lightning" data-name="English Electric Lightning" data-country="UK" data-role="2nd Gen Interceptor" data-years="1960–1988">
+    <div class="no-img" id="ph-English_Electric_Lightning">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">English Electric Lightning</div>
+      <div class="card-country">🌍 UK</div>
+      <div class="card-role">2nd Gen Interceptor</div>
+      <div class="card-years">📅 1960–1988</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Dassault_Super_Mystère" data-name="Dassault Super Mystère" data-country="France" data-role="2nd Gen Jet Fighter" data-years="1957–1977">
+    <div class="no-img" id="ph-Dassault_Super_Mystère">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Dassault Super Mystère</div>
+      <div class="card-country">🌍 France</div>
+      <div class="card-role">2nd Gen Jet Fighter</div>
+      <div class="card-years">📅 1957–1977</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Gloster_Javelin" data-name="Gloster Javelin" data-country="UK" data-role="2nd Gen All-weather Interceptor" data-years="1956–1968">
+    <div class="no-img" id="ph-Gloster_Javelin">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Gloster Javelin</div>
+      <div class="card-country">🌍 UK</div>
+      <div class="card-role">2nd Gen All-weather Interceptor</div>
+      <div class="card-years">📅 1956–1968</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Saab_29_Tunnan" data-name="Saab J 29 Tunnan" data-country="Sweden" data-role="2nd Gen Jet Fighter" data-years="1951–1976">
+    <div class="no-img" id="ph-Saab_29_Tunnan">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Saab J 29 Tunnan</div>
+      <div class="card-country">🌍 Sweden</div>
+      <div class="card-role">2nd Gen Jet Fighter</div>
+      <div class="card-years">📅 1951–1976</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Saab_32_Lansen" data-name="Saab J 32 Lansen" data-country="Sweden" data-role="2nd Gen Jet Fighter" data-years="1956–1997">
+    <div class="no-img" id="ph-Saab_32_Lansen">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Saab J 32 Lansen</div>
+      <div class="card-country">🌍 Sweden</div>
+      <div class="card-role">2nd Gen Jet Fighter</div>
+      <div class="card-years">📅 1956–1997</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Saab_35_Draken" data-name="Saab J 35 Draken" data-country="Sweden" data-role="2nd Gen Jet Fighter" data-years="1960–2005">
+    <div class="no-img" id="ph-Saab_35_Draken">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Saab J 35 Draken</div>
+      <div class="card-country">🌍 Sweden</div>
+      <div class="card-role">2nd Gen Jet Fighter</div>
+      <div class="card-years">📅 1960–2005</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="De_Havilland_Sea_Vixen" data-name="de Havilland Sea Vixen" data-country="UK" data-role="2nd Gen Carrier Fighter" data-years="1959–1972">
+    <div class="no-img" id="ph-De_Havilland_Sea_Vixen">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">de Havilland Sea Vixen</div>
+      <div class="card-country">🌍 UK</div>
+      <div class="card-role">2nd Gen Carrier Fighter</div>
+      <div class="card-years">📅 1959–1972</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Hawker_Hunter" data-name="Hawker Hunter" data-country="UK" data-role="2nd Gen Fighter-Bomber" data-years="1954–2015">
+    <div class="no-img" id="ph-Hawker_Hunter">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Hawker Hunter</div>
+      <div class="card-country">🌍 UK</div>
+      <div class="card-role">2nd Gen Fighter-Bomber</div>
+      <div class="card-years">📅 1954–2015</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Avro_Canada_CF-100_Canuck" data-name="Avro Canada CF-100 Canuck" data-country="Canada" data-role="2nd Gen Interceptor" data-years="1953–1981">
+    <div class="no-img" id="ph-Avro_Canada_CF-100_Canuck">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Avro Canada CF-100 Canuck</div>
+      <div class="card-country">🌍 Canada</div>
+      <div class="card-role">2nd Gen Interceptor</div>
+      <div class="card-years">📅 1953–1981</div>
+    </div>
+  </div>
+</div>
+<h2>✈ 3rd Generation (1960–1975)<span class="count">(16 aircraft)</span></h2>
+<div class="grid">
+  <div class="card" data-wiki="McDonnell_Douglas_F-4_Phantom_II" data-name="McDonnell Douglas F-4 Phantom II" data-country="USA" data-role="3rd Gen Multirole Fighter" data-years="1960–2021">
+    <div class="no-img" id="ph-McDonnell_Douglas_F-4_Phantom_II">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">McDonnell Douglas F-4 Phantom II</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">3rd Gen Multirole Fighter</div>
+      <div class="card-years">📅 1960–2021</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Mikoyan-Gurevich_MiG-23" data-name="MiG-23 Flogger" data-country="USSR/Russia" data-role="3rd Gen Fighter" data-years="1970–present">
+    <div class="no-img" id="ph-Mikoyan-Gurevich_MiG-23">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">MiG-23 Flogger</div>
+      <div class="card-country">🌍 USSR/Russia</div>
+      <div class="card-role">3rd Gen Fighter</div>
+      <div class="card-years">📅 1970–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Mikoyan-Gurevich_MiG-25" data-name="MiG-25 Foxbat" data-country="USSR/Russia" data-role="3rd Gen Interceptor" data-years="1970–present">
+    <div class="no-img" id="ph-Mikoyan-Gurevich_MiG-25">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">MiG-25 Foxbat</div>
+      <div class="card-country">🌍 USSR/Russia</div>
+      <div class="card-role">3rd Gen Interceptor</div>
+      <div class="card-years">📅 1970–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Hawker_Siddeley_Harrier" data-name="Hawker Siddeley Harrier" data-country="UK" data-role="3rd Gen V/STOL Fighter" data-years="1969–2003">
+    <div class="no-img" id="ph-Hawker_Siddeley_Harrier">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Hawker Siddeley Harrier</div>
+      <div class="card-country">🌍 UK</div>
+      <div class="card-role">3rd Gen V/STOL Fighter</div>
+      <div class="card-years">📅 1969–2003</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Dassault_Mirage_III" data-name="Dassault Mirage III" data-country="France" data-role="3rd Gen Interceptor" data-years="1961–present">
+    <div class="no-img" id="ph-Dassault_Mirage_III">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Dassault Mirage III</div>
+      <div class="card-country">🌍 France</div>
+      <div class="card-role">3rd Gen Interceptor</div>
+      <div class="card-years">📅 1961–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Dassault_Mirage_F1" data-name="Dassault Mirage F1" data-country="France" data-role="3rd Gen Fighter-Bomber" data-years="1973–present">
+    <div class="no-img" id="ph-Dassault_Mirage_F1">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Dassault Mirage F1</div>
+      <div class="card-country">🌍 France</div>
+      <div class="card-role">3rd Gen Fighter-Bomber</div>
+      <div class="card-years">📅 1973–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Dassault_Mirage_5" data-name="Dassault Mirage 5" data-country="France" data-role="3rd Gen Fighter-Bomber" data-years="1967–present">
+    <div class="no-img" id="ph-Dassault_Mirage_5">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Dassault Mirage 5</div>
+      <div class="card-country">🌍 France</div>
+      <div class="card-role">3rd Gen Fighter-Bomber</div>
+      <div class="card-years">📅 1967–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="SEPECAT_Jaguar" data-name="SEPECAT Jaguar" data-country="UK/France" data-role="3rd Gen Strike Fighter" data-years="1973–2007">
+    <div class="no-img" id="ph-SEPECAT_Jaguar">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">SEPECAT Jaguar</div>
+      <div class="card-country">🌍 UK/France</div>
+      <div class="card-role">3rd Gen Strike Fighter</div>
+      <div class="card-years">📅 1973–2007</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="LTV_A-7_Corsair_II" data-name="A-7 Corsair II" data-country="USA" data-role="3rd Gen Attack Aircraft" data-years="1966–1991">
+    <div class="no-img" id="ph-LTV_A-7_Corsair_II">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">A-7 Corsair II</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">3rd Gen Attack Aircraft</div>
+      <div class="card-years">📅 1966–1991</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Northrop_F-5" data-name="Northrop F-5 Tiger II" data-country="USA" data-role="3rd Gen Lightweight Fighter" data-years="1963–present">
+    <div class="no-img" id="ph-Northrop_F-5">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Northrop F-5 Tiger II</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">3rd Gen Lightweight Fighter</div>
+      <div class="card-years">📅 1963–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Vought_F-8_Crusader" data-name="F-8 Crusader" data-country="USA" data-role="3rd Gen Carrier Fighter" data-years="1957–1999">
+    <div class="no-img" id="ph-Vought_F-8_Crusader">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">F-8 Crusader</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">3rd Gen Carrier Fighter</div>
+      <div class="card-years">📅 1957–1999</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Saab_37_Viggen" data-name="Saab AJ 37 Viggen" data-country="Sweden" data-role="3rd Gen Multirole Fighter" data-years="1971–2005">
+    <div class="no-img" id="ph-Saab_37_Viggen">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Saab AJ 37 Viggen</div>
+      <div class="card-country">🌍 Sweden</div>
+      <div class="card-role">3rd Gen Multirole Fighter</div>
+      <div class="card-years">📅 1971–2005</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="IAI_Kfir" data-name="IAI Kfir" data-country="Israel" data-role="3rd Gen Fighter-Bomber" data-years="1975–present">
+    <div class="no-img" id="ph-IAI_Kfir">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">IAI Kfir</div>
+      <div class="card-country">🌍 Israel</div>
+      <div class="card-role">3rd Gen Fighter-Bomber</div>
+      <div class="card-years">📅 1975–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Mitsubishi_F-1" data-name="Mitsubishi F-1" data-country="Japan" data-role="3rd Gen Strike Fighter" data-years="1978–2006">
+    <div class="no-img" id="ph-Mitsubishi_F-1">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Mitsubishi F-1</div>
+      <div class="card-country">🌍 Japan</div>
+      <div class="card-role">3rd Gen Strike Fighter</div>
+      <div class="card-years">📅 1978–2006</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Chengdu_J-7" data-name="Chengdu J-7" data-country="China" data-role="3rd Gen Fighter" data-years="1966–present">
+    <div class="no-img" id="ph-Chengdu_J-7">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Chengdu J-7</div>
+      <div class="card-country">🌍 China</div>
+      <div class="card-role">3rd Gen Fighter</div>
+      <div class="card-years">📅 1966–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Panavia_Tornado" data-name="Panavia Tornado IDS/ADV" data-country="UK/Germany/Italy" data-role="3rd Gen Strike Fighter" data-years="1979–present">
+    <div class="no-img" id="ph-Panavia_Tornado">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Panavia Tornado IDS/ADV</div>
+      <div class="card-country">🌍 UK/Germany/Italy</div>
+      <div class="card-role">3rd Gen Strike Fighter</div>
+      <div class="card-years">📅 1979–present</div>
+    </div>
+  </div>
+</div>
+<h2>🛦 4th Generation (1970s–2000s)<span class="count">(16 aircraft)</span></h2>
+<div class="grid">
+  <div class="card" data-wiki="Grumman_F-14_Tomcat" data-name="Grumman F-14 Tomcat" data-country="USA" data-role="4th Gen Carrier Interceptor" data-years="1974–2006">
+    <div class="no-img" id="ph-Grumman_F-14_Tomcat">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Grumman F-14 Tomcat</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">4th Gen Carrier Interceptor</div>
+      <div class="card-years">📅 1974–2006</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="McDonnell_Douglas_F-15_Eagle" data-name="McDonnell Douglas F-15 Eagle" data-country="USA" data-role="4th Gen Air Superiority" data-years="1976–present">
+    <div class="no-img" id="ph-McDonnell_Douglas_F-15_Eagle">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">McDonnell Douglas F-15 Eagle</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">4th Gen Air Superiority</div>
+      <div class="card-years">📅 1976–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="General_Dynamics_F-16_Fighting_Falcon" data-name="General Dynamics F-16 Fighting Falcon" data-country="USA" data-role="4th Gen Multirole" data-years="1978–present">
+    <div class="no-img" id="ph-General_Dynamics_F-16_Fighting_Falcon">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">General Dynamics F-16 Fighting Falcon</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">4th Gen Multirole</div>
+      <div class="card-years">📅 1978–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="McDonnell_Douglas_F/A-18_Hornet" data-name="McDonnell Douglas F/A-18 Hornet" data-country="USA" data-role="4th Gen Carrier Multirole" data-years="1983–present">
+    <div class="no-img" id="ph-McDonnell_Douglas_F_A-18_Hornet">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">McDonnell Douglas F/A-18 Hornet</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">4th Gen Carrier Multirole</div>
+      <div class="card-years">📅 1983–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Sukhoi_Su-27" data-name="Sukhoi Su-27 Flanker" data-country="USSR/Russia" data-role="4th Gen Air Superiority" data-years="1985–present">
+    <div class="no-img" id="ph-Sukhoi_Su-27">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Sukhoi Su-27 Flanker</div>
+      <div class="card-country">🌍 USSR/Russia</div>
+      <div class="card-role">4th Gen Air Superiority</div>
+      <div class="card-years">📅 1985–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Mikoyan_MiG-29" data-name="MiG-29 Fulcrum" data-country="USSR/Russia" data-role="4th Gen Air Superiority" data-years="1983–present">
+    <div class="no-img" id="ph-Mikoyan_MiG-29">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">MiG-29 Fulcrum</div>
+      <div class="card-country">🌍 USSR/Russia</div>
+      <div class="card-role">4th Gen Air Superiority</div>
+      <div class="card-years">📅 1983–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Dassault_Mirage_2000" data-name="Dassault Mirage 2000" data-country="France" data-role="4th Gen Multirole" data-years="1984–present">
+    <div class="no-img" id="ph-Dassault_Mirage_2000">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Dassault Mirage 2000</div>
+      <div class="card-country">🌍 France</div>
+      <div class="card-role">4th Gen Multirole</div>
+      <div class="card-years">📅 1984–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Saab_JAS_39_Gripen" data-name="JAS 39 Gripen A/B/C/D" data-country="Sweden" data-role="4th Gen Multirole" data-years="1996–present">
+    <div class="no-img" id="ph-Saab_JAS_39_Gripen">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">JAS 39 Gripen A/B/C/D</div>
+      <div class="card-country">🌍 Sweden</div>
+      <div class="card-role">4th Gen Multirole</div>
+      <div class="card-years">📅 1996–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Chengdu_J-10" data-name="Chengdu J-10" data-country="China" data-role="4th Gen Multirole" data-years="2003–present">
+    <div class="no-img" id="ph-Chengdu_J-10">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Chengdu J-10</div>
+      <div class="card-country">🌍 China</div>
+      <div class="card-role">4th Gen Multirole</div>
+      <div class="card-years">📅 2003–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="HAL_Tejas" data-name="HAL Tejas Mk1" data-country="India" data-role="4th Gen Lightweight Multirole" data-years="2015–present">
+    <div class="no-img" id="ph-HAL_Tejas">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">HAL Tejas Mk1</div>
+      <div class="card-country">🌍 India</div>
+      <div class="card-role">4th Gen Lightweight Multirole</div>
+      <div class="card-years">📅 2015–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Atlas_Cheetah" data-name="Atlas Cheetah" data-country="South Africa" data-role="4th Gen Fighter-Bomber" data-years="1986–2008">
+    <div class="no-img" id="ph-Atlas_Cheetah">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Atlas Cheetah</div>
+      <div class="card-country">🌍 South Africa</div>
+      <div class="card-role">4th Gen Fighter-Bomber</div>
+      <div class="card-years">📅 1986–2008</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="ENAER_Pantera" data-name="ENAER Pantera" data-country="Chile" data-role="4th Gen Fighter-Bomber" data-years="1988–present">
+    <div class="no-img" id="ph-ENAER_Pantera">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">ENAER Pantera</div>
+      <div class="card-country">🌍 Chile</div>
+      <div class="card-role">4th Gen Fighter-Bomber</div>
+      <div class="card-years">📅 1988–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Mitsubishi_F-2" data-name="Mitsubishi F-2" data-country="Japan" data-role="4th Gen Multirole" data-years="2000–present">
+    <div class="no-img" id="ph-Mitsubishi_F-2">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Mitsubishi F-2</div>
+      <div class="card-country">🌍 Japan</div>
+      <div class="card-role">4th Gen Multirole</div>
+      <div class="card-years">📅 2000–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Sukhoi_Su-33" data-name="Sukhoi Su-33" data-country="Russia" data-role="4th Gen Carrier Fighter" data-years="1993–present">
+    <div class="no-img" id="ph-Sukhoi_Su-33">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Sukhoi Su-33</div>
+      <div class="card-country">🌍 Russia</div>
+      <div class="card-role">4th Gen Carrier Fighter</div>
+      <div class="card-years">📅 1993–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Sukhoi_Su-25" data-name="Sukhoi Su-25 Frogfoot" data-country="Russia" data-role="4th Gen Attack Aircraft" data-years="1981–present">
+    <div class="no-img" id="ph-Sukhoi_Su-25">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Sukhoi Su-25 Frogfoot</div>
+      <div class="card-country">🌍 Russia</div>
+      <div class="card-role">4th Gen Attack Aircraft</div>
+      <div class="card-years">📅 1981–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="CAC/PAC_JF-17_Thunder" data-name="PAC JF-17 Thunder" data-country="China/Pakistan" data-role="4th Gen Lightweight Fighter" data-years="2007–present">
+    <div class="no-img" id="ph-CAC_PAC_JF-17_Thunder">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">PAC JF-17 Thunder</div>
+      <div class="card-country">🌍 China/Pakistan</div>
+      <div class="card-role">4th Gen Lightweight Fighter</div>
+      <div class="card-years">📅 2007–present</div>
+    </div>
+  </div>
+</div>
+<h2>🛦 4.5th Generation (1990s–present)<span class="count">(13 aircraft)</span></h2>
+<div class="grid">
+  <div class="card" data-wiki="Boeing_F/A-18E/F_Super_Hornet" data-name="Boeing F/A-18E/F Super Hornet" data-country="USA" data-role="4.5th Gen Carrier Multirole" data-years="1999–present">
+    <div class="no-img" id="ph-Boeing_F_A-18E_F_Super_Hornet">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Boeing F/A-18E/F Super Hornet</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">4.5th Gen Carrier Multirole</div>
+      <div class="card-years">📅 1999–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Boeing_F-15EX_Eagle_II" data-name="Boeing F-15EX Eagle II" data-country="USA" data-role="4.5th Gen Air Superiority" data-years="2021–present">
+    <div class="no-img" id="ph-Boeing_F-15EX_Eagle_II">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Boeing F-15EX Eagle II</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">4.5th Gen Air Superiority</div>
+      <div class="card-years">📅 2021–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Eurofighter_Typhoon" data-name="Eurofighter Typhoon" data-country="UK/Germany/Italy/Spain" data-role="4.5th Gen Multirole" data-years="2003–present">
+    <div class="no-img" id="ph-Eurofighter_Typhoon">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Eurofighter Typhoon</div>
+      <div class="card-country">🌍 UK/Germany/Italy/Spain</div>
+      <div class="card-role">4.5th Gen Multirole</div>
+      <div class="card-years">📅 2003–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Dassault_Rafale" data-name="Dassault Rafale" data-country="France" data-role="4.5th Gen Multirole" data-years="2001–present">
+    <div class="no-img" id="ph-Dassault_Rafale">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Dassault Rafale</div>
+      <div class="card-country">🌍 France</div>
+      <div class="card-role">4.5th Gen Multirole</div>
+      <div class="card-years">📅 2001–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Sukhoi_Su-30" data-name="Sukhoi Su-30" data-country="Russia" data-role="4.5th Gen Multirole" data-years="1992–present">
+    <div class="no-img" id="ph-Sukhoi_Su-30">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Sukhoi Su-30</div>
+      <div class="card-country">🌍 Russia</div>
+      <div class="card-role">4.5th Gen Multirole</div>
+      <div class="card-years">📅 1992–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Sukhoi_Su-34" data-name="Sukhoi Su-34 Fullback" data-country="Russia" data-role="4.5th Gen Strike Fighter" data-years="2014–present">
+    <div class="no-img" id="ph-Sukhoi_Su-34">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Sukhoi Su-34 Fullback</div>
+      <div class="card-country">🌍 Russia</div>
+      <div class="card-role">4.5th Gen Strike Fighter</div>
+      <div class="card-years">📅 2014–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Sukhoi_Su-35" data-name="Sukhoi Su-35S Flanker-E" data-country="Russia" data-role="4.5th Gen Air Superiority" data-years="2014–present">
+    <div class="no-img" id="ph-Sukhoi_Su-35">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Sukhoi Su-35S Flanker-E</div>
+      <div class="card-country">🌍 Russia</div>
+      <div class="card-role">4.5th Gen Air Superiority</div>
+      <div class="card-years">📅 2014–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Mikoyan_MiG-35" data-name="MiG-35 Fulcrum-F" data-country="Russia" data-role="4.5th Gen Multirole" data-years="2019–present">
+    <div class="no-img" id="ph-Mikoyan_MiG-35">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">MiG-35 Fulcrum-F</div>
+      <div class="card-country">🌍 Russia</div>
+      <div class="card-role">4.5th Gen Multirole</div>
+      <div class="card-years">📅 2019–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Chengdu_J-10" data-name="Chengdu J-10C" data-country="China" data-role="4.5th Gen Multirole" data-years="2017–present">
+    <div class="no-img" id="ph-Chengdu_J-10">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Chengdu J-10C</div>
+      <div class="card-country">🌍 China</div>
+      <div class="card-role">4.5th Gen Multirole</div>
+      <div class="card-years">📅 2017–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Shenyang_J-15" data-name="Shenyang J-15 Flying Shark" data-country="China" data-role="4.5th Gen Carrier Fighter" data-years="2013–present">
+    <div class="no-img" id="ph-Shenyang_J-15">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Shenyang J-15 Flying Shark</div>
+      <div class="card-country">🌍 China</div>
+      <div class="card-role">4.5th Gen Carrier Fighter</div>
+      <div class="card-years">📅 2013–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Saab_JAS_39_Gripen" data-name="Saab JAS 39E/F Gripen-E" data-country="Sweden" data-role="4.5th Gen Multirole" data-years="2019–present">
+    <div class="no-img" id="ph-Saab_JAS_39_Gripen">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Saab JAS 39E/F Gripen-E</div>
+      <div class="card-country">🌍 Sweden</div>
+      <div class="card-role">4.5th Gen Multirole</div>
+      <div class="card-years">📅 2019–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="KAI_T-50_Golden_Eagle" data-name="KAI FA-50 Golden Eagle" data-country="South Korea" data-role="4.5th Gen Light Fighter" data-years="2011–present">
+    <div class="no-img" id="ph-KAI_T-50_Golden_Eagle">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">KAI FA-50 Golden Eagle</div>
+      <div class="card-country">🌍 South Korea</div>
+      <div class="card-role">4.5th Gen Light Fighter</div>
+      <div class="card-years">📅 2011–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="HAL_Tejas" data-name="HAL Tejas Mk1A" data-country="India" data-role="4.5th Gen Multirole" data-years="2024–present">
+    <div class="no-img" id="ph-HAL_Tejas">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">HAL Tejas Mk1A</div>
+      <div class="card-country">🌍 India</div>
+      <div class="card-role">4.5th Gen Multirole</div>
+      <div class="card-years">📅 2024–present</div>
+    </div>
+  </div>
+</div>
+<h2>🔷 5th Generation & Stealth Pioneers<span class="count">(7 aircraft)</span></h2>
+<div class="grid">
+  <div class="card" data-wiki="Lockheed_F-117_Nighthawk" data-name="Lockheed F-117 Nighthawk" data-country="USA" data-role="5th Gen Stealth Attack (pioneer)" data-years="1983–2008">
+    <div class="no-img" id="ph-Lockheed_F-117_Nighthawk">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Lockheed F-117 Nighthawk</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">5th Gen Stealth Attack (pioneer)</div>
+      <div class="card-years">📅 1983–2008</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Lockheed_Martin_F-22_Raptor" data-name="Lockheed Martin F-22 Raptor" data-country="USA" data-role="5th Gen Stealth Fighter" data-years="2005–present">
+    <div class="no-img" id="ph-Lockheed_Martin_F-22_Raptor">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Lockheed Martin F-22 Raptor</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">5th Gen Stealth Fighter</div>
+      <div class="card-years">📅 2005–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Lockheed_Martin_F-35_Lightning_II" data-name="Lockheed Martin F-35 Lightning II" data-country="USA" data-role="5th Gen Stealth Multirole" data-years="2015–present">
+    <div class="no-img" id="ph-Lockheed_Martin_F-35_Lightning_II">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Lockheed Martin F-35 Lightning II</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">5th Gen Stealth Multirole</div>
+      <div class="card-years">📅 2015–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Chengdu_J-20" data-name="Chengdu J-20 Mighty Dragon" data-country="China" data-role="5th Gen Stealth Fighter" data-years="2017–present">
+    <div class="no-img" id="ph-Chengdu_J-20">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Chengdu J-20 Mighty Dragon</div>
+      <div class="card-country">🌍 China</div>
+      <div class="card-role">5th Gen Stealth Fighter</div>
+      <div class="card-years">📅 2017–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Sukhoi_Su-57" data-name="Sukhoi Su-57 Felon" data-country="Russia" data-role="5th Gen Stealth Fighter" data-years="2020–present">
+    <div class="no-img" id="ph-Sukhoi_Su-57">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Sukhoi Su-57 Felon</div>
+      <div class="card-country">🌍 Russia</div>
+      <div class="card-role">5th Gen Stealth Fighter</div>
+      <div class="card-years">📅 2020–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Shenyang_J-35" data-name="Shenyang J-35 Gyrfalcon" data-country="China" data-role="5th Gen Stealth Carrier Fighter" data-years="2023–present">
+    <div class="no-img" id="ph-Shenyang_J-35">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Shenyang J-35 Gyrfalcon</div>
+      <div class="card-country">🌍 China</div>
+      <div class="card-role">5th Gen Stealth Carrier Fighter</div>
+      <div class="card-years">📅 2023–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="KAI_KF-21_Boramae" data-name="KAI KF-21 Boramae" data-country="South Korea" data-role="5th Gen Multirole (dev)" data-years="2026–present">
+    <div class="no-img" id="ph-KAI_KF-21_Boramae">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">KAI KF-21 Boramae</div>
+      <div class="card-country">🌍 South Korea</div>
+      <div class="card-role">5th Gen Multirole (dev)</div>
+      <div class="card-years">📅 2026–present</div>
+    </div>
+  </div>
+</div>
+<h2>🚀 6th Generation (in development)<span class="count">(3 aircraft)</span></h2>
+<div class="grid">
+  <div class="card" data-wiki="Next_Generation_Air_Dominance" data-name="Boeing F-47 (NGAD)" data-country="USA" data-role="6th Gen Stealth Air Superiority" data-years="2025–dev">
+    <div class="no-img" id="ph-Next_Generation_Air_Dominance">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Boeing F-47 (NGAD)</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">6th Gen Stealth Air Superiority</div>
+      <div class="card-years">📅 2025–dev</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="BAE_Systems_Tempest" data-name="BAE Tempest / GCAP" data-country="UK/Italy/Japan" data-role="6th Gen Multirole" data-years="2035 est.">
+    <div class="no-img" id="ph-BAE_Systems_Tempest">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">BAE Tempest / GCAP</div>
+      <div class="card-country">🌍 UK/Italy/Japan</div>
+      <div class="card-role">6th Gen Multirole</div>
+      <div class="card-years">📅 2035 est.</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Future_Combat_Air_System_(Europe)" data-name="FCAS (Next Gen Fighter)" data-country="France/Germany/Spain" data-role="6th Gen Multirole" data-years="2040 est.">
+    <div class="no-img" id="ph-Future_Combat_Air_System_(Europe)">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">FCAS (Next Gen Fighter)</div>
+      <div class="card-country">🌍 France/Germany/Spain</div>
+      <div class="card-role">6th Gen Multirole</div>
+      <div class="card-years">📅 2040 est.</div>
+    </div>
+  </div>
+</div>
+<h2>💣 Strategic Bombers<span class="count">(8 aircraft)</span></h2>
+<div class="grid">
+  <div class="card" data-wiki="Boeing_B-52_Stratofortress" data-name="Boeing B-52 Stratofortress" data-country="USA" data-role="Strategic Bomber" data-years="1955–present">
+    <div class="no-img" id="ph-Boeing_B-52_Stratofortress">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Boeing B-52 Stratofortress</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">Strategic Bomber</div>
+      <div class="card-years">📅 1955–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Rockwell_B-1_Lancer" data-name="Rockwell B-1B Lancer" data-country="USA" data-role="Strategic Bomber" data-years="1986–present">
+    <div class="no-img" id="ph-Rockwell_B-1_Lancer">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Rockwell B-1B Lancer</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">Strategic Bomber</div>
+      <div class="card-years">📅 1986–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Northrop_Grumman_B-2_Spirit" data-name="Northrop Grumman B-2 Spirit" data-country="USA" data-role="Strategic Stealth Bomber" data-years="1997–present">
+    <div class="no-img" id="ph-Northrop_Grumman_B-2_Spirit">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Northrop Grumman B-2 Spirit</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">Strategic Stealth Bomber</div>
+      <div class="card-years">📅 1997–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Northrop_Grumman_B-21_Raider" data-name="Northrop Grumman B-21 Raider" data-country="USA" data-role="Strategic Stealth Bomber" data-years="2023–present">
+    <div class="no-img" id="ph-Northrop_Grumman_B-21_Raider">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Northrop Grumman B-21 Raider</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">Strategic Stealth Bomber</div>
+      <div class="card-years">📅 2023–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Tupolev_Tu-95" data-name="Tupolev Tu-95 Bear" data-country="Russia" data-role="Strategic Bomber" data-years="1956–present">
+    <div class="no-img" id="ph-Tupolev_Tu-95">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Tupolev Tu-95 Bear</div>
+      <div class="card-country">🌍 Russia</div>
+      <div class="card-role">Strategic Bomber</div>
+      <div class="card-years">📅 1956–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Tupolev_Tu-22M" data-name="Tupolev Tu-22M Backfire" data-country="Russia" data-role="Strategic Bomber" data-years="1972–present">
+    <div class="no-img" id="ph-Tupolev_Tu-22M">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Tupolev Tu-22M Backfire</div>
+      <div class="card-country">🌍 Russia</div>
+      <div class="card-role">Strategic Bomber</div>
+      <div class="card-years">📅 1972–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Tupolev_Tu-160" data-name="Tupolev Tu-160 Blackjack" data-country="Russia" data-role="Strategic Bomber" data-years="1987–present">
+    <div class="no-img" id="ph-Tupolev_Tu-160">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Tupolev Tu-160 Blackjack</div>
+      <div class="card-country">🌍 Russia</div>
+      <div class="card-role">Strategic Bomber</div>
+      <div class="card-years">📅 1987–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Xian_H-6" data-name="Xian H-6" data-country="China" data-role="Strategic Bomber" data-years="1969–present">
+    <div class="no-img" id="ph-Xian_H-6">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Xian H-6</div>
+      <div class="card-country">🌍 China</div>
+      <div class="card-role">Strategic Bomber</div>
+      <div class="card-years">📅 1969–present</div>
+    </div>
+  </div>
+</div>
+<h2>🎯 Attack & Support Aircraft<span class="count">(4 aircraft)</span></h2>
+<div class="grid">
+  <div class="card" data-wiki="Fairchild_Republic_A-10_Thunderbolt_II" data-name="Fairchild Republic A-10 Thunderbolt II" data-country="USA" data-role="Attack: Close Air Support" data-years="1977–present">
+    <div class="no-img" id="ph-Fairchild_Republic_A-10_Thunderbolt_II">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Fairchild Republic A-10 Thunderbolt II</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">Attack: Close Air Support</div>
+      <div class="card-years">📅 1977–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="McDonnell_Douglas_AV-8B_Harrier_II" data-name="McDonnell Douglas AV-8B Harrier II" data-country="USA/UK" data-role="Attack: V/STOL" data-years="1985–present">
+    <div class="no-img" id="ph-McDonnell_Douglas_AV-8B_Harrier_II">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">McDonnell Douglas AV-8B Harrier II</div>
+      <div class="card-country">🌍 USA/UK</div>
+      <div class="card-role">Attack: V/STOL</div>
+      <div class="card-years">📅 1985–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="Boeing_EA-18G_Growler" data-name="Northrop Grumman EA-18G Growler" data-country="USA" data-role="Attack: Electronic Warfare" data-years="2009–present">
+    <div class="no-img" id="ph-Boeing_EA-18G_Growler">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">Northrop Grumman EA-18G Growler</div>
+      <div class="card-country">🌍 USA</div>
+      <div class="card-role">Attack: Electronic Warfare</div>
+      <div class="card-years">📅 2009–present</div>
+    </div>
+  </div>
+  <div class="card" data-wiki="BAE_Systems_Hawk" data-name="BAE Systems Hawk" data-country="UK" data-role="Attack: Trainer / Light Attack" data-years="1976–present">
+    <div class="no-img" id="ph-BAE_Systems_Hawk">✈<span>Loading...</span></div>
+    <div class="card-body">
+      <div class="card-title">BAE Systems Hawk</div>
+      <div class="card-country">🌍 UK</div>
+      <div class="card-role">Attack: Trainer / Light Attack</div>
+      <div class="card-years">📅 1976–present</div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail panel -->
+<div id="backdrop"></div>
+<div id="detail">
+  <img id="detail-img" src="" alt="" class="hidden">
+  <div id="detail-no-img">✈</div>
+  <div id="detail-body">
+    <div id="detail-title"></div>
+    <div id="detail-meta">
+      <span class="meta-tag tag-country" id="detail-country"></span>
+      <span class="meta-tag tag-role" id="detail-role"></span>
+      <span class="meta-tag tag-years" id="detail-years"></span>
+    </div>
+    <div id="detail-loading">Loading Wikipedia summary...</div>
+    <div id="detail-extract" style="display:none"></div>
+    <div id="detail-footer">
+      <a id="detail-wiki-link" href="#" target="_blank">↗ Read on Wikipedia</a>
+      <button id="detail-close">✕ Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const wikiCache = {};
+
+// Fetch all thumbnails on load (staggered)
+const allCards = document.querySelectorAll('.card[data-wiki]');
+allCards.forEach((card, i) => {
+  const wiki = card.dataset.wiki;
+  const safeId = wiki.replace(/\//g, '_').replace(/ /g, '_');
+  const ph = document.getElementById('ph-' + safeId);
+  setTimeout(() => {
+    fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(wiki))
+      .then(r => r.json())
+      .then(data => {
+        wikiCache[wiki] = data;
+        if (data.thumbnail) {
+          const img = document.createElement('img');
+          img.className = 'card-img';
+          img.src = data.thumbnail.source.replace(/\/\d+px-/, '/320px-');
+          img.alt = data.title || wiki;
+          img.onerror = () => { img.src = data.thumbnail.source; };
+          if (ph) ph.replaceWith(img);
+        } else {
+          if (ph) ph.innerHTML = '📷<span>No image</span>';
+        }
+      })
+      .catch(() => { if (ph) ph.innerHTML = '📷<span>Unavailable</span>'; });
+  }, i * 80);
+});
+
+// Detail panel elements
+const backdrop = document.getElementById('backdrop');
+const detail   = document.getElementById('detail');
+const dImg     = document.getElementById('detail-img');
+const dNoImg   = document.getElementById('detail-no-img');
+const dTitle   = document.getElementById('detail-title');
+const dCountry = document.getElementById('detail-country');
+const dRole    = document.getElementById('detail-role');
+const dYears   = document.getElementById('detail-years');
+const dLoading = document.getElementById('detail-loading');
+const dExtract = document.getElementById('detail-extract');
+const dLink    = document.getElementById('detail-wiki-link');
+const dClose   = document.getElementById('detail-close');
+
+function hideDetail() {
+  backdrop.classList.remove('visible');
+  detail.classList.remove('visible');
+}
+
+function showDetail(card) {
+  const wiki    = card.dataset.wiki;
+  const name    = card.dataset.name;
+  const country = card.dataset.country;
+  const role    = card.dataset.role;
+  const years   = card.dataset.years;
+
+  dTitle.textContent   = name;
+  dCountry.textContent = '🌍 ' + country;
+  dRole.textContent    = role;
+  dYears.textContent   = '📅 ' + years;
+  dLink.href = 'https://en.wikipedia.org/wiki/' + encodeURIComponent(wiki);
+
+  dImg.className = 'hidden';
+  dNoImg.style.display = 'none';
+  dLoading.style.display = 'block';
+  dExtract.style.display = 'none';
+  dExtract.textContent = '';
+
+  backdrop.classList.add('visible');
+  detail.classList.add('visible');
+
+  const populate = (data) => {
+    dLoading.style.display = 'none';
+    if (data.originalimage || data.thumbnail) {
+      const src = data.originalimage
+        ? data.originalimage.source
+        : data.thumbnail.source.replace(/\/\d+px-/, '/800px-');
+      dImg.src = src;
+      dImg.alt = name;
+      dImg.className = 'card-img';
+      dImg.onerror = () => { dImg.className = 'hidden'; dNoImg.style.display = 'flex'; };
+      dNoImg.style.display = 'none';
+    } else {
+      dImg.className = 'hidden';
+      dNoImg.style.display = 'flex';
+    }
+    dExtract.textContent = data.extract || 'No description available.';
+    dExtract.style.display = 'block';
+  };
+
+  if (wikiCache[wiki] && wikiCache[wiki].extract !== undefined) {
+    populate(wikiCache[wiki]);
+  } else {
+    fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(wiki))
+      .then(r => r.json())
+      .then(data => { wikiCache[wiki] = data; populate(data); })
+      .catch(() => {
+        dLoading.style.display = 'none';
+        dExtract.textContent = 'Could not load Wikipedia data.';
+        dExtract.style.display = 'block';
+        dNoImg.style.display = 'flex';
+      });
+  }
+}
+
+// Click to open
+allCards.forEach(card => {
+  card.addEventListener('click', () => showDetail(card));
+});
+
+backdrop.addEventListener('click', hideDetail);
+dClose.addEventListener('click', hideDetail);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') hideDetail(); });
+</script>
+</body></html>

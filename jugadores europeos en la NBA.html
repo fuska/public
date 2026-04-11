@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>NBA Europa 2026</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0d1117; font-family:"Segoe UI",Arial,sans-serif; color:white; }
+h1 {
+  text-align:center; font-size:2em; padding:15px 0 4px;
+  background:linear-gradient(90deg,#ff6b00,#fff,#ff6b00);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  letter-spacing:3px;
+}
+h2.sub { text-align:center; color:#888; font-size:0.85em; margin-bottom:6px; }
+p.tip { text-align:center; color:#555; font-size:0.78em; margin-bottom:8px; }
+
+#map { width:100%; height:72vh; min-height:480px; background:#0d1117; }
+
+/* Leaflet overrides */
+.leaflet-container { background:#0d1117 !important; }
+.leaflet-tile-pane { display:none; }
+
+/* Tooltip */
+.nba-popup .leaflet-popup-content-wrapper {
+  background:rgba(10,15,25,0.97);
+  border:2px solid #ff6b00;
+  border-radius:14px;
+  color:white;
+  box-shadow:0 8px 32px rgba(0,0,0,0.8);
+  min-width:260px;
+  max-width:320px;
+}
+.nba-popup .leaflet-popup-tip { background:#ff6b00; }
+.nba-popup .leaflet-popup-content { margin:14px 16px; }
+
+.popup-title {
+  font-size:1.1em; font-weight:700; color:#ff6b00;
+  margin-bottom:10px; display:flex; align-items:center; gap:6px;
+}
+.player-card {
+  display:flex; align-items:center; gap:10px;
+  background:rgba(255,255,255,0.06);
+  border-radius:8px; padding:7px 10px; margin-bottom:6px;
+}
+.player-card img {
+  width:52px; height:52px; border-radius:50%;
+  object-fit:cover; object-position:top;
+  border:2.5px solid var(--tc);
+  flex-shrink:0;
+}
+.player-info { display:flex; flex-direction:column; flex:1; }
+.player-name { font-size:0.88em; font-weight:700; color:#fff; }
+.player-team { font-size:0.73em; margin-top:2px; }
+.team-pill {
+  font-size:0.7em; font-weight:800; border-radius:5px;
+  padding:3px 7px; margin-left:auto; flex-shrink:0;
+  border:1px solid;
+}
+
+/* Legend */
+#legend {
+  display:flex; flex-wrap:wrap; justify-content:center;
+  gap:7px; padding:12px 16px 18px; max-width:1200px; margin:0 auto;
+}
+.leg-item {
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+  border-radius:20px; padding:4px 11px; font-size:0.76em;
+  cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:5px;
+}
+.leg-item:hover { background:rgba(255,107,0,0.25); border-color:#ff6b00; }
+.leg-dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<h1>🏀 NBA EUROPE 2026</h1>
+<h2 class="sub">Temporada 2025-26 · 71 jugadores europeos en la NBA</h2>
+<p class="tip">🖱️ Haz clic en un país coloreado para ver sus jugadores</p>
+
+<div id="map"></div>
+<div id="legend"></div>
+
+<script>
+const TEAMS = {
+  "Atlanta Hawks":          "#E03A3E",
+  "Boston Celtics":         "#007A33",
+  "Brooklyn Nets":          "#777777",
+  "Charlotte Hornets":      "#1D1160",
+  "Chicago Bulls":          "#CE1141",
+  "Cleveland Cavaliers":    "#860038",
+  "Dallas Mavericks":       "#00538C",
+  "Denver Nuggets":         "#FEC524",
+  "Detroit Pistons":        "#C8102E",
+  "Golden State Warriors":  "#FFC72C",
+  "Houston Rockets":        "#CE1141",
+  "Indiana Pacers":         "#FDBB30",
+  "LA Clippers":            "#C8102E",
+  "Los Angeles Lakers":     "#552583",
+  "Memphis Grizzlies":      "#5D76A9",
+  "Miami Heat":             "#98002E",
+  "Milwaukee Bucks":        "#00471B",
+  "Minnesota Timberwolves": "#236192",
+  "New Orleans Pelicans":   "#0C2340",
+  "New York Knicks":        "#F58426",
+  "Oklahoma City Thunder":  "#007AC1",
+  "Orlando Magic":          "#0077C0",
+  "Philadelphia 76ers":     "#006BB6",
+  "Phoenix Suns":           "#1D1160",
+  "Portland Trail Blazers": "#E03A3E",
+  "Sacramento Kings":       "#5A2D81",
+  "San Antonio Spurs":      "#C4CED4",
+  "Toronto Raptors":        "#CE1141",
+  "Utah Jazz":              "#002B5C",
+  "Washington Wizards":     "#002B5C"
+};
+
+const ABBR = {
+  "Atlanta Hawks":"ATL","Boston Celtics":"BOS","Brooklyn Nets":"BKN",
+  "Charlotte Hornets":"CHA","Chicago Bulls":"CHI","Cleveland Cavaliers":"CLE",
+  "Dallas Mavericks":"DAL","Denver Nuggets":"DEN","Detroit Pistons":"DET",
+  "Golden State Warriors":"GSW","Houston Rockets":"HOU","Indiana Pacers":"IND",
+  "LA Clippers":"LAC","Los Angeles Lakers":"LAL","Memphis Grizzlies":"MEM",
+  "Miami Heat":"MIA","Milwaukee Bucks":"MIL","Minnesota Timberwolves":"MIN",
+  "New Orleans Pelicans":"NOP","New York Knicks":"NYK","Oklahoma City Thunder":"OKC",
+  "Orlando Magic":"ORL","Philadelphia 76ers":"PHI","Phoenix Suns":"PHX",
+  "Portland Trail Blazers":"POR","Sacramento Kings":"SAC","San Antonio Spurs":"SAS",
+  "Toronto Raptors":"TOR","Utah Jazz":"UTA","Washington Wizards":"WAS"
+};
+
+const NBA_IDS = {
+  "Victor Wembanyama":1641705,"Rudy Gobert":203497,"Alex Sarr":1642361,
+  "Zaccharie Risacher":1642385,"Tidjane Salaun":1642390,"Pacôme Dadiet":1642383,
+  "Franz Wagner":1630532,"Dennis Schröder":203471,"Isaiah Hartenstein":1628392,
+  "Moritz Wagner":1628976,"Nikola Jokić":203999,"Bogdan Bogdanović":203992,
+  "Nikola Jović":1631107,"Giannis Antetokounmpo":203507,
+  "Luka Dončić":1629029,"Vlatko Čančar":1628427,
+  "Kristaps Porziņģis":204001,"Domantas Sabonis":1627734,
+  "Matas Buzelis":1642358,"Jonas Valančiūnas":202685,
+  "Ivica Zubac":1627826,"Dario Šarić":203967,
+  "Lauri Markkanen":1628374,"Alperen Şengün":1630578,
+  "OG Anunoby":1628384,"Simone Fontecchio":1629638,
+  "Clint Capela":203991,"Kyshawn George":1642362,
+  "Alex Len":203458,"Svi Mykhailiuk":1628978,
+  "Jakob Poeltl":1627751,"Jusuf Nurkić":203994,
+  "Nikola Vučević":202696,"Neemias Queta":1630217,
+  "Toumani Camara":1641726,"Ajay Mitchell":1642369,
+  "Pelle Larsson":1642373,"Bobi Klintman":1641744,
+  "Goga Bitadze":1629048,"Quinten Post":1642370,
+  "Jesse Edwards":1630556,"Jeremy Sochan":1631109,
+  "Deni Avdija":1630166,"Vít Krejčí":1630188,
+  "Santi Aldama":1630583,"Eli Ndiaye":1642366
+};
+
+const PLAYERS = {
+  "Spain":{"flag":"🇪🇸","color":"#c60b1e","lat":40.2,"lon":-3.7,"players":[
+    {name:"Santi Aldama",team:"Memphis Grizzlies"},
+    {name:"Eli Ndiaye",team:"Atlanta Hawks"}
+  ]},
+  "France":{"flag":"🇫🇷","color":"#0055a4","lat":46.5,"lon":2.3,"players":[
+    {name:"Victor Wembanyama",team:"San Antonio Spurs"},
+    {name:"Rudy Gobert",team:"Minnesota Timberwolves"},
+    {name:"Alex Sarr",team:"Washington Wizards"},
+    {name:"Zaccharie Risacher",team:"Atlanta Hawks"},
+    {name:"Tidjane Salaun",team:"Charlotte Hornets"},
+    {name:"Pacôme Dadiet",team:"New York Knicks"}
+  ]},
+  "Germany":{"flag":"🇩🇪","color":"#333","lat":51.2,"lon":10.4,"players":[
+    {name:"Franz Wagner",team:"Orlando Magic"},
+    {name:"Dennis Schröder",team:"Brooklyn Nets"},
+    {name:"Isaiah Hartenstein",team:"Oklahoma City Thunder"},
+    {name:"Moritz Wagner",team:"Orlando Magic"}
+  ]},
+  "Serbia":{"flag":"🇷🇸","color":"#c6363c","lat":44.0,"lon":21.0,"players":[
+    {name:"Nikola Jokić",team:"Denver Nuggets"},
+    {name:"Bogdan Bogdanović",team:"Atlanta Hawks"},
+    {name:"Nikola Jović",team:"Miami Heat"}
+  ]},
+  "Greece":{"flag":"🇬🇷","color":"#0d5eaf","lat":39.0,"lon":22.0,"players":[
+    {name:"Giannis Antetokounmpo",team:"Milwaukee Bucks"}
+  ]},
+  "Slovenia":{"flag":"🇸🇮","color":"#003da5","lat":46.1,"lon":14.9,"players":[
+    {name:"Luka Dončić",team:"Los Angeles Lakers"},
+    {name:"Vlatko Čančar",team:"Denver Nuggets"}
+  ]},
+  "Latvia":{"flag":"🇱🇻","color":"#9e3039","lat":56.9,"lon":24.6,"players":[
+    {name:"Kristaps Porziņģis",team:"Boston Celtics"}
+  ]},
+  "Lithuania":{"flag":"🇱🇹","color":"#006a44","lat":55.2,"lon":24.0,"players":[
+    {name:"Domantas Sabonis",team:"Sacramento Kings"},
+    {name:"Matas Buzelis",team:"Chicago Bulls"},
+    {name:"Jonas Valančiūnas",team:"Washington Wizards"}
+  ]},
+  "Croatia":{"flag":"🇭🇷","color":"#ff0000","lat":45.1,"lon":15.2,"players":[
+    {name:"Ivica Zubac",team:"LA Clippers"},
+    {name:"Dario Šarić",team:"Denver Nuggets"}
+  ]},
+  "Finland":{"flag":"🇫🇮","color":"#003580","lat":64.0,"lon":26.0,"players":[
+    {name:"Lauri Markkanen",team:"Utah Jazz"}
+  ]},
+  "Turkey":{"flag":"🇹🇷","color":"#e30a17","lat":39.0,"lon":35.0,"players":[
+    {name:"Alperen Şengün",team:"Houston Rockets"}
+  ]},
+  "United Kingdom":{"flag":"🇬🇧","color":"#012169","lat":54.0,"lon":-2.5,"players":[
+    {name:"OG Anunoby",team:"New York Knicks"}
+  ]},
+  "Italy":{"flag":"🇮🇹","color":"#009246","lat":42.5,"lon":12.5,"players":[
+    {name:"Simone Fontecchio",team:"Detroit Pistons"}
+  ]},
+  "Switzerland":{"flag":"🇨🇭","color":"#ff0000","lat":46.8,"lon":8.2,"players":[
+    {name:"Clint Capela",team:"Atlanta Hawks"},
+    {name:"Kyshawn George",team:"Washington Wizards"}
+  ]},
+  "Ukraine":{"flag":"🇺🇦","color":"#005bbb","lat":49.0,"lon":32.0,"players":[
+    {name:"Alex Len",team:"Sacramento Kings"},
+    {name:"Svi Mykhailiuk",team:"Utah Jazz"}
+  ]},
+  "Austria":{"flag":"🇦🇹","color":"#ed2939","lat":47.5,"lon":14.5,"players":[
+    {name:"Jakob Poeltl",team:"Toronto Raptors"}
+  ]},
+  "Bosnia and Herzegovina":{"flag":"🇧🇦","color":"#002395","lat":43.9,"lon":17.7,"players":[
+    {name:"Jusuf Nurkić",team:"Phoenix Suns"}
+  ]},
+  "Montenegro":{"flag":"🇲🇪","color":"#d4af37","lat":42.7,"lon":19.4,"players":[
+    {name:"Nikola Vučević",team:"Chicago Bulls"}
+  ]},
+  "Portugal":{"flag":"🇵🇹","color":"#006600","lat":39.6,"lon":-8.0,"players":[
+    {name:"Neemias Queta",team:"Boston Celtics"}
+  ]},
+  "Belgium":{"flag":"🇧🇪","color":"#fdda25","lat":50.5,"lon":4.5,"players":[
+    {name:"Toumani Camara",team:"Portland Trail Blazers"},
+    {name:"Ajay Mitchell",team:"Oklahoma City Thunder"}
+  ]},
+  "Sweden":{"flag":"🇸🇪","color":"#006aa7","lat":62.0,"lon":16.0,"players":[
+    {name:"Pelle Larsson",team:"Miami Heat"},
+    {name:"Bobi Klintman",team:"Detroit Pistons"}
+  ]},
+  "Georgia":{"flag":"🇬🇪","color":"#ff0000","lat":42.3,"lon":43.4,"players":[
+    {name:"Goga Bitadze",team:"Orlando Magic"}
+  ]},
+  "Netherlands":{"flag":"🇳🇱","color":"#ae1c28","lat":52.3,"lon":5.3,"players":[
+    {name:"Quinten Post",team:"Golden State Warriors"},
+    {name:"Jesse Edwards",team:"Minnesota Timberwolves"}
+  ]},
+  "Poland":{"flag":"🇵🇱","color":"#dc143c","lat":52.0,"lon":20.0,"players":[
+    {name:"Jeremy Sochan",team:"San Antonio Spurs"}
+  ]},
+  "Israel":{"flag":"🇮🇱","color":"#0038b8","lat":31.5,"lon":34.8,"players":[
+    {name:"Deni Avdija",team:"Portland Trail Blazers"}
+  ]},
+  "Czech Republic":{"flag":"🇨🇿","color":"#d7141a","lat":49.8,"lon":15.5,"players":[
+    {name:"Vít Krejčí",team:"Atlanta Hawks"}
+  ]}
+};
+
+// ── MAPA ──────────────────────────────────────────────────────
+const map = L.map("map", {
+  center:[52,15], zoom:4, zoomControl:true,
+  attributionControl:false, minZoom:3, maxZoom:7
+});
+
+// Fondo oscuro con CartoDB dark matter
+L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",{
+  attribution:"", subdomains:"abcd", maxZoom:19
+}).addTo(map);
+
+// ── GeoJSON de países europeos desde CDN confiable ────────────
+fetch("https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson")
+  .then(r=>r.json())
+  .then(data => buildMap(data))
+  .catch(()=>{
+    // Fallback: markers simples si GeoJSON falla
+    buildMarkers();
+  });
+
+function playerHTML(p){
+  const id = NBA_IDS[p.name];
+  const img = id
+    ? `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}.png`
+    : `https://via.placeholder.com/52x52/333/fff?text=NBA`;
+  const tc = TEAMS[p.team]||"#888";
+  const ab = ABBR[p.team]||"NBA";
+  return `
+  <div class="player-card">
+    <img src="${img}" style="--tc:${tc}; border-color:${tc}"
+         onerror="this.src='https://via.placeholder.com/52x52/222/888?text=NBA'">
+    <div class="player-info">
+      <span class="player-name">${p.name}</span>
+      <span class="player-team" style="color:${tc}">● ${p.team}</span>
+    </div>
+    <span class="team-pill" style="color:${tc};border-color:${tc}40;background:${tc}18">${ab}</span>
+  </div>`;
+}
+
+function popupHTML(country, data){
+  let h = `<div class="popup-title">${data.flag} ${country} <span style="color:#888;font-size:0.75em;font-weight:400">(${data.players.length} jugador${data.players.length>1?"es":""})</span></div>`;
+  data.players.forEach(p=>{ h += playerHTML(p); });
+  return h;
+}
+
+const NAME_MAP = {
+  "Spain":"Spain","France":"France","Germany":"Germany",
+  "Serbia":"Serbia","Greece":"Greece","Slovenia":"Slovenia",
+  "Latvia":"Latvia","Lithuania":"Lithuania","Croatia":"Croatia",
+  "Finland":"Finland","Turkey":"Turkey","United Kingdom":"United Kingdom",
+  "Italy":"Italy","Switzerland":"Switzerland","Ukraine":"Ukraine",
+  "Austria":"Austria","Bosnia and Herzegovina":"Bosnia and Herzegovina",
+  "Montenegro":"Montenegro","Portugal":"Portugal","Belgium":"Belgium",
+  "Sweden":"Sweden","Georgia":"Georgia","Netherlands":"Netherlands",
+  "Poland":"Poland","Israel":"Israel","Czech Republic":"Czech Republic",
+  "Czechia":"Czech Republic","Czech Rep.":"Czech Republic",
+  "Bosnia and Herz.":"Bosnia and Herzegovina",
+  "UK":"United Kingdom","Great Britain":"United Kingdom"
+};
+
+function buildMap(geojson){
+  L.geoJSON(geojson, {
+    style(feature){
+      const n = NAME_MAP[feature.properties.NAME||feature.properties.name||feature.properties.ADMIN] || "";
+      const d = PLAYERS[n];
+      return {
+        fillColor: d ? d.color : "#1e2a3a",
+        fillOpacity: d ? 0.75 : 0.3,
+        color: d ? "#ff6b00" : "#2a3a4a",
+        weight: d ? 1.5 : 0.5
+      };
+    },
+    onEachFeature(feature, layer){
+      const raw = feature.properties.NAME||feature.properties.name||feature.properties.ADMIN||"";
+      const n = NAME_MAP[raw] || raw;
+      const d = PLAYERS[n];
+      if(!d) return;
+
+      layer.bindTooltip(`${d.flag} <strong>${n}</strong>`, {sticky:true, className:"", direction:"top"});
+      layer.bindPopup(popupHTML(n,d), {
+        className:"nba-popup", maxWidth:340, minWidth:260
+      });
+      layer.on("mouseover", function(){ this.setStyle({fillOpacity:0.95, weight:2.5}); });
+      layer.on("mouseout",  function(){ this.setStyle({fillOpacity:0.75, weight:1.5}); });
+    }
+  }).addTo(map);
+}
+
+function buildMarkers(){
+  // Fallback: círculos con marcadores
+  Object.entries(PLAYERS).forEach(([country,data])=>{
+    const circle = L.circleMarker([data.lat,data.lon],{
+      radius:10+data.players.length*3,
+      fillColor:data.color, color:"#ff6b00",
+      weight:2, fillOpacity:0.85
+    }).addTo(map);
+    circle.bindPopup(popupHTML(country,data),{className:"nba-popup",maxWidth:340});
+    circle.bindTooltip(`${data.flag} ${country} (${data.players.length})`,{sticky:true});
+  });
+}
+
+// ── LEYENDA ───────────────────────────────────────────────────
+const leg = document.getElementById("legend");
+Object.entries(PLAYERS)
+  .sort((a,b)=>b[1].players.length-a[1].players.length)
+  .forEach(([country,data])=>{
+    const el = document.createElement("div");
+    el.className="leg-item";
+    el.innerHTML=`<span class="leg-dot" style="background:${data.color}"></span>${data.flag} ${country} <strong style="color:#ff6b00;margin-left:3px">${data.players.length}</strong>`;
+    el.title=data.players.map(p=>p.name).join(", ");
+    el.onclick=()=>map.flyTo([data.lat,data.lon],5,{duration:1});
+    leg.appendChild(el);
+  });
+</script>
+</body>
+</html>
