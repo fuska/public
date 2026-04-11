@@ -1,0 +1,222 @@
+
+<style>
+  .wrap { padding: 1rem 0; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { background: var(--color-background-tertiary); color: var(--color-text-secondary); font-weight: 500; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; padding: 8px 10px; text-align: left; border-bottom: 1.5px solid var(--color-border-primary); position: sticky; top: 0; z-index: 1; }
+  td { padding: 8px 10px; vertical-align: top; line-height: 1.5; border-bottom: 1px solid var(--color-border-tertiary); }
+  tr.dem td { background: rgba(30, 100, 220, 0.06); }
+  tr.rep td { background: rgba(200, 30, 30, 0.06); }
+  tr:hover td { filter: brightness(0.96); }
+  .name { font-weight: 500; color: var(--color-text-primary); white-space: nowrap; }
+  .yr { font-weight: 500; color: var(--color-text-secondary); white-space: nowrap; }
+  .tag { display: inline-block; font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 4px; margin-top: 3px; }
+  .tag.d { background: rgba(30,100,220,0.15); color: #1a4eaa; }
+  .tag.r { background: rgba(200,30,30,0.15); color: #992020; }
+  @media (prefers-color-scheme: dark) {
+    .tag.d { color: #7aaeff; }
+    .tag.r { color: #ff8888; }
+  }
+  .hito { color: var(--color-text-secondary); font-size: 11.5px; margin: 0; padding-left: 14px; }
+  .hito li { margin-bottom: 3px; }
+  .postura { color: var(--color-text-primary); font-size: 12px; }
+  .pib-col { min-width: 190px; }
+  .pib-label { font-size: 10.5px; color: var(--color-text-secondary); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .pib-label strong { color: var(--color-text-primary); font-weight: 500; min-width: 38px; display: inline-block; }
+  .bar-track { flex: 1; height: 7px; background: var(--color-border-tertiary); border-radius: 4px; overflow: visible; position: relative; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .bar-over { border-radius: 4px; height: 100%; }
+  .bar-ussr { background: #c04040; }
+  .bar-cn   { background: #c08020; }
+  .over-mark { position: absolute; right: -2px; top: -2px; width: 2px; height: 11px; background: var(--color-border-primary); border-radius: 1px; }
+  .note { font-size: 10px; color: var(--color-text-tertiary); margin-top: 5px; line-height: 1.4; }
+  .over-label { font-size: 9.5px; color: #c08020; font-weight: 500; margin-left: 2px; }
+</style>
+<div class="wrap">
+<table>
+  <thead>
+    <tr>
+      <th style="width:44px">Año</th>
+      <th style="width:140px">Presidente</th>
+      <th>Postura hacia China</th>
+      <th>Postura hacia Taiwán</th>
+      <th>Principales hitos</th>
+      <th class="pib-col">PIB rival / PIB EE.UU. (PPP)<br><span style="font-weight:400;text-transform:none;font-size:10px">La barra termina en 100% = paridad</span></th>
+    </tr>
+  </thead>
+  <tbody id="tb"></tbody>
+</table>
+<p style="font-size:10.5px;color:var(--color-text-tertiary);margin-top:8px;padding:0 2px">
+  Fuentes: Maddison Project Database, FMI World Economic Outlook, Banco Mundial. PPP ajusta por diferencias de precios locales: un yuan o un rublo compran más dentro de su país de lo que indica el tipo de cambio. Las cifras soviéticas anteriores a 1960 son especialmente inciertas dado que las economías planificadas distorsionan los precios. La barra se limita al 100% (paridad con EE.UU.); el porcentaje real aparece en texto cuando supera ese umbral.
+</p>
+</div>
+<script>
+const rows = [
+  {
+    yr:"1941", cls:"dem", name:"Franklin D. Roosevelt", tag:"d", tagt:"Demócrata",
+    china:"Aliado firme del KMT. China nacionalista como potencia futura en Asia.",
+    taiwan:"Taiwán no era asunto americano (bajo control japonés).",
+    hitos:["Apoyo masivo a Chiang Kai-shek en WWII.","China entre los «Cuatro Grandes» aliados.","Cairo (1943): se acuerda devolver Taiwán a China."],
+    ussr:44, cn:16,
+    nota:"En PPP la URSS ya era potencia considerable. China: enorme población pero economía agraria devastada por guerra."
+  },
+  {
+    yr:"1945", cls:"dem", name:"Harry S. Truman", tag:"d", tagt:"Demócrata",
+    china:"Apoyo al KMT, frustración creciente por su corrupción.",
+    taiwan:"Dispuesto a abandonar Taiwán tras la derrota del KMT.",
+    hitos:["Fin de WWII (1945).","Derrota del KMT (1949).","Guerra de Corea (1950): 7ª Flota protege Taiwán."],
+    ussr:30, cn:13,
+    nota:"URSS devastada por WWII (~27M muertos), cae en PPP. EE.UU. sale de la guerra más fuerte que nunca."
+  },
+  {
+    yr:"1953", cls:"rep", name:"Dwight D. Eisenhower", tag:"r", tagt:"Republicano",
+    china:"China comunista como enemigo de la Guerra Fría. Sin reconocimiento.",
+    taiwan:"Aliado firme del KMT. Taiwán como «China legítima».",
+    hitos:["Tratado de Defensa Mutua con Taiwán (1954).","Crisis del Estrecho (1954–55 y 1958).","Taiwán mantiene asiento en la ONU."],
+    ussr:50, cn:15,
+    nota:"URSS recuperada; en PPP supera el 50% del PIB americano. La amenaza es real, no solo militar."
+  },
+  {
+    yr:"1961", cls:"dem", name:"John F. Kennedy", tag:"d", tagt:"Demócrata",
+    china:"Sin reconocimiento. Considera apertura, no concretada.",
+    taiwan:"Continuidad del apoyo al KMT.",
+    hitos:["Debate interno sobre reconocer a la RPC: descartado.","China desarrolla su primer reactor nuclear."],
+    ussr:58, cn:13,
+    nota:"Cénit relativo de la URSS en PPP. La Gran Hambruna maoísta (1959–61) hunde el PIB chino."
+  },
+  {
+    yr:"1963", cls:"dem", name:"Lyndon B. Johnson", tag:"d", tagt:"Demócrata",
+    china:"Hostilidad. China apoya a Vietnam del Norte.",
+    taiwan:"Apoyo sostenido al KMT, sin protagonismo.",
+    hitos:["China detona su primera bomba atómica (1964).","Guerra de Vietnam absorbe la política exterior."],
+    ussr:57, cn:13,
+    nota:"Revolución Cultural china (desde 1966) paraliza la economía. URSS en su momento más competitivo."
+  },
+  {
+    yr:"1969", cls:"rep", name:"Richard Nixon", tag:"r", tagt:"Republicano",
+    china:"Apertura histórica. China como contrapeso a la URSS.",
+    taiwan:"Sacrifica a Taiwán en aras del acercamiento a Pekín.",
+    hitos:["Visita a China (1972).","Comunicado de Shanghái.","Taiwán expulsado de la ONU (1971)."],
+    ussr:55, cn:15,
+    nota:"URSS en paridad nuclear. China sale lentamente de la Revolución Cultural con economía dañada."
+  },
+  {
+    yr:"1974", cls:"rep", name:"Gerald Ford", tag:"r", tagt:"Republicano",
+    china:"Continúa apertura nixoniana.",
+    taiwan:"Statu quo de ambigüedad estratégica.",
+    hitos:["Visita a Pekín (1975), sin grandes avances.","Sin cambios formales sobre Taiwán."],
+    ussr:52, cn:17,
+    nota:"Détente. Economía soviética empieza a mostrar señales de estancamiento estructural."
+  },
+  {
+    yr:"1977", cls:"dem", name:"Jimmy Carter", tag:"d", tagt:"Demócrata",
+    china:"Normalización plena de relaciones con la RPC.",
+    taiwan:"Rompe relaciones diplomáticas formales con Taiwán.",
+    hitos:["Reconocimiento diplomático de la RPC (1979).","Taiwan Relations Act (1979).","EE.UU. retira tropas de Taiwán."],
+    ussr:50, cn:20,
+    nota:"Deng Xiaoping inicia reformas (1978). En PPP China empieza a crecer; la URSS se estanca."
+  },
+  {
+    yr:"1981", cls:"rep", name:"Ronald Reagan", tag:"r", tagt:"Republicano",
+    china:"Pragmático. Acuerdo sobre armas (1982) pero con reservas.",
+    taiwan:"Simpatía personal. «Seis Garantías» informales a Taipéi.",
+    hitos:["Comunicado EE.UU.-China sobre armas a Taiwán (1982).","Seis Garantías a Taiwán.","URSS en declive acelerado."],
+    ussr:46, cn:28,
+    nota:"China crece ~10% anual. En PPP el salto chino ya es visible. La URSS gasta el 15% del PIB en defensa."
+  },
+  {
+    yr:"1989", cls:"rep", name:"George H. W. Bush", tag:"r", tagt:"Republicano",
+    china:"Sanciones simbólicas tras Tiananmen, sin ruptura.",
+    taiwan:"Apoya a Taiwán pero sin confrontar a Pekín.",
+    hitos:["Masacre de Tiananmen (1989).","Caída del Muro de Berlín (1989).","Venta de F-16 a Taiwán (1992)."],
+    ussr:38, cn:38,
+    nota:"La URSS colapsa (1991). En PPP, China ya iguala a la URSS por primera vez."
+  },
+  {
+    yr:"1993", cls:"dem", name:"Bill Clinton", tag:"d", tagt:"Demócrata",
+    china:"Engagement constructivo. Integrar China en el orden global.",
+    taiwan:"Crisis del Estrecho 1996: envía portaaviones. Luego, «Tres Noes».",
+    hitos:["China lanza misiles frente a Taiwán (1995–96).","EE.UU. envía dos portaaviones.","Clinton en Shanghái: «Tres Noes» (1998)."],
+    ussr:14, cn:47,
+    nota:"Rusia en caída libre postsoviética. China ya casi la mitad del PIB de EE.UU. en PPP."
+  },
+  {
+    yr:"2001", cls:"rep", name:"George W. Bush", tag:"r", tagt:"Republicano",
+    china:"Competidor estratégico inicial; luego cooperación antiterrorista.",
+    taiwan:"Más pro-Taiwán al inicio; luego frena a Chen Shui-bian.",
+    hitos:["Incidente EP-3 (2001).","China en la OMC (2001).","Bush frena a Taiwán (2003)."],
+    ussr:16, cn:65,
+    nota:"China en la OMC dispara su crecimiento. En PPP ya supera el 60% del PIB americano."
+  },
+  {
+    yr:"2009", cls:"dem", name:"Barack Obama", tag:"d", tagt:"Demócrata",
+    china:"Compromiso y diálogo. «Pivote a Asia».",
+    taiwan:"Ventas de armas; relación estable sin gestos dramáticos.",
+    hitos:["Venta de armas a Taiwán (2010).","China: 2ª economía mundial nominal (2010).","Tensiones en Mar del Sur de China."],
+    ussr:20, cn:88,
+    nota:"China roza la paridad con EE.UU. en PPP. El «Pivote a Asia» de Obama es la respuesta directa a esta gráfica."
+  },
+  {
+    yr:"2017", cls:"rep", name:"Donald Trump (1er mandato)", tag:"r", tagt:"Republicano",
+    china:"Confrontacional. Guerra comercial, aranceles, sanciones tech.",
+    taiwan:"El más pro-Taiwán en décadas. Llamada directa con Tsai.",
+    hitos:["Llamada con presidenta Tsai.","Guerra comercial (2018–19).","Veto a Huawei.","Taiwan Travel Act (2018)."],
+    ussr:19, cn:117,
+    nota:"China ya supera a EE.UU. en PPP desde ~2016. La guerra comercial de Trump es la respuesta política a este hecho."
+  },
+  {
+    yr:"2021", cls:"dem", name:"Joe Biden", tag:"d", tagt:"Demócrata",
+    china:"Competencia sistémica. AUKUS, Quad, restricciones semiconductores.",
+    taiwan:"Varias declaraciones de defensa militar (matizadas después).",
+    hitos:["Visita de Pelosi a Taiwán (2022): maniobras chinas.","Restricciones a chips a China.","Biden: EE.UU. defendería Taiwán militarmente."],
+    ussr:18, cn:118,
+    nota:"China mantiene ~118% del PIB de EE.UU. en PPP. La desaceleración inmobiliaria frena el crecimiento."
+  },
+  {
+    yr:"2025", cls:"rep", name:"Donald Trump (2º mandato)", tag:"r", tagt:"Republicano",
+    china:"Aranceles históricos (145%). Relación transaccional y volátil.",
+    taiwan:"Ambigüedad: pide a Taiwán pagar por su defensa.",
+    hitos:["Aranceles del 145% sobre China (abril 2025).","Declaraciones ambiguas sobre defensa de Taiwán.","Presión a Taiwán en gasto de defensa."],
+    ussr:17, cn:116,
+    nota:"China se desacelera levemente. Rusia cae por sanciones pero el PPP amortigua el impacto."
+  }
+];
+
+const tb = document.getElementById('tb');
+const MAX = 100;
+
+rows.forEach(r => {
+  const ussrLabel = parseInt(r.yr) >= 1993 ? "Rusia" : "URSS";
+  const ussrPct = Math.min(r.ussr, MAX);
+  const cnPct = Math.min(r.cn, MAX);
+  const cnOver = r.cn > MAX;
+  const cnOverLabel = cnOver ? `<span class="over-label">▶ ${r.cn}%</span>` : '';
+
+  tb.innerHTML += `<tr class="${r.cls}">
+    <td class="yr">${r.yr}</td>
+    <td class="name">${r.name}<br><span class="tag ${r.tag}">${r.tagt}</span></td>
+    <td class="postura">${r.china}</td>
+    <td class="postura">${r.taiwan}</td>
+    <td><ul class="hito">${r.hitos.map(h=>`<li>${h}</li>`).join('')}</ul></td>
+    <td class="pib-col">
+      <div class="pib-label">
+        <strong>${r.ussr}%</strong>
+        <span style="min-width:32px;font-size:10px">${ussrLabel}</span>
+        <div class="bar-track">
+          <div class="bar-fill bar-ussr" style="width:${ussrPct}%"></div>
+          <div class="over-mark"></div>
+        </div>
+      </div>
+      <div class="pib-label">
+        <strong>${r.cn}%</strong>
+        <span style="min-width:32px;font-size:10px">China</span>
+        <div class="bar-track">
+          <div class="bar-fill bar-cn" style="width:${cnPct}%"></div>
+          <div class="over-mark"></div>
+        </div>
+        ${cnOverLabel}
+      </div>
+      <div class="note">${r.nota}</div>
+    </td>
+  </tr>`;
+});
+</script>
