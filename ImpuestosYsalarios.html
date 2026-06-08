@@ -1,0 +1,1543 @@
+
+<style>
+* { box-sizing: border-box; }
+.wrap { padding: 1rem 0; font-family: var(--font-sans, system-ui); }
+.tabs-nav { display:flex; gap:0; border-bottom:1.5px solid var(--color-border-secondary,#ccc); margin-bottom:16px; overflow-x:auto; scrollbar-width:none; }
+.tabs-nav::-webkit-scrollbar { display:none; }
+.tab-btn { font-size:12px; padding:7px 16px; border:none; border-bottom:2.5px solid transparent; background:transparent; color:var(--color-text-secondary,#666); cursor:pointer; white-space:nowrap; font-family:inherit; margin-bottom:-1.5px; transition:color .15s,border-color .15s; font-weight:400; }
+.tab-btn:hover { color:var(--color-text-primary,#000); }
+.tab-btn.active { color:#2d6a4f; border-bottom-color:#2d6a4f; font-weight:600; }
+.tab-panel { display:none; } .tab-panel.active { display:block; }
+.tab-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; color:var(--color-text-tertiary,#999); font-size:13px; gap:10px; }
+.tab-empty .empty-icon { font-size:32px; opacity:.35; }
+.tab-empty .empty-title { font-size:14px; font-weight:500; color:var(--color-text-secondary,#666); }
+.tab-empty .empty-sub { font-size:12px; color:var(--color-text-tertiary,#999); }
+.top-bar { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+.year-label { font-size:13px; color:var(--color-text-secondary,#666); }
+.year-nav { display:flex; align-items:center; gap:6px; }
+.nav-btn { width:28px; height:28px; border:.5px solid var(--color-border-secondary,#ccc); border-radius:6px; background:var(--color-background-primary,#fff); color:var(--color-text-primary,#000); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; user-select:none; }
+.nav-btn:hover:not(:disabled) { background:var(--color-background-secondary,#f5f5f5); }
+.nav-btn:disabled { opacity:.3; cursor:default; }
+select { font-size:13px; padding:5px 10px; border:.5px solid var(--color-border-secondary,#ccc); border-radius:6px; background:var(--color-background-primary,#fff); color:var(--color-text-primary,#000); cursor:pointer; }
+.mode-btn { font-size:11px; padding:4px 10px; border:.5px solid var(--color-border-secondary,#ccc); border-radius:6px; background:var(--color-background-primary,#fff); color:var(--color-text-primary,#000); cursor:pointer; white-space:nowrap; }
+.mode-btn:hover { background:var(--color-background-secondary,#f5f5f5); }
+.hint { font-size:11px; color:var(--color-text-tertiary,#999); }
+.pending-banner { background:var(--color-background-secondary,#f5f5f5); border:.5px solid var(--color-border-secondary,#ccc); border-radius:8px; padding:14px 16px; font-size:13px; color:var(--color-text-secondary,#666); margin:10px 0; }
+.tbl-wrap { overflow-x:auto; position:relative; }
+table { border-collapse:collapse; font-size:10.5px; white-space:nowrap; width:100%; }
+thead tr.hdr1 th { background:#2d6a4f; color:#e8f5ee; font-weight:500; padding:5px 7px; text-align:center; font-size:10px; line-height:1.2; border:.5px solid #3a8562; position:sticky; top:0; z-index:3; }
+thead tr.hdr2 th { background:#52b788; color:#fff; font-weight:500; padding:5px 7px; border:.5px solid #3a8562; text-align:right; font-size:10px; line-height:1.2; position:sticky; z-index:3; }
+thead tr.hdr2 th:first-child { text-align:left; }
+th.col-fixed, td.col-fixed { position:sticky; left:0; z-index:2; background:var(--color-background-primary,#fff); }
+thead tr.hdr1 th.col-fixed { background:#2d6a4f; z-index:4; }
+thead tr.hdr2 th.col-fixed { background:#52b788; z-index:4; }
+tbody tr.selected td.col-fixed { background:#0C447C; color:#E6F1FB; font-weight:500; }
+tbody tr:not(.selected):hover td.col-fixed { background:var(--color-background-secondary,#f5f5f5); }
+tbody tr.total-row td.col-fixed { background:var(--color-background-secondary,#f5f5f5); }
+tbody tr { cursor:pointer; } tbody tr:hover { background:var(--color-background-secondary,#f5f5f5); }
+tbody tr.selected { background:#0C447C; } tbody tr.selected td { color:#B5D4F4; }
+tbody tr.total-row { cursor:default; border-top:1px solid var(--color-border-secondary,#ccc); background:var(--color-background-secondary,#f5f5f5); }
+td { padding:4px 7px; color:var(--color-text-primary,#000); text-align:right; border:.5px solid var(--color-border-tertiary,#e0e0e0); font-variant-numeric:tabular-nums; }
+td.col-fixed { text-align:left; font-variant-numeric:normal; }
+td.sep, th.sep { border-left:2px solid var(--color-border-secondary,#ccc); }
+thead tr.hdr1 th.sep { border-left:2px solid #3a8562; }
+.charts-row { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; margin-top:14px; }
+.chart-wrap { display:flex; flex-direction:column; align-items:center; }
+.chart-title { font-size:10px; color:var(--color-text-secondary,#666); margin-bottom:6px; text-align:center; line-height:1.4; min-height:2.8em; display:flex; align-items:flex-end; justify-content:center; }
+.donut-area { display:flex; align-items:center; gap:6px; }
+.icon-side { opacity:.4; line-height:1; }
+.donut-container { position:relative; width:110px; height:110px; flex-shrink:0; }
+.donut-container canvas { position:absolute; top:0; left:0; }
+.donut-label { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; pointer-events:none; }
+.donut-pct { font-size:17px; font-weight:500; color:#0C447C; line-height:1; font-variant-numeric:tabular-nums; }
+/* Colores por serie — coinciden con el gráfico */
+#pct1,#spct1 { color:#1a5f9a; } #pct2,#spct2 { color:#b06000; }
+#pct3,#spct3 { color:#276749; } #pct4       { color:#862e9c; }
+#spct4       { color:#c0392b; }
+.donut-sub { font-size:9px; color:var(--color-text-secondary,#666); margin-top:2px; }
+.legend { display:flex; gap:6px; margin-top:5px; font-size:9.5px; color:var(--color-text-secondary,#666); flex-wrap:wrap; justify-content:center; }
+.legend span { display:flex; align-items:center; gap:3px; }
+.swatch { width:7px; height:7px; border-radius:2px; flex-shrink:0; }
+.bar-section { margin-top:20px; border-top:.5px solid var(--color-border-tertiary,#e0e0e0); padding-top:14px; }
+.bar-controls { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; align-items:center; }
+.bar-controls-label { font-size:11px; color:var(--color-text-secondary,#666); margin-right:4px; }
+.serie-btn { font-size:11px; padding:4px 11px; border-radius:20px; border:1.5px solid transparent; cursor:pointer; font-weight:500; opacity:.38; }
+.serie-btn.active { opacity:1; }
+.bar-canvas-wrap { position:relative; width:100%; height:260px; }
+.bar-canvas-wrap canvas { display:block; width:100%; height:100%; }
+.actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; align-items:center; }
+.source { margin-top:12px; font-size:10px; color:var(--color-text-tertiary,#999); border-top:.5px solid var(--color-border-tertiary,#e0e0e0); padding-top:8px; line-height:1.9; }
+.source a { color:var(--color-text-tertiary,#999); text-decoration:underline; }
+/* Tooltip custom para cabeceras de tabla */
+/* Tooltip custom para cabeceras — div flotante global */
+.th-tip { cursor:help; text-decoration:underline dotted rgba(255,255,255,0.7); }
+#thTooltip {
+  position:fixed; z-index:9999; pointer-events:none;
+  background:rgba(20,20,20,0.92); color:#eee;
+  font-size:10px; font-weight:400; line-height:1.5;
+  white-space:normal; width:220px; text-align:center;
+  padding:7px 10px; border-radius:6px;
+  opacity:0; transition:opacity 80ms ease;
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+
+<div class="wrap">
+<div id="thTooltip"></div>
+<nav class="tabs-nav">
+  <button class="tab-btn active" onclick="switchTab('irpf',this)">IRPF</button>
+  <button class="tab-btn" onclick="switchTab('salarios',this)">Distribución de salarios</button>
+  <button class="tab-btn" onclick="switchTab('fedea',this)">Observatorio Fedea</button>
+  <button class="tab-btn" onclick="switchTab('diferencial',this)">Diferencial</button>
+</nav>
+
+<!-- ── IRPF ── -->
+<div class="tab-panel active" id="panel-irpf">
+  <div class="top-bar">
+    <span class="year-label">Año fiscal:</span>
+    <div class="year-nav">
+      <button class="nav-btn" id="btnPrev" onclick="T.irpf.shiftYear(-1)">‹</button>
+      <select id="yearSelect" onchange="T.irpf.changeYear(parseInt(this.value))">
+        <option value="2022">2022</option><option value="2023">2023</option><option value="2024">2024</option>
+      </select>
+      <button class="nav-btn" id="btnNext" onclick="T.irpf.shiftYear(1)">›</button>
+    </div>
+    <button class="mode-btn" id="modeBtn" onclick="toggleMode()">Vista reducida</button>
+    <span class="hint">Haz clic en una o varias filas para seleccionarlas</span>
+  </div>
+  <div id="pendingBanner" style="display:none" class="pending-banner"></div>
+  <div id="tableWrap">
+    <div class="tbl-wrap"><table id="mainTable"><thead id="irpf-thead"></thead><tbody id="irpf-tbody"></tbody></table></div>
+    <div class="actions">
+      <button class="mode-btn" onclick="T.irpf.clearAll()">Limpiar selección</button>
+      <button class="mode-btn" onclick="T.irpf.selectAll()">Seleccionar todo</button>
+      <button class="mode-btn" id="btnRent" onclick="cycleRent()">Rentas &gt; 60k€</button>
+      <button class="mode-btn" id="btnHalf" onclick="selectHalf()">Primeras 5</button>
+    </div>
+    <div class="charts-row">
+<div class="chart-wrap"><div class="chart-title">% sobre total<br>declarantes</div><div class="donut-area"><div class="icon-side"><i class="ti ti-users" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="c1"></canvas><div class="donut-label"><div class="donut-pct" id="pct1">0,0%</div><div class="donut-sub">seleccionado</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#1a5f9a"></span>Selec.</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>Resto</span></div></div>
+      <div class="chart-wrap"><div class="chart-title">% recaudado<br>Partida 596 (retenciones)</div><div class="donut-area"><div class="icon-side"><i class="ti ti-coin-euro" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="c2"></canvas><div class="donut-label"><div class="donut-pct" id="pct2">0,0%</div><div class="donut-sub">seleccionado</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#b06000"></span>Selec.</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>Resto</span></div></div>
+      <div class="chart-wrap"><div class="chart-title">% recaudado<br>Partida 595 (autoliquidación)</div><div class="donut-area"><div class="icon-side"><i class="ti ti-receipt-tax" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="c3"></canvas><div class="donut-label"><div class="donut-pct" id="pct3">0,0%</div><div class="donut-sub">seleccionado</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#276749"></span>Selec.</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>Resto</span></div></div>
+      <div class="chart-wrap"><div class="chart-title">Tipo medio aprox.<br>(media filas selec.)</div><div class="donut-area"><div class="icon-side"><i class="ti ti-percentage" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="c4"></canvas><div class="donut-label"><div class="donut-pct" id="pct4">0,0%</div><div class="donut-sub">media sel.</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#862e9c"></span>Tipo</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>Máx.</span></div></div>
+    </div>
+    <div class="bar-section">
+      <div class="bar-controls">
+        <span class="bar-controls-label">Mostrar:</span>
+        <button class="serie-btn active" id="sbtn-liq"    onclick="T.irpf.toggleSerie('liq')"    style="background:#EAF2FB;color:#1a5f9a;border-color:#1a5f9a">👤 Declarantes</button>
+        <button class="serie-btn"        id="sbtn-imp596" onclick="T.irpf.toggleSerie('imp596')" style="background:#FFF4E5;color:#b06000;border-color:#b06000">💶 Retenciones (P596)</button>
+        <button class="serie-btn"        id="sbtn-imp595" onclick="T.irpf.toggleSerie('imp595')" style="background:#F0FFF4;color:#276749;border-color:#276749">📋 Autoliquidación (P595)</button>
+        <button class="serie-btn active" id="sbtn-tipo"   onclick="T.irpf.toggleSerie('tipo')"   style="background:#FDF2F8;color:#862e9c;border-color:#862e9c">Tipo medio</button>
+      </div>
+      <div class="bar-canvas-wrap" id="barWrap"><canvas id="barChart"></canvas></div>
+      <div id="irpfRangeIndicator" style="margin-top:6px;font-size:10px;"></div>
+    </div>
+  </div>
+  <div class="source" id="sourceEl"></div>
+</div>
+
+<!-- ── Distribución de salarios ── -->
+<div class="tab-panel" id="panel-salarios">
+  <div class="top-bar">
+    <span class="year-label">Año fiscal:</span>
+    <div class="year-nav">
+      <button class="nav-btn" id="sBtnPrev" onclick="T.sal.shiftYear(-1)">‹</button>
+      <select id="sYearSelect" onchange="T.sal.changeYear(parseInt(this.value))">
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+      </select>
+      <button class="nav-btn" id="sBtnNext" onclick="T.sal.shiftYear(1)">›</button>
+    </div>
+    <span class="hint">Haz clic en una o varias filas para seleccionarlas</span>
+  </div>
+  <div class="tbl-wrap" style="max-height:271.5px;overflow-y:auto;overflow-x:auto;">
+    <table id="sTable" style="width:100%"><thead id="sal-thead"></thead><tbody id="sal-tbody"></tbody><tfoot id="sal-tfoot"></tfoot></table>
+  </div>
+  <div class="actions" style="margin-top:8px;">
+    <button class="mode-btn" onclick="T.sal.clearAll()">Limpiar selección</button>
+    <button class="mode-btn" onclick="T.sal.selectAll()">Seleccionar todo</button>
+    <button class="mode-btn" id="sBtnTop" onclick="sCycleTop()">Top 70%</button>
+    <button class="mode-btn" id="sBtnBot" onclick="sCycleBot()">Bottom 50%</button>
+    <button class="mode-btn" id="sBtnSMI" onclick="sCycleSMI()">SMI</button>
+  </div>
+  <div class="charts-row">
+<div class="chart-wrap"><div class="chart-title">% asalariados<br>seleccionados</div><div class="donut-area"><div class="icon-side"><i class="ti ti-users" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="sc1"></canvas><div class="donut-label"><div class="donut-pct" id="spct1">0,0%</div><div class="donut-sub">seleccionado</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#1a5f9a"></span>Selec.</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>Resto</span></div></div>
+    <div class="chart-wrap"><div class="chart-title">% suma de salarios<br>seleccionados</div><div class="donut-area"><div class="icon-side"><i class="ti ti-coin-euro" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="sc2"></canvas><div class="donut-label"><div class="donut-pct" id="spct2">0,0%</div><div class="donut-sub">seleccionado</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#b06000"></span>Selec.</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>Resto</span></div></div>
+    <div class="chart-wrap"><div class="chart-title">% suma de retenciones<br>seleccionadas</div><div class="donut-area"><div class="icon-side"><i class="ti ti-receipt-tax" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="sc3"></canvas><div class="donut-label"><div class="donut-pct" id="spct3">0,0%</div><div class="donut-sub">seleccionado</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#276749"></span>Selec.</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>Resto</span></div></div>
+    <div class="chart-wrap"><div class="chart-title">Tipo medio<br>(media centiles selec.)</div><div class="donut-area"><div class="icon-side"><i class="ti ti-percentage" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="sc4"></canvas><div class="donut-label"><div class="donut-pct" id="spct4">0,0%</div><div class="donut-sub">media sel.</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#c0392b"></span>Tipo</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>Máx.</span></div></div>
+  </div>
+  <div class="bar-section">
+    <div class="bar-controls">
+      <span class="bar-controls-label">Mostrar:</span>
+      <button class="serie-btn active" id="ssbtn-asal" onclick="T.sal.toggleSerie('asal')" style="background:#EAF2FB;color:#1a5f9a;border-color:#1a5f9a">👤 Asalariados</button>
+      <button class="serie-btn active" id="ssbtn-sal"  onclick="T.sal.toggleSerie('sal')"  style="background:#FFF4E5;color:#b06000;border-color:#b06000">💶 Suma salarios</button>
+      <button class="serie-btn active" id="ssbtn-ret"  onclick="T.sal.toggleSerie('ret')"  style="background:#F0FFF4;color:#276749;border-color:#276749">📋 Suma de retenciones</button>
+      <button class="serie-btn active" id="ssbtn-tipo" onclick="T.sal.toggleSerie('tipo')" style="background:#FDF2F8;color:#c0392b;border-color:#c0392b">📈 Tipo medio</button>
+    </div>
+    <div class="bar-canvas-wrap" id="sAreaWrap" style="height:300px;"><canvas id="sAreaChart"></canvas></div>
+  </div>
+  <div class="source" id="salSourceEl"></div>
+</div>
+
+<!-- ── Observatorio Fedea ── -->
+<div class="tab-panel" id="panel-fedea">
+  <div class="top-bar">
+    <span class="year-label">Año:</span>
+    <div class="year-nav">
+      <button class="nav-btn" id="fBtnPrev" onclick="T.fedea.shiftYear(-1)">‹</button>
+      <select id="fYearSelect" onchange="T.fedea.changeYear(parseInt(this.value))">
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+      </select>
+      <button class="nav-btn" id="fBtnNext" onclick="T.fedea.shiftYear(1)">›</button>
+    </div>
+    <button class="mode-btn" id="fedeaModeBtn" onclick="toggleFedeaMode()">Vista completa</button>
+    <span class="hint">Datos medios por hogar en euros · Haz clic en una fila para seleccionarla</span>
+  </div>
+  <div class="tbl-wrap" style="max-height:271.5px;overflow-y:auto;overflow-x:auto;">
+    <table id="fTable" style="width:100%"><thead id="fedea-thead"></thead><tbody id="fedea-tbody"></tbody><tfoot id="fedea-tfoot"></tfoot></table>
+  </div>
+  <div style="font-size:10px;color:var(--color-text-tertiary,#999);padding:4px 0 0 2px;">
+    Nota: la media es de 2,5 personas por hogar
+  </div>
+  <div style="height:28px;"></div>
+  <div class="actions" style="margin-top:0;">
+    <button class="mode-btn" id="fedeaQ5Btn" onclick="toggleFedeaQ5()">Agrupar Q5</button>
+  </div>
+  <div class="actions" style="margin-top:4px;">
+    <button class="mode-btn" onclick="T.fedea.clearAll()">Limpiar selección</button>
+    <button class="mode-btn" onclick="T.fedea.selectAll()">Seleccionar todo</button>
+  </div>
+  <div class="charts-row">
+<div class="chart-wrap"><div class="chart-title">Renta de mercado<br>vs Renta disponible</div><div class="donut-area"><div class="icon-side"><i class="ti ti-home" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="fc1"></canvas><div class="donut-label"><div class="donut-pct" id="fpct1">—</div><div class="donut-sub">ratio sel.</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#0C447C"></span>R. disp.</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>R. merc.</span></div></div>
+    <div class="chart-wrap"><div class="chart-title">Tipo medio efectivo<br>(TME, media sel.)</div><div class="donut-area"><div class="icon-side"><i class="ti ti-percentage" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="fc2"></canvas><div class="donut-label"><div class="donut-pct" id="fpct2">—</div><div class="donut-sub">media sel.</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#0C447C"></span>TME</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>Máx.</span></div></div>
+    <div class="chart-wrap"><div class="chart-title">Subsidio total<br>(SME + SEME, media sel.)</div><div class="donut-area"><div class="icon-side"><i class="ti ti-coin-euro" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="fc3"></canvas><div class="donut-label"><div class="donut-pct" id="fpct3">—</div><div class="donut-sub">media sel.</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#52b788"></span>SME</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>Máx.</span></div></div>
+    <div class="chart-wrap"><div class="chart-title">% impuestos totales<br>s/ renta bruta (sel.)</div><div class="donut-area"><div class="icon-side"><i class="ti ti-receipt-tax" style="font-size:26px;color:var(--color-text-tertiary,#999)"></i></div><div class="donut-container"><canvas id="fc4"></canvas><div class="donut-label"><div class="donut-pct" id="fpct4">—</div><div class="donut-sub">sel.</div></div></div></div><div class="legend"><span><span class="swatch" style="background:#b06000"></span>%</span><span><span class="swatch" style="background:#D3D1C7;border:.5px solid #ccc"></span>Máx.</span></div></div>
+  </div>
+  <div class="bar-section">
+    <div class="bar-controls">
+      <span class="bar-controls-label">Mostrar:</span>
+      <button class="serie-btn active" id="fsbtn-sme_jub"   onclick="T.fedea.toggleSerie('sme_jub')"   style="background:#EAF2FB;color:#1a5f9a;border-color:#1a5f9a">▲ Jubilación</button>
+      <button class="serie-btn active" id="fsbtn-sme_resto" onclick="T.fedea.toggleSerie('sme_resto')" style="background:#dceeff;color:#2980b9;border-color:#2980b9">▲ Resto pres. monetarias</button>
+      <button class="serie-btn active" id="fsbtn-seme"      onclick="T.fedea.toggleSerie('seme')"      style="background:#eafaf1;color:#1e8449;border-color:#27ae60">▲ Prest. especie</button>
+      <button class="serie-btn active" id="fsbtn-tme_dir"   onclick="T.fedea.toggleSerie('tme_dir')"   style="background:#FDF2F8;color:#c0392b;border-color:#c0392b">▼ Imp. directos</button>
+      <button class="serie-btn active" id="fsbtn-tme_ind"   onclick="T.fedea.toggleSerie('tme_ind')"   style="background:#fff0f0;color:#e07070;border-color:#e07070">▼ Imp. indirectos</button>
+      <button class="serie-btn active" id="fsbtn-neto"      onclick="T.fedea.toggleSerie('neto')"      style="background:#FFF8EC;color:#b07010;border-color:#e8a020">◆ Neto</button>
+    </div>
+    <div class="bar-canvas-wrap" id="fAreaWrap" style="height:300px;"><canvas id="fAreaChart"></canvas></div>
+    <div id="fedeaRangeIndicator" style="margin-top:6px;font-size:10px;color:var(--color-text-secondary,#666);"></div>
+  </div>
+  <div class="source" id="fedeaSourceEl" style="margin-top:80px;">
+    Fuente: <a href="https://fedea.net/decimo-informe-del-observatorio-sobre-el-reparto-de-los-impuestos-y-prestaciones-entre-los-hogares-espanoles/" target="_blank">FEDEA — Décimo informe del Observatorio sobre el reparto de los impuestos y prestaciones entre los hogares españoles</a>
+  </div>
+</div>
+
+<!-- ── Diferencial ── -->
+<div class="tab-panel" id="panel-diferencial"><div class="tab-empty"><div class="empty-icon"><i class="ti ti-trending-up"></i></div><div class="empty-title">Diferencial</div><div class="empty-sub">Contenido próximamente</div></div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+/*
+ * NOTA DE ARQUITECTURA — LEER ANTES DE MODIFICAR
+ * ═══════════════════════════════════════════════
+ * Este archivo implementa varias pestañas de datos fiscales/salariales.
+ * REGLA FUNDAMENTAL: cuando dos o más pestañas compartan estructura o
+ * mecanismos similares (tabla interactiva, selector de año, donuts,
+ * gráfico con tooltip, botones de selección rápida…), el código DEBE
+ * reutilizarse en lugar de duplicarse.
+ *
+ * El motor compartido es TabEngine (ver abajo). Cada pestaña es una
+ * instancia de TabEngine con su configuración específica (datos, IDs
+ * del DOM, funciones de formato y de dibujo propias).
+ * Funciones genéricas de una sola instancia: makeDonut(), drawTooltip(),
+ * switchTab(), window.resize handler.
+ *
+ * Para añadir una nueva pestaña:
+ *   1. Añadir el HTML de la pestaña (panel, tabla, donuts, canvas).
+ *   2. Definir los datos (DATA_NUEVA), columnas y funciones fmt*.
+ *   3. Crear una instancia: T.nueva = new TabEngine(nuevaCfg).
+ *   4. Registrar en switchTab() si necesita acción al activarse.
+ *   NO copiar/pegar bloques enteros de lógica de otra pestaña.
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   MOTOR GENÉRICO DE PESTAÑA
+   Todas las funciones compartidas viven aquí una sola vez.
+   Cada pestaña es una instancia de TabEngine con su config.
+   ═══════════════════════════════════════════════════════════ */
+function makeDonut(id,color){
+  color=color||'#0C447C';
+  return new Chart(document.getElementById(id),{
+    type:'doughnut',
+    data:{datasets:[{data:[0,100],backgroundColor:[color,'#D3D1C7'],borderWidth:0}]},
+    options:{animation:false,responsive:true,maintainAspectRatio:false,cutout:'68%',
+             plugins:{legend:{display:false},tooltip:{enabled:false}}}
+  });
+}
+
+function drawTooltip(ctx,W,H,mx,my,title,lines,TW){
+  const TPAD=10,TH=22+lines.length*20+10;
+  let tx=mx+14,ty=my-TH/2;
+  if(tx+TW>W-10)tx=mx-TW-14;
+  if(ty<4)ty=4; if(ty+TH>H-4)ty=H-TH-4;
+  ctx.save(); ctx.globalAlpha=1;
+  ctx.fillStyle='rgba(20,20,20,0.88)';
+  const rr=8;
+  ctx.beginPath();ctx.moveTo(tx+rr,ty);ctx.lineTo(tx+TW-rr,ty);ctx.quadraticCurveTo(tx+TW,ty,tx+TW,ty+rr);
+  ctx.lineTo(tx+TW,ty+TH-rr);ctx.quadraticCurveTo(tx+TW,ty+TH,tx+TW-rr,ty+TH);
+  ctx.lineTo(tx+rr,ty+TH);ctx.quadraticCurveTo(tx,ty+TH,tx,ty+TH-rr);
+  ctx.lineTo(tx,ty+rr);ctx.quadraticCurveTo(tx,ty,tx+rr,ty);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 11px system-ui,sans-serif';ctx.textAlign='left';
+  ctx.fillText(title,tx+TPAD,ty+16);
+  lines.forEach((l,i)=>{
+    const ly=ty+32+i*20;
+    ctx.fillStyle=l.color; ctx.fillRect(tx+TPAD,ly-8,10,10);
+    ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=.5;ctx.strokeRect(tx+TPAD,ly-8,10,10);
+    ctx.fillStyle='#eee';ctx.font='10.5px system-ui,sans-serif';
+    ctx.fillText(l.label+': '+l.val,tx+TPAD+14,ly+1);
+  });
+  ctx.restore();
+}
+
+/* ── Navegación de pestañas ── */
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+  requestAnimationFrame(()=>{
+    if(id==='irpf'){fixHdr2Top();T.irpf.drawChart();}
+    if(id==='salarios'){T.sal.drawChart();}
+  });
+}
+
+window.addEventListener('resize',()=>{fixHdr2Top();T.irpf.drawChart();T.sal.drawChart();});
+
+/* ═══════════════════════════════════════════════════════════
+   DATOS IRPF
+   ═══════════════════════════════════════════════════════════ */
+const IRPF_YEARS=[2022,2023,2024];
+const TRAMO_LABELS=['Negativo y cero','(0 - 1,5]','(1,5 - 6]','(6 - 12]','(12 - 21]','(21 - 30]','(30 - 60]','(60 - 150]','(150 - 601]','Mayor de 601'];
+const IRPF_DATA={
+  2022:{pending:false,totalLiq:22898072,totalImp596:87633921993,totalImp595:108398217760,totalP596:17589814,media596:4982.08,totalP595:15978174,media595:6784.14,totalRetDin:542140443645,totalLiqP3:20973283,totalSalMedio:30821.27,totalTipo:16.16,rows:[{liq:1284835,dLiq:5.61,liqP596:647591,imp596:74709749,dImp596:0.09,med596:115.37,nP595:62,dN595:0.00,imp595:144248,dImp595:0.00,med595:2326.58,retDin:4569915491,liqP3:938491,salMed:7056.79,tipo:1.63},{liq:1415760,dLiq:6.18,liqP596:666875,imp596:112341014,dImp596:0.13,med596:168.46,nP595:1421,dN595:0.01,imp595:180266,dImp595:0.00,med595:126.86,retDin:7536038866,liqP3:1137139,salMed:11300.53,tipo:1.49},{liq:3028019,dLiq:13.22,liqP596:1537395,imp596:492257596,dImp596:0.56,med596:320.19,nP595:77487,dN595:0.48,imp595:3686595,dImp595:0.00,med595:47.58,retDin:30038494351,liqP3:2739815,salMed:19538.57,tipo:1.64},{liq:2313798,dLiq:10.10,liqP596:1431699,imp596:895239424,dImp596:1.02,med596:625.30,nP595:1421319,dN595:8.90,imp595:625379551,dImp595:0.58,med595:440.00,retDin:28526663370,liqP3:2036531,salMed:19925.04,tipo:3.14},{liq:4813918,dLiq:21.02,liqP596:4060008,imp596:7681122314,dImp596:8.77,med596:1891.90,nP595:4497864,dN595:28.15,imp595:8009023509,dImp595:7.39,med595:1780.63,retDin:87543958445,liqP3:4523949,salMed:21562.51,tipo:8.77},{liq:3974212,dLiq:17.36,liqP596:3660041,imp596:14035000984,dImp596:16.02,med596:3834.66,nP595:3919005,dN595:24.53,imp595:14665737937,dImp595:13.53,med595:3742.21,retDin:103094820523,liqP3:3831140,salMed:28167.67,tipo:13.61},{liq:4869658,dLiq:21.27,liqP596:4557763,imp596:36289138805,dImp596:41.41,med596:7962.05,nP595:4863387,dN595:30.44,imp595:39937934592,dImp595:36.84,med595:8211.96,retDin:189309293431,liqP3:4685648,salMed:41535.57,tipo:19.17},{liq:1038056,dLiq:4.53,liqP596:903496,imp596:18617369021,dImp596:21.24,med596:20605.92,nP595:1037832,dN595:6.50,imp595:25146729924,dImp595:23.20,med595:24230.06,retDin:67323730231,liqP3:946554,salMed:74514.70,tipo:27.65},{liq:144630,dLiq:0.63,liqP596:113560,imp596:6401015268,dImp596:7.30,med596:56366.13,nP595:144613,dN595:0.91,imp595:11798795772,dImp595:10.88,med595:81588.76,retDin:17330361271,liqP3:121742,salMed:152609.73,tipo:36.94},{liq:15186,dLiq:0.07,liqP596:11386,imp596:3035727818,dImp596:3.46,med596:266619.34,nP595:15184,dN595:0.10,imp595:8210605366,dImp595:7.57,med595:540740.61,retDin:6867167666,liqP3:12274,salMed:603123.81,tipo:44.21}],source:`Fuente: AEAT 2022 · P596: <a href="https://sede.agenciatributaria.gob.es/AEAT/Contenidos_Comunes/La_Agencia_Tributaria/Estadisticas/Publicaciones/sites/irpf/2022/jrubik6eff8bdf3ec1e16577e837da1912e3e37132d50e.html" target="_blank">AEAT</a> · P595: <a href="https://sede.agenciatributaria.gob.es/AEAT/Contenidos_Comunes/La_Agencia_Tributaria/Estadisticas/Publicaciones/sites/irpf/2022/jrubikf4336ccc7446bf9fcf2d21e453af658a89746f390.html" target="_blank">AEAT</a> · P3: <a href="https://sede.agenciatributaria.gob.es/AEAT/Contenidos_Comunes/La_Agencia_Tributaria/Estadisticas/Publicaciones/sites/irpf/2022/jrubik592444a7f926d31e5daa6e1d35549f0aaf47969e.html" target="_blank">AEAT</a>`},
+  2023:{pending:false,totalLiq:23987211,totalImp596:97512998332,totalImp595:117673789396,totalP596:18467871,media596:5280.14,totalP595:16651601,media595:7067,totalRetDin:588520292906,totalLiqP3:21859658,totalSalMedio:31867.25,totalTipo:16.57,rows:[{liq:1270127,dLiq:5.30,liqP596:581901,imp596:80337988,dImp596:0.08,med596:138.06,nP595:37,dN595:0.00,imp595:176331,dImp595:0.00,med595:4766,retDin:4834674738,liqP3:883955,salMed:8308.41,tipo:1.66},{liq:1691865,dLiq:7.05,liqP596:751367,imp596:141373705,dImp596:0.14,med596:188.16,nP595:1544,dN595:0.01,imp595:293781,dImp595:0.00,med595:190,retDin:9827735225,liqP3:1372540,salMed:13079.81,tipo:1.44},{liq:3127766,dLiq:13.04,liqP596:1575150,imp596:578872923,dImp596:0.59,med596:367.50,nP595:106601,dN595:0.64,imp595:4567774,dImp595:0.00,med595:43,retDin:33530509483,liqP3:2819827,salMed:21287.19,tipo:1.73},{liq:2688297,dLiq:11.21,liqP596:1886434,imp596:1322084221,dImp596:1.36,med596:700.84,nP595:1674303,dN595:10.05,imp595:753441925,dImp595:0.64,med595:450,retDin:37058434767,liqP3:2397615,salMed:19644.70,tipo:3.57},{liq:4302709,dLiq:17.94,liqP596:3611299,imp596:7190338925,dImp596:7.37,med596:1991.07,nP595:4023059,dN595:24.16,imp595:7265122953,dImp595:6.17,med595:1806,retDin:79590034020,liqP3:3980968,salMed:22039.17,tipo:9.03},{liq:4277053,dLiq:17.83,liqP596:3949320,imp596:15528557663,dImp596:15.92,med596:3931.96,nP595:4222908,dN595:25.36,imp595:15881458369,dImp595:13.50,med595:3761,retDin:111516036611,liqP3:4116670,salMed:28236.77,tipo:13.92},{liq:5282994,dLiq:22.02,liqP596:4949593,imp596:40765160531,dImp596:41.80,med596:8236.06,nP595:5277002,dN595:31.69,imp595:44169592854,dImp595:37.54,med595:8370,retDin:208361158301,liqP3:5073998,salMed:42096.62,tipo:19.56},{liq:1170735,dLiq:4.88,liqP596:1023646,imp596:21399348872,dImp596:21.95,med596:20905.03,nP595:1170500,dN595:7.03,imp595:28462476734,dImp595:24.19,med595:24317,retDin:76964127132,liqP3:1066085,salMed:75186.27,tipo:27.80},{liq:160927,dLiq:0.67,liqP596:127932,imp596:7299057912,dImp596:7.49,med596:57054.20,nP595:160911,dN595:0.97,imp595:13128053696,dImp595:11.16,med595:81586,retDin:19643902468,liqP3:136009,salMed:153549.56,tipo:37.16},{liq:14738,dLiq:0.06,liqP596:11229,imp596:3207865592,dImp596:3.29,med596:285676.87,nP595:14736,dN595:0.09,imp595:8008604978,dImp595:6.81,med595:543472,retDin:7193680161,liqP3:11991,salMed:640634.09,tipo:44.59}],source:`Fuente: AEAT 2023 · P596: <a href="https://sede.agenciatributaria.gob.es/AEAT/Contenidos_Comunes/La_Agencia_Tributaria/Estadisticas/Publicaciones/sites/irpf/2023/jrubik9b80fce38eb8af327beb74e8368e1844a7eb970.html" target="_blank">AEAT</a> · P595: <a href="https://sede.agenciatributaria.gob.es/AEAT/Contenidos_Comunes/La_Agencia_Tributaria/Estadisticas/Publicaciones/sites/irpf/2023/jrubikf7a8112a5b41c3fff03083be4a7a651473da97bbe.html" target="_blank">AEAT</a> · P3: <a href="https://sede.agenciatributaria.gob.es/AEAT/Contenidos_Comunes/La_Agencia_Tributaria/Estadisticas/Publicaciones/sites/irpf/2023/jrubikf26c5df75d97bb38dc28a4f5c420ef6e15be72691.html" target="_blank">AEAT</a>`},
+  2024:{pending:true,source:''}
+};
+
+/* ═══════════════════════════════════════════════════════════
+   DATOS SALARIOS
+   ═══════════════════════════════════════════════════════════ */
+const SAL_YEARS=[2022,2023];
+
+const SAL_DATA={
+  2022:{totalAsal:19596966,totalSal:434710751578,totalRet:67958865597,totalTipo:27.22,
+    rows:[{"centil":1,"sal":1306217626,"ret":25459528,"asal":1496858,"tipo":1.95,"salMed":873},{"centil":2,"sal":3006501108,"ret":60854130,"asal":1012886,"tipo":2.02,"salMed":2968},{"centil":3,"sal":4352497359,"ret":95396621,"asal":873956,"tipo":2.19,"salMed":4980},{"centil":4,"sal":6198403246,"ret":139105081,"asal":883024,"tipo":2.24,"salMed":7020},{"centil":5,"sal":8196178663,"ret":190200658,"asal":910712,"tipo":2.32,"salMed":9000},{"centil":6,"sal":10222763032,"ret":256587107,"asal":928779,"tipo":2.51,"salMed":11007},{"centil":7,"sal":13710927655,"ret":367301980,"asal":1050401,"tipo":2.68,"salMed":13053},{"centil":8,"sal":20194489572,"ret":717123242,"asal":1348458,"tipo":3.55,"salMed":14976},{"centil":9,"sal":21232115264,"ret":1352025075,"asal":1250249,"tipo":6.37,"salMed":16982},{"centil":10,"sal":22451508607,"ret":2015355383,"asal":1182862,"tipo":8.98,"salMed":18981},{"centil":11,"sal":22547314401,"ret":2373569113,"asal":1074892,"tipo":10.53,"salMed":20976},{"centil":12,"sal":21041339891,"ret":2462657363,"asal":916136,"tipo":11.7,"salMed":22967},{"centil":13,"sal":18881328134,"ret":2408991930,"asal":756310,"tipo":12.76,"salMed":24965},{"centil":14,"sal":17960290207,"ret":2480028330,"asal":665748,"tipo":13.81,"salMed":26978},{"centil":15,"sal":15489325532,"ret":2280934436,"asal":534798,"tipo":14.73,"salMed":28963},{"centil":16,"sal":14757690303,"ret":2298009260,"asal":476525,"tipo":15.57,"salMed":30969},{"centil":17,"sal":14308121171,"ret":2340457363,"asal":433816,"tipo":16.36,"salMed":32982},{"centil":18,"sal":14484018537,"ret":2478234645,"asal":413682,"tipo":17.11,"salMed":35012},{"centil":19,"sal":15185492162,"ret":2696525570,"asal":410736,"tipo":17.76,"salMed":36971},{"centil":20,"sal":14203824566,"ret":2600772634,"asal":364498,"tipo":18.31,"salMed":38968},{"centil":21,"sal":12662917032,"ret":2398293478,"asal":309112,"tipo":18.94,"salMed":40965},{"centil":22,"sal":11935409291,"ret":2344182472,"asal":277695,"tipo":19.64,"salMed":42980},{"centil":23,"sal":10944241081,"ret":2214691245,"asal":243370,"tipo":20.24,"salMed":44970},{"centil":24,"sal":9596544980,"ret":1993906409,"asal":204315,"tipo":20.78,"salMed":46969},{"centil":25,"sal":8711599649,"ret":1855367515,"asal":177890,"tipo":21.3,"salMed":48972},{"centil":26,"sal":7574243607,"ret":1647036894,"asal":148628,"tipo":21.75,"salMed":50961},{"centil":27,"sal":6419349762,"ret":1423441949,"asal":121192,"tipo":22.17,"salMed":52968},{"centil":28,"sal":5820645298,"ret":1320592291,"asal":105883,"tipo":22.69,"salMed":54972},{"centil":29,"sal":5270826710,"ret":1220587841,"asal":92511,"tipo":23.16,"salMed":56975},{"centil":30,"sal":4898683702,"ret":1156480393,"asal":83048,"tipo":23.61,"salMed":58986},{"centil":31,"sal":4721050073,"ret":1137417709,"asal":77452,"tipo":24.09,"salMed":60955},{"centil":32,"sal":4329954767,"ret":1059919123,"asal":68749,"tipo":24.48,"salMed":62982},{"centil":33,"sal":4052373706,"ret":1008697436,"asal":62363,"tipo":24.89,"salMed":64980},{"centil":34,"sal":3677541040,"ret":935072353,"asal":54912,"tipo":25.43,"salMed":66972},{"centil":35,"sal":3389856614,"ret":879044307,"asal":49137,"tipo":25.93,"salMed":68988},{"centil":36,"sal":3233641830,"ret":854656368,"asal":45563,"tipo":26.43,"salMed":70971},{"centil":37,"sal":2960384185,"ret":796011321,"asal":40569,"tipo":26.89,"salMed":72972},{"centil":38,"sal":2794408149,"ret":764575243,"asal":37268,"tipo":27.36,"salMed":74981},{"centil":39,"sal":2569024188,"ret":712169435,"asal":33373,"tipo":27.72,"salMed":76979},{"centil":40,"sal":2430025292,"ret":685857983,"asal":30765,"tipo":28.22,"salMed":78987},{"centil":41,"sal":2276699592,"ret":651135087,"asal":28119,"tipo":28.6,"salMed":80967},{"centil":42,"sal":2113524782,"ret":612327626,"asal":25470,"tipo":28.97,"salMed":82981},{"centil":43,"sal":2083996651,"ret":610829227,"asal":24515,"tipo":29.31,"salMed":85009},{"centil":44,"sal":1845269940,"ret":546976410,"asal":21215,"tipo":29.64,"salMed":86979},{"centil":45,"sal":1695509207,"ret":507597411,"asal":19056,"tipo":29.94,"salMed":88975},{"centil":46,"sal":1609045108,"ret":486862028,"asal":17690,"tipo":30.26,"salMed":90958},{"centil":47,"sal":1485879459,"ret":453962108,"asal":15979,"tipo":30.55,"salMed":92990},{"centil":48,"sal":1361000129,"ret":419522952,"asal":14329,"tipo":30.82,"salMed":94982},{"centil":49,"sal":1295048087,"ret":402649945,"asal":13355,"tipo":31.09,"salMed":96971},{"centil":50,"sal":1185520227,"ret":371418364,"asal":11976,"tipo":31.33,"salMed":98991},{"centil":51,"sal":1117813965,"ret":353112800,"asal":11073,"tipo":31.59,"salMed":100950},{"centil":52,"sal":1027612310,"ret":327303072,"asal":9978,"tipo":31.85,"salMed":102988},{"centil":53,"sal":960908107,"ret":307812025,"asal":9153,"tipo":32.03,"salMed":104983},{"centil":54,"sal":891723971,"ret":287310375,"asal":8335,"tipo":32.22,"salMed":106985},{"centil":55,"sal":851990818,"ret":276616742,"asal":7818,"tipo":32.47,"salMed":108978},{"centil":56,"sal":804133610,"ret":262802410,"asal":7246,"tipo":32.68,"salMed":110976},{"centil":57,"sal":747354622,"ret":245052829,"asal":6615,"tipo":32.79,"salMed":112979},{"centil":58,"sal":700858997,"ret":231563814,"asal":6095,"tipo":33.04,"salMed":114989},{"centil":59,"sal":648338733,"ret":215458585,"asal":5542,"tipo":33.23,"salMed":116986},{"centil":60,"sal":615180312,"ret":205830819,"asal":5170,"tipo":33.46,"salMed":118990},{"centil":61,"sal":622627010,"ret":209319140,"asal":5149,"tipo":33.62,"salMed":120922},{"centil":62,"sal":555679029,"ret":187472362,"asal":4518,"tipo":33.74,"salMed":122992},{"centil":63,"sal":533821237,"ret":181017671,"asal":4271,"tipo":33.91,"salMed":124987},{"centil":64,"sal":494716917,"ret":168013072,"asal":3896,"tipo":33.96,"salMed":126981},{"centil":65,"sal":479729465,"ret":164125194,"asal":3719,"tipo":34.21,"salMed":128994},{"centil":66,"sal":458174932,"ret":156931789,"asal":3498,"tipo":34.25,"salMed":130982},{"centil":67,"sal":427569956,"ret":147836630,"asal":3216,"tipo":34.58,"salMed":132951},{"centil":68,"sal":396069396,"ret":137062896,"asal":2934,"tipo":34.61,"salMed":134993},{"centil":69,"sal":387764949,"ret":134549457,"asal":2831,"tipo":34.7,"salMed":136971},{"centil":70,"sal":374305196,"ret":130726554,"asal":2693,"tipo":34.93,"salMed":138992},{"centil":71,"sal":361533368,"ret":126786706,"asal":2565,"tipo":35.07,"salMed":140949},{"centil":72,"sal":327891399,"ret":115241640,"asal":2293,"tipo":35.15,"salMed":142997},{"centil":73,"sal":345355663,"ret":122111245,"asal":2382,"tipo":35.36,"salMed":144986},{"centil":74,"sal":322934382,"ret":114275328,"asal":2197,"tipo":35.39,"salMed":146989},{"centil":75,"sal":310642037,"ret":110516048,"asal":2085,"tipo":35.58,"salMed":148989},{"centil":76,"sal":321731910,"ret":115141104,"asal":2132,"tipo":35.79,"salMed":150906},{"centil":77,"sal":278438122,"ret":99283076,"asal":1820,"tipo":35.66,"salMed":152988},{"centil":78,"sal":279268942,"ret":99911080,"asal":1802,"tipo":35.78,"salMed":154977},{"centil":79,"sal":254175167,"ret":91139059,"asal":1619,"tipo":35.86,"salMed":156995},{"centil":80,"sal":261931414,"ret":94403693,"asal":1647,"tipo":36.04,"salMed":159035},{"centil":81,"sal":258652769,"ret":93385387,"asal":1607,"tipo":36.1,"salMed":160954},{"centil":82,"sal":232094169,"ret":83880538,"asal":1424,"tipo":36.14,"salMed":162987},{"centil":83,"sal":227047116,"ret":82362681,"asal":1376,"tipo":36.28,"salMed":165005},{"centil":84,"sal":227385084,"ret":82506351,"asal":1362,"tipo":36.28,"salMed":166949},{"centil":85,"sal":219700874,"ret":80154623,"asal":1300,"tipo":36.48,"salMed":169001},{"centil":86,"sal":218509693,"ret":80143501,"asal":1278,"tipo":36.68,"salMed":170978},{"centil":87,"sal":202211128,"ret":74017266,"asal":1169,"tipo":36.6,"salMed":172978},{"centil":88,"sal":225883081,"ret":83098806,"asal":1291,"tipo":36.79,"salMed":174968},{"centil":89,"sal":204272027,"ret":75516541,"asal":1154,"tipo":36.97,"salMed":177012},{"centil":90,"sal":185442987,"ret":68255258,"asal":1036,"tipo":36.81,"salMed":178999},{"centil":91,"sal":195753800,"ret":72196171,"asal":1082,"tipo":36.88,"salMed":180918},{"centil":92,"sal":180606492,"ret":67538639,"asal":987,"tipo":37.4,"salMed":182985},{"centil":93,"sal":180164364,"ret":66825463,"asal":974,"tipo":37.09,"salMed":184974},{"centil":94,"sal":184014114,"ret":68813939,"asal":984,"tipo":37.4,"salMed":187006},{"centil":95,"sal":165751101,"ret":61728767,"asal":877,"tipo":37.24,"salMed":188998},{"centil":96,"sal":174159989,"ret":65232506,"asal":912,"tipo":37.46,"salMed":190965},{"centil":97,"sal":163659373,"ret":61290928,"asal":848,"tipo":37.45,"salMed":192995},{"centil":98,"sal":162257820,"ret":61170020,"asal":832,"tipo":37.7,"salMed":195021},{"centil":99,"sal":141846121,"ret":53511036,"asal":720,"tipo":37.72,"salMed":197009},{"centil":100,"sal":126502366,"ret":47637589,"asal":636,"tipo":37.66,"salMed":198903}]
+  },
+  2023:{totalAsal:20062318,totalSal:468061657990,totalRet:74168743245,totalTipo:27.12,
+    rows:[{"centil":1,"sal":1245801757,"ret":23036682,"asal":1442902,"tipo":1.85,"salMed":863},{"centil":2,"sal":2841837512,"ret":54174753,"asal":955775,"tipo":1.91,"salMed":2973},{"centil":3,"sal":4126541412,"ret":85547571,"asal":829277,"tipo":2.07,"salMed":4976},{"centil":4,"sal":5788226886,"ret":124940312,"asal":823917,"tipo":2.16,"salMed":7025},{"centil":5,"sal":7828069677,"ret":170762838,"asal":869694,"tipo":2.18,"salMed":9001},{"centil":6,"sal":9713580168,"ret":230361152,"asal":882274,"tipo":2.37,"salMed":11010},{"centil":7,"sal":12244834186,"ret":319649241,"asal":942273,"tipo":2.61,"salMed":12995},{"centil":8,"sal":19429936360,"ret":528196935,"asal":1288212,"tipo":2.72,"salMed":15083},{"centil":9,"sal":22098030202,"ret":1025948692,"asal":1301114,"tipo":4.64,"salMed":16984},{"centil":10,"sal":23059779659,"ret":1687541385,"asal":1214489,"tipo":7.32,"salMed":18987},{"centil":11,"sal":24004358137,"ret":2397543474,"asal":1143848,"tipo":9.99,"salMed":20986},{"centil":12,"sal":22734434987,"ret":2609563849,"asal":990036,"tipo":11.48,"salMed":22963},{"centil":13,"sal":21083138619,"ret":2672539514,"asal":844555,"tipo":12.68,"salMed":24964},{"centil":14,"sal":19064127612,"ret":2624324871,"asal":706832,"tipo":13.77,"salMed":26971},{"centil":15,"sal":18126769689,"ret":2657975945,"asal":625901,"tipo":14.66,"salMed":28961},{"centil":16,"sal":16030910580,"ret":2490025399,"asal":517777,"tipo":15.53,"salMed":30961},{"centil":17,"sal":15219705581,"ret":2484206587,"asal":461346,"tipo":16.32,"salMed":32990},{"centil":18,"sal":14703907085,"ret":2506129806,"asal":420231,"tipo":17.04,"salMed":34990},{"centil":19,"sal":15602263662,"ret":2761729312,"asal":421723,"tipo":17.7,"salMed":36996},{"centil":20,"sal":15796018439,"ret":2887048396,"asal":405073,"tipo":18.28,"salMed":38995},{"centil":21,"sal":14231253238,"ret":2690774561,"asal":347409,"tipo":18.91,"salMed":40964},{"centil":22,"sal":13030256720,"ret":2551301493,"asal":303268,"tipo":19.58,"salMed":42966},{"centil":23,"sal":12301310092,"ret":2487657080,"asal":273423,"tipo":20.22,"salMed":44990},{"centil":24,"sal":10969905772,"ret":2279991456,"asal":233575,"tipo":20.78,"salMed":46965},{"centil":25,"sal":9828505915,"ret":2089805568,"asal":200699,"tipo":21.26,"salMed":48971},{"centil":26,"sal":8994048751,"ret":1955131973,"asal":176476,"tipo":21.74,"salMed":50965},{"centil":27,"sal":7670325333,"ret":1697173401,"asal":144805,"tipo":22.13,"salMed":52970},{"centil":28,"sal":6708319045,"ret":1515317206,"asal":122043,"tipo":22.59,"salMed":54967},{"centil":29,"sal":6007541429,"ret":1381256511,"asal":105439,"tipo":22.99,"salMed":56976},{"centil":30,"sal":5509464390,"ret":1291582166,"asal":93405,"tipo":23.44,"salMed":58985},{"centil":31,"sal":5301271486,"ret":1267526468,"asal":86969,"tipo":23.91,"salMed":60956},{"centil":32,"sal":4765773197,"ret":1158550731,"asal":75664,"tipo":24.31,"salMed":62986},{"centil":33,"sal":4577293945,"ret":1132652728,"asal":70439,"tipo":24.75,"salMed":64982},{"centil":34,"sal":4227521390,"ret":1067277661,"asal":63115,"tipo":25.25,"salMed":66981},{"centil":35,"sal":3892810450,"ret":1003096845,"asal":56435,"tipo":25.77,"salMed":68979},{"centil":36,"sal":3673181742,"ret":964943985,"asal":51758,"tipo":26.27,"salMed":70968},{"centil":37,"sal":3387400450,"ret":906620193,"asal":46420,"tipo":26.76,"salMed":72973},{"centil":38,"sal":3167369671,"ret":861378572,"asal":42238,"tipo":27.2,"salMed":74989},{"centil":39,"sal":2923016420,"ret":807674432,"asal":37970,"tipo":27.63,"salMed":76982},{"centil":40,"sal":2749481615,"ret":771458615,"asal":34813,"tipo":28.06,"salMed":78979},{"centil":41,"sal":2621833327,"ret":747112954,"asal":32379,"tipo":28.5,"salMed":80973},{"centil":42,"sal":2432770434,"ret":701782297,"asal":29313,"tipo":28.85,"salMed":82993},{"centil":43,"sal":2332791842,"ret":681234363,"asal":27452,"tipo":29.2,"salMed":84977},{"centil":44,"sal":2139936272,"ret":632615440,"asal":24603,"tipo":29.56,"salMed":86979},{"centil":45,"sal":2034828764,"ret":608280344,"asal":22867,"tipo":29.89,"salMed":88985},{"centil":46,"sal":2009036503,"ret":606620199,"asal":22088,"tipo":30.19,"salMed":90956},{"centil":47,"sal":1787394425,"ret":545206408,"asal":19223,"tipo":30.5,"salMed":92982},{"centil":48,"sal":1600078001,"ret":491916743,"asal":16846,"tipo":30.74,"salMed":94983},{"centil":49,"sal":1533805542,"ret":476314925,"asal":15815,"tipo":31.05,"salMed":96984},{"centil":50,"sal":1431387551,"ret":448153618,"asal":14461,"tipo":31.31,"salMed":98983},{"centil":51,"sal":1346525897,"ret":424543216,"asal":13336,"tipo":31.53,"salMed":100969},{"centil":52,"sal":1233643192,"ret":391310552,"asal":11979,"tipo":31.72,"salMed":102984},{"centil":53,"sal":1153862590,"ret":368594165,"asal":10991,"tipo":31.94,"salMed":104982},{"centil":54,"sal":1059401832,"ret":341062329,"asal":9901,"tipo":32.19,"salMed":106999},{"centil":55,"sal":1011153500,"ret":328321877,"asal":9278,"tipo":32.47,"salMed":108984},{"centil":56,"sal":953145960,"ret":311362491,"asal":8589,"tipo":32.67,"salMed":110973},{"centil":57,"sal":875981757,"ret":287813148,"asal":7754,"tipo":32.86,"salMed":112972},{"centil":58,"sal":834527593,"ret":275617656,"asal":7258,"tipo":33.03,"salMed":114980},{"centil":59,"sal":771920687,"ret":255902991,"asal":6598,"tipo":33.15,"salMed":116993},{"centil":60,"sal":728263669,"ret":242863036,"asal":6120,"tipo":33.35,"salMed":118997},{"centil":61,"sal":734801368,"ret":246663838,"asal":6076,"tipo":33.57,"salMed":120935},{"centil":62,"sal":659053649,"ret":221664033,"asal":5359,"tipo":33.63,"salMed":122981},{"centil":63,"sal":627781682,"ret":212296246,"asal":5023,"tipo":33.82,"salMed":124981},{"centil":64,"sal":576981005,"ret":195928542,"asal":4544,"tipo":33.96,"salMed":126976},{"centil":65,"sal":566163766,"ret":193901113,"asal":4389,"tipo":34.25,"salMed":128996},{"centil":66,"sal":535071914,"ret":183505404,"asal":4085,"tipo":34.3,"salMed":130985},{"centil":67,"sal":523343803,"ret":180354546,"asal":3935,"tipo":34.46,"salMed":132997},{"centil":68,"sal":502532670,"ret":173803093,"asal":3723,"tipo":34.59,"salMed":134981},{"centil":69,"sal":452722481,"ret":157128086,"asal":3305,"tipo":34.71,"salMed":136981},{"centil":70,"sal":438193873,"ret":152903970,"asal":3153,"tipo":34.89,"salMed":138977},{"centil":71,"sal":417690009,"ret":146178315,"asal":2963,"tipo":35.0,"salMed":140969},{"centil":72,"sal":389623455,"ret":136444457,"asal":2725,"tipo":35.02,"salMed":142981},{"centil":73,"sal":385223298,"ret":135559183,"asal":2657,"tipo":35.19,"salMed":144984},{"centil":74,"sal":353060724,"ret":125139946,"asal":2402,"tipo":35.44,"salMed":146986},{"centil":75,"sal":351075793,"ret":124470094,"asal":2356,"tipo":35.45,"salMed":149013},{"centil":76,"sal":369313649,"ret":131773976,"asal":2447,"tipo":35.68,"salMed":150925},{"centil":77,"sal":329527525,"ret":117450652,"asal":2154,"tipo":35.64,"salMed":152984},{"centil":78,"sal":325748860,"ret":116623832,"asal":2102,"tipo":35.8,"salMed":154971},{"centil":79,"sal":312741804,"ret":112177313,"asal":1992,"tipo":35.87,"salMed":156999},{"centil":80,"sal":302212074,"ret":109020406,"asal":1901,"tipo":36.07,"salMed":158975},{"centil":81,"sal":287156924,"ret":103819044,"asal":1784,"tipo":36.15,"salMed":160962},{"centil":82,"sal":272205701,"ret":98504722,"asal":1670,"tipo":36.19,"salMed":162997},{"centil":83,"sal":268273488,"ret":97551277,"asal":1626,"tipo":36.36,"salMed":164990},{"centil":84,"sal":247639107,"ret":90154229,"asal":1483,"tipo":36.41,"salMed":166985},{"centil":85,"sal":240139385,"ret":87528742,"asal":1421,"tipo":36.45,"salMed":168993},{"centil":86,"sal":253021535,"ret":92267002,"asal":1480,"tipo":36.47,"salMed":170960},{"centil":87,"sal":231296751,"ret":84765735,"asal":1337,"tipo":36.65,"salMed":172997},{"centil":88,"sal":230646569,"ret":84746889,"asal":1318,"tipo":36.74,"salMed":174997},{"centil":89,"sal":212744033,"ret":78347233,"asal":1202,"tipo":36.83,"salMed":176992},{"centil":90,"sal":212506436,"ret":78296685,"asal":1187,"tipo":36.84,"salMed":179028},{"centil":91,"sal":232312840,"ret":85893956,"asal":1284,"tipo":36.97,"salMed":180929},{"centil":92,"sal":194708693,"ret":72219848,"asal":1064,"tipo":37.09,"salMed":182997},{"centil":93,"sal":221752813,"ret":82824957,"asal":1199,"tipo":37.35,"salMed":184948},{"centil":94,"sal":189990539,"ret":70780295,"asal":1016,"tipo":37.25,"salMed":186999},{"centil":95,"sal":193923337,"ret":72375232,"asal":1026,"tipo":37.32,"salMed":189009},{"centil":96,"sal":182773753,"ret":68507873,"asal":957,"tipo":37.48,"salMed":190986},{"centil":97,"sal":194314568,"ret":72861345,"asal":1007,"tipo":37.5,"salMed":192964},{"centil":98,"sal":170427841,"ret":63638646,"asal":874,"tipo":37.34,"salMed":194998},{"centil":99,"sal":170389555,"ret":64303194,"asal":865,"tipo":37.74,"salMed":196982},{"centil":100,"sal":151958121,"ret":57322185,"asal":764,"tipo":37.72,"salMed":198898}]
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════
+   IRPF — config específica de columnas y formato
+   ═══════════════════════════════════════════════════════════ */
+let fullMode=true;
+const IRPF_COLS=[
+  {id:'liq',label:'Liq. N.º',group:'gen',sep:false,hide:false},{id:'dLiq',label:'Distrib. %',group:'gen',sep:false,hide:false},
+  {id:'liqP596',label:'Liq. partida N.º',group:'p596',sep:true,hide:true},{id:'imp596',label:'Importe',group:'p596',sep:false,hide:false},{id:'dImp596',label:'Distrib. %',group:'p596',sep:false,hide:false},{id:'med596',label:'Media',group:'p596',sep:false,hide:true},
+  {id:'nP595',label:'N.º partidas',group:'p595',sep:true,hide:true},{id:'dN595',label:'Distrib. %',group:'p595',sep:false,hide:true},{id:'imp595',label:'Importe',group:'p595',sep:false,hide:false},{id:'dImp595',label:'Distrib. %',group:'p595',sep:false,hide:false},{id:'med595',label:'Media',group:'p595',sep:false,hide:true},
+  {id:'retDin',label:'Retribuciones din.',group:'p3',sep:true,hide:false},{id:'liqP3',label:'N.º liq. p.3',group:'p3',sep:false,hide:true},{id:'salMed',label:'Salario medio aprox.',group:'p3',sep:false,hide:false},{id:'tipo',label:'Tipo medio aprox.',group:'p3',sep:false,hide:false},
+];
+const GROUP_META={gen:{label:'Datos generales',sep:false},p596:{label:'Partida 596 — Retenciones trabajo',sep:true},p595:{label:'Partida 595 — Autoliquidación',sep:true},p3:{label:'Partida 3 — Retribuciones dinerarias',sep:true}};
+const GROUP_ORDER=['gen','p596','p595','p3'];
+function visibleCols(){return IRPF_COLS.filter(c=>fullMode||!c.hide);}
+function fixHdr2Top(){
+  const h1=document.querySelector('#irpf-thead tr.hdr1');if(!h1)return;
+  const h=h1.getBoundingClientRect().height;
+  document.querySelectorAll('#irpf-thead tr.hdr2 th').forEach(th=>th.style.top=Math.round(h)+'px');
+}
+function fmtIrpfVal(cid,r){
+  const f=n=>n.toLocaleString('es-ES',{useGrouping:true}),fd=(n,d=2)=>n.toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+  return({liq:f(r.liq),dLiq:fd(r.dLiq)+'%',liqP596:f(r.liqP596),imp596:f(r.imp596),dImp596:fd(r.dImp596)+'%',med596:fd(r.med596),nP595:f(r.nP595),dN595:fd(r.dN595)+'%',imp595:f(r.imp595),dImp595:fd(r.dImp595)+'%',med595:fd(r.med595),retDin:f(r.retDin),liqP3:f(r.liqP3),salMed:fd(r.salMed),tipo:fd(r.tipo)+'%'})[cid]||'';
+}
+function fmtIrpfTotal(cid,d){
+  const f=n=>n.toLocaleString('es-ES',{useGrouping:true}),fd=(n,dec=2)=>n.toLocaleString('es-ES',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+  return({liq:f(d.totalLiq),dLiq:'100,00%',liqP596:f(d.totalP596),imp596:f(d.totalImp596),dImp596:'100,00%',med596:fd(d.media596),nP595:f(d.totalP595),dN595:'100,00%',imp595:f(d.totalImp595),dImp595:'100,00%',med595:fd(d.media595),retDin:f(d.totalRetDin),liqP3:f(d.totalLiqP3),salMed:fd(d.totalSalMedio),tipo:fd(d.totalTipo)+'%'})[cid]||'';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SALARIOS — config específica de columnas y formato
+   ═══════════════════════════════════════════════════════════ */
+const SAL_COLS=[
+  {id:'centil', label:'Centil',             align:'left'},
+  {id:'salMed', label:'Salario medio (€)',  align:'right'},
+  {id:'asal',   label:'Nº asalariados',     align:'right'},
+  {id:'sal',    label:'Suma salarios',      align:'right'},
+  {id:'ret',    label:'Suma de retenciones',align:'right'},
+  {id:'tipo',   label:'Tipo medio',         align:'right'},
+];
+function fmtSalVal(cid,r){
+  const f=n=>n.toLocaleString('es-ES',{useGrouping:true}),fd=(n,d=2)=>n.toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+  if(cid==='centil') return r.centil;
+  if(cid==='salMed') return f(r.salMed)+' €';
+  if(cid==='asal')   return f(r.asal);
+  if(cid==='sal')    return f(r.sal);
+  if(cid==='ret')    return f(r.ret);
+  if(cid==='tipo')   return fd(r.tipo)+'%';
+  return '';
+}
+function fmtSalTotal(cid,d){
+  const f=n=>n.toLocaleString('es-ES',{useGrouping:true}),fd=(n,dec=2)=>n.toLocaleString('es-ES',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+  if(cid==='centil') return 'Total';
+  if(cid==='asal')   return f(d.totalAsal);
+  if(cid==='sal')    return f(d.totalSal);
+  if(cid==='ret')    return f(d.totalRet);
+  if(cid==='tipo')   return fd(d.totalTipo)+'%';
+  return '—';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TabEngine — motor genérico compartido
+   ═══════════════════════════════════════════════════════════ */
+function TabEngine(cfg){
+  /* cfg: { years, data, years[], selected:Set,
+     theadId, tbodyId, tfootId,
+     prevBtnId, nextBtnId, selectId,
+     cols, fmtVal, fmtTotal, rowLabel(d,i),
+     donuts:[{pctId,chartId}], tipoMax,
+     seriesBtnsPrefix, activeSeries:Set,
+     drawChart(), updateDonuts(sel,d) } */
+  const c=cfg;
+
+  this.changeYear=function(y){ c.currentYear=y; if(c.onYearChange)c.onYearChange(); this.render(); };
+  this.shiftYear=function(delta){
+    const idx=c.years.indexOf(c.currentYear), ni=idx+delta;
+    if(ni>=0&&ni<c.years.length){ c.currentYear=c.years[ni]; if(c.onYearChange)c.onYearChange(); this.render(); }
+  };
+  this.toggleSerie=function(key){
+    if(c.activeSeries.has(key)&&c.activeSeries.size===1)return;
+    if(c.activeSeries.has(key))c.activeSeries.delete(key);else c.activeSeries.add(key);
+    document.getElementById(c.seriesBtnsPrefix+key).classList.toggle('active',c.activeSeries.has(key));
+    c.drawChart();
+  };
+  this.toggle=function(i){
+    if(c.selected.has(i))c.selected.delete(i);else c.selected.add(i);
+    if(c.onManualToggle)c.onManualToggle();
+    this._syncRows(); c.updateDonuts(); c.drawChart();
+  };
+  this.clearAll=function(){ c.selected.clear(); if(c.onClear)c.onClear(); this.render(); };
+  this.selectAll=function(){ const d=c.data[c.currentYear]; if(!d||!d.rows)return; d.rows.forEach((_,i)=>c.selected.add(i)); this.render(); };
+  this.drawChart=function(){ c.drawChart(); };
+
+  this._syncRows=function(){
+    const tbody=document.getElementById(c.tbodyId);
+    if(!tbody)return;
+    Array.from(tbody.rows).forEach((tr,i)=>{
+      const sel=c.selected.has(i);
+      tr.classList.toggle('selected',sel);
+      Array.from(tr.cells).forEach(td=>{
+        td.style.color=sel?'#B5D4F4':'var(--color-text-primary,#000)';
+      });
+      tr.style.background=sel?'#0C447C':'';
+    });
+  };
+
+  this.render=function(){
+    /* sync nav */
+    const ni=c.years.indexOf(c.currentYear);
+    document.getElementById(c.selectId).value=c.currentYear;
+    document.getElementById(c.prevBtnId).disabled=(ni===0);
+    document.getElementById(c.nextBtnId).disabled=(ni===c.years.length-1);
+    const d=c.data[c.currentYear];
+    /* pending banner (IRPF only) */
+    if(c.pendingBannerId){
+      const banner=document.getElementById(c.pendingBannerId);
+      const wrap=document.getElementById(c.tableWrapId);
+      if(d.pending){banner.style.display='block';banner.innerHTML=c.pendingMsg||'Datos pendientes.';wrap.style.display='none';if(c.sourceId)document.getElementById(c.sourceId).innerHTML='';return;}
+      banner.style.display='none';wrap.style.display='block';
+    }
+    /* header */
+    const thead=document.getElementById(c.theadId);thead.innerHTML='';
+    if(c.buildHeader){c.buildHeader(thead);}
+    else{
+      const hr=document.createElement('tr');
+      c.cols.forEach(col=>{
+        const th=document.createElement('th');th.textContent=col.label;
+        th.style.cssText='background:#2d6a4f;color:#e8f5ee;font-weight:500;padding:6px 7px 7px 7px;font-size:10px;border:.5px solid #3a8562;text-align:'+col.align+';position:sticky;top:0;z-index:3;white-space:nowrap;';
+        hr.appendChild(th);
+      });
+      thead.appendChild(hr);
+    }
+    /* body */
+    const tbody=document.getElementById(c.tbodyId);tbody.innerHTML='';
+    d.rows.forEach((r,i)=>{
+      const tr=document.createElement('tr');
+      if(c.selected.has(i)){tr.classList.add('selected');tr.style.background='#0C447C';}
+      if(c.rowPrefix)c.rowPrefix(r,i,tr,c.selected.has(i)); // hook: celda fija antes de las columnas
+      c.cols.forEach(col=>{
+        const td=document.createElement('td');
+        td.textContent=c.fmtVal(col.id,r);
+        if(col.isLabel) td.style.cssText='text-align:left;font-variant-numeric:normal;padding:4px 7px;border:.5px solid var(--color-border-tertiary,#e0e0e0);color:'+(c.selected.has(i)?'#B5D4F4':'var(--color-text-primary,#000)')+';font-size:10.5px;';
+        else            td.style.cssText='text-align:right;padding:4px 7px;border:.5px solid var(--color-border-tertiary,#e0e0e0);color:'+(c.selected.has(i)?'#B5D4F4':'var(--color-text-primary,#000)')+';font-variant-numeric:tabular-nums;font-size:10.5px;'+(col.sep?'border-left:2px solid var(--color-border-secondary,#ccc);':'');
+        tr.appendChild(td);
+      });
+      tr.style.cursor='pointer';
+      tr.addEventListener('click',()=>this.toggle(i));
+      tbody.appendChild(tr);
+    });
+    /* tfoot */
+    const tfoot=document.getElementById(c.tfootId);
+    if(tfoot){
+      tfoot.innerHTML='';
+      const ft=document.createElement('tr');
+      ft.style.cssText='background:var(--color-background-secondary,#f5f5f5);border-top:1px solid var(--color-border-secondary,#ccc);';
+      c.cols.forEach(col=>{
+        const td=document.createElement('td');td.textContent=c.fmtTotal(col.id,d);
+        td.style.cssText='font-weight:500;padding:4px 7px;border:.5px solid var(--color-border-tertiary,#e0e0e0);text-align:'+(col.isLabel?'left':'right')+';font-size:10.5px;font-variant-numeric:tabular-nums;';
+        ft.appendChild(td);
+      });
+      tfoot.appendChild(ft);
+    }
+    /* total-row fallback in tbody (IRPF style) */
+    if(c.appendTotalToBody){
+      const tot=document.createElement('tr');tot.className='total-row';
+      const tdF=document.createElement('td');tdF.className='col-fixed';tdF.style.fontWeight='500';tdF.textContent='Total';tot.appendChild(tdF);
+      c.cols.forEach(col=>{const td=document.createElement('td');if(col.sep)td.classList.add('sep');td.style.fontWeight='500';td.textContent=c.fmtTotal(col.id,d);tot.appendChild(td);});
+      tbody.appendChild(tot);
+    }
+    if(c.sourceId&&d.source!==undefined)document.getElementById(c.sourceId).innerHTML=d.source;
+    if(c.modeBtnId)document.getElementById(c.modeBtnId).textContent=fullMode?'Vista reducida':'Vista completa';
+    if(c.afterRender)c.afterRender();
+    c.updateDonuts(); c.drawChart();
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INSTANCIA IRPF
+   ═══════════════════════════════════════════════════════════ */
+const irpfSelected=new Set();
+const irpfActiveSeries=new Set(['liq','tipo']);
+const IRPF_BAR_KEYS=['liq','imp596','imp595'];
+const IRPF_BAR_W=15,IRPF_BAR_GAP=2;
+const IRPF_SERIE_DEFS=[
+  {key:'liq',   label:'Declarantes',          color:'#1a5f9a',axis:'far', fmt:v=>(v/1e6).toFixed(2)+' M'},
+  {key:'imp596',label:'Retenciones (P596)',   color:'#b06000',axis:'left',fmt:v=>(v/1e9).toFixed(1)+' MM€'},
+  {key:'imp595',label:'Autoliq. (P595)',       color:'#276749',axis:'left',fmt:v=>(v/1e9).toFixed(1)+' MM€'},
+  {key:'tipo',  label:'Tipo medio %',          color:'#862e9c',axis:'right',fmt:v=>v.toFixed(1)+'%'},
+];
+const IRPF_PAD={top:10,bot:56,left:68,right:120};
+
+function irpfBuildHeader(thead){
+  const vis=visibleCols();
+  const r1=document.createElement('tr');r1.className='hdr1';
+  const thF=document.createElement('th');thF.className='col-fixed';thF.rowSpan=2;
+  thF.style.cssText='min-width:105px;vertical-align:middle;text-align:left;';thF.innerHTML='Tramo<br>(miles&nbsp;€)';r1.appendChild(thF);
+  GROUP_ORDER.forEach(gid=>{
+    const cols=vis.filter(c=>c.group===gid);if(!cols.length)return;
+    const th=document.createElement('th');th.colSpan=cols.length;th.textContent=GROUP_META[gid].label;
+    if(GROUP_META[gid].sep)th.classList.add('sep');r1.appendChild(th);
+  });
+  thead.appendChild(r1);
+  const r2=document.createElement('tr');r2.className='hdr2';
+  vis.forEach(c=>{const th=document.createElement('th');th.textContent=c.label;if(c.sep)th.classList.add('sep');r2.appendChild(th);});
+  thead.appendChild(r2);
+  requestAnimationFrame(fixHdr2Top);
+}
+
+function irpfDrawChart(){
+  const wrap=document.getElementById('barWrap'),canvas=document.getElementById('barChart');
+  const d=IRPF_DATA[irpfCfg.currentYear];if(!d||!d.rows)return;
+  const W=wrap.clientWidth||600,H=wrap.clientHeight||260,dpr=window.devicePixelRatio||1;
+  const bsW=Math.round(W*dpr),bsH=Math.round(H*dpr);
+  if(canvas.width!==bsW||canvas.height!==bsH){canvas.width=bsW;canvas.height=bsH;}
+  const ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+  const P=IRPF_PAD,rows=d.rows,N=rows.length;
+  const selArr=rows.map((_,i)=>irpfSelected.has(i)),anySelected=selArr.some(Boolean);
+  const PW=W-P.left-P.right,PH=H-P.top-P.bot,baseY=P.top+PH,catW=PW/N;
+  const totalBarW=3*IRPF_BAR_W+2*IRPF_BAR_GAP;
+  const barOff=[-totalBarW/2,-totalBarW/2+IRPF_BAR_W+IRPF_BAR_GAP,-totalBarW/2+2*(IRPF_BAR_W+IRPF_BAR_GAP)];
+  const leftVals=[];
+  if(irpfActiveSeries.has('imp596'))rows.forEach(r=>leftVals.push(r.imp596));
+  if(irpfActiveSeries.has('imp595'))rows.forEach(r=>leftVals.push(r.imp595));
+  const leftMax=leftVals.length?Math.max(...leftVals)*1.12:1;
+  const farMax=irpfActiveSeries.has('liq')?Math.max(...rows.map(r=>r.liq))*1.12:1;
+  const rightMax=50;
+  function valToY(v,mx){return P.top+PH*(1-v/mx);}
+  ctx.strokeStyle='rgba(128,128,128,0.12)';ctx.lineWidth=.5;
+  for(let t=1;t<=5;t++){const y=P.top+(PH/5)*(5-t);ctx.beginPath();ctx.moveTo(P.left,y);ctx.lineTo(P.left+PW,y);ctx.stroke();}
+  IRPF_BAR_KEYS.forEach((key,bi)=>{
+    const def=IRPF_SERIE_DEFS.find(d=>d.key===key),isActive=irpfActiveSeries.has(key);
+    rows.forEach((r,ci)=>{
+      const cx=P.left+catW*(ci+.5),bx=cx+barOff[bi],val=r[key],mx=key==='liq'?farMax:leftMax;
+      const top=valToY(val,mx),bh=baseY-top;if(bh<1)return;
+      const sel=anySelected?selArr[ci]:true,alpha=isActive?(sel?.85:.13):0;if(alpha<=0)return;
+      ctx.globalAlpha=alpha;const r2=Math.min(3,bh/2);
+      ctx.beginPath();ctx.moveTo(bx,baseY);ctx.lineTo(bx,top+r2);ctx.quadraticCurveTo(bx,top,bx+r2,top);ctx.lineTo(bx+IRPF_BAR_W-r2,top);ctx.quadraticCurveTo(bx+IRPF_BAR_W,top,bx+IRPF_BAR_W,top+r2);ctx.lineTo(bx+IRPF_BAR_W,baseY);ctx.closePath();
+      ctx.fillStyle=def.color;ctx.fill();
+    });
+  });
+  ctx.globalAlpha=1;
+  if(irpfActiveSeries.has('tipo')){
+    const def=IRPF_SERIE_DEFS.find(d=>d.key==='tipo');
+    ctx.strokeStyle=def.color;ctx.lineWidth=2.5;ctx.lineJoin='round';
+    ctx.beginPath();rows.forEach((r,ci)=>{const x=P.left+catW*(ci+.5),y=valToY(r.tipo,rightMax);ci===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();
+    rows.forEach((r,ci)=>{const x=P.left+catW*(ci+.5),y=valToY(r.tipo,rightMax),isSel=!anySelected||selArr[ci];ctx.beginPath();ctx.arc(x,y,isSel?4:2.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=def.color;ctx.lineWidth=isSel?2:1;ctx.stroke();});
+  }
+  ctx.strokeStyle='rgba(128,128,128,0.35)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P.left,baseY);ctx.lineTo(P.left+PW,baseY);ctx.stroke();
+  const TICKS=5;ctx.font='9px system-ui,sans-serif';
+  if(irpfActiveSeries.has('imp596')||irpfActiveSeries.has('imp595')){ctx.textAlign='right';ctx.fillStyle='rgba(160,90,0,0.75)';for(let t=0;t<=TICKS;t++){const v=(leftMax/TICKS)*t,y=P.top+PH*(1-t/TICKS);ctx.fillText(v>=1e9?(v/1e9).toFixed(0)+' MM€':v>=1e6?(v/1e6).toFixed(0)+' M€':'0',P.left-4,y+3);}}
+  if(irpfActiveSeries.has('liq')){ctx.textAlign='left';ctx.fillStyle='rgba(26,95,154,0.8)';const rx=W-P.right+6;for(let t=0;t<=TICKS;t++){const v=(farMax/TICKS)*t,y=P.top+PH*(1-t/TICKS);ctx.fillText(v>=1e6?(v/1e6).toFixed(1)+' M':v>=1e3?(v/1e3).toFixed(0)+'k':'0',rx,y+3);}}
+  if(irpfActiveSeries.has('tipo')){ctx.textAlign='left';ctx.fillStyle='rgba(134,46,156,0.8)';const rxOff=irpfActiveSeries.has('liq')?54:0,rx2=W-P.right+6+rxOff;for(let t=0;t<=TICKS;t++){const v=(rightMax/TICKS)*t,y=P.top+PH*(1-t/TICKS);ctx.fillText(v+'%',rx2,y+3);}}
+  ctx.fillStyle='rgba(80,80,80,0.75)';ctx.font='8.5px system-ui,sans-serif';ctx.textAlign='center';
+  rows.forEach((_,ci)=>{const x=P.left+catW*(ci+.5),lbl=TRAMO_LABELS[ci],words=lbl.split(' ');if(words.length===1){ctx.fillText(lbl,x,baseY+14);}else{const mid=Math.ceil(words.length/2);ctx.fillText(words.slice(0,mid).join(' '),x,baseY+13);ctx.fillText(words.slice(mid).join(' '),x,baseY+24);}});
+}
+
+function irpfUpdateDonuts(){
+  const d=IRPF_DATA[irpfCfg.currentYear];if(!d||!d.rows)return;
+  let sL=0,sI596=0,sI595=0,sumTipo=0,nSel=0;
+  irpfSelected.forEach(i=>{sL+=d.rows[i].liq;sI596+=d.rows[i].imp596;sI595+=d.rows[i].imp595;sumTipo+=d.rows[i].tipo;nSel++;});
+  const pL=sL/d.totalLiq*100,pI596=sI596/d.totalImp596*100,pI595=sI595/d.totalImp595*100,avgTipo=nSel>0?sumTipo/nSel:null;
+  const fd=(n,dec=1)=>n.toLocaleString('es-ES',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+  document.getElementById('pct1').textContent=fd(pL)+'%';
+  document.getElementById('pct2').textContent=fd(pI596)+'%';
+  document.getElementById('pct3').textContent=fd(pI595)+'%';
+  document.getElementById('pct4').textContent=avgTipo!==null?fd(avgTipo,2)+'%':'—';
+  ch1.data.datasets[0].data=[pL,100-pL];ch1.update('none');
+  ch2.data.datasets[0].data=[pI596,100-pI596];ch2.update('none');
+  ch3.data.datasets[0].data=[pI595,100-pI595];ch3.update('none');
+  const tipoPct=avgTipo!==null?Math.min(avgTipo/50*100,100):0;
+  ch4.data.datasets[0].data=[tipoPct,100-tipoPct];ch4.update('none');
+}
+
+const irpfCfg={
+  years:IRPF_YEARS, data:IRPF_DATA, currentYear:2022,
+  selected:irpfSelected, activeSeries:irpfActiveSeries,
+  theadId:'irpf-thead', tbodyId:'irpf-tbody', tfootId:null,
+  prevBtnId:'btnPrev', nextBtnId:'btnNext', selectId:'yearSelect',
+  cols:null, fmtVal:fmtIrpfVal, fmtTotal:fmtIrpfTotal,
+  seriesBtnsPrefix:'sbtn-',
+  pendingBannerId:'pendingBanner', tableWrapId:'tableWrap',
+  pendingMsg:'Los datos del ejercicio 2024 se publicarán en julio de 2026.',
+  sourceId:'sourceEl', modeBtnId:'modeBtn',
+  appendTotalToBody:true,
+  buildHeader:irpfBuildHeader,
+  rowPrefix:function(r,i,tr,sel){
+    const td=document.createElement('td');
+    td.className='col-fixed';
+    td.textContent=TRAMO_LABELS[i];
+    td.style.color=sel?'#B5D4F4':'var(--color-text-primary,#000)';
+    tr.appendChild(td);
+  },
+  drawChart:irpfDrawChart,
+  updateDonuts:irpfUpdateDonuts,
+  onClear:function(){halfState=0;rentState=-1;document.getElementById('btnHalf').textContent='Primeras 5';document.getElementById('btnRent').textContent=RENT_CYCLES[0].label;}
+};
+/* patch cols getter for fullMode */
+Object.defineProperty(irpfCfg,'cols',{get:()=>visibleCols()});
+
+const T={irpf:new TabEngine(irpfCfg)};
+
+/* IRPF-specific buttons */
+let halfState=0,rentState=-1;
+const RENT_CYCLES=[{label:'Rentas > 60k€',rows:[7,8,9]},{label:'Rentas medias',rows:[4,5,6]},{label:'Rentas < 12k€',rows:[0,1,2,3]}];
+function cycleRent(){
+  rentState=(rentState+1)%RENT_CYCLES.length;
+  irpfSelected.clear();RENT_CYCLES[rentState].rows.forEach(i=>irpfSelected.add(i));
+  document.getElementById('btnRent').textContent=RENT_CYCLES[(rentState+1)%RENT_CYCLES.length].label;
+  T.irpf.render();
+}
+function selectHalf(){
+  irpfSelected.clear();rentState=-1;document.getElementById('btnRent').textContent=RENT_CYCLES[0].label;
+  if(halfState===0){[0,1,2,3,4].forEach(i=>irpfSelected.add(i));document.getElementById('btnHalf').textContent='Últimas 5';halfState=1;}
+  else{[5,6,7,8,9].forEach(i=>irpfSelected.add(i));document.getElementById('btnHalf').textContent='Primeras 5';halfState=0;}
+  T.irpf.render();
+}
+function toggleMode(){fullMode=!fullMode;T.irpf.render();}
+
+/* IRPF tooltip */
+(function(){
+  const canvas=document.getElementById('barChart');
+  canvas.addEventListener('mousemove',function(e){
+    const d=IRPF_DATA[irpfCfg.currentYear];if(!d||!d.rows)return;
+    const rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    const W=rect.width,H=rect.height,P=IRPF_PAD;
+    const rows=d.rows,N=rows.length,PW=W-P.left-P.right,PH=H-P.top-P.bot,catW=PW/N;
+    if(mx<P.left||mx>P.left+PW){irpfDrawChart();return;}
+    let ci=Math.max(0,Math.min(N-1,Math.floor((mx-P.left)/catW)));
+    irpfDrawChart();
+    const ctx=canvas.getContext('2d'),r=rows[ci],lines=[];
+    if(irpfActiveSeries.has('liq'))   lines.push({color:'#1a5f9a',label:'Declarantes',       val:(r.liq/1e6).toFixed(2)+' M'});
+    if(irpfActiveSeries.has('imp596'))lines.push({color:'#b06000',label:'Retenciones (P596)', val:(r.imp596/1e9).toFixed(1)+' MM€'});
+    if(irpfActiveSeries.has('imp595'))lines.push({color:'#276749',label:'Autoliq. (P595)',    val:(r.imp595/1e9).toFixed(1)+' MM€'});
+    if(irpfActiveSeries.has('tipo'))  lines.push({color:'#862e9c',label:'Tipo medio %',       val:r.tipo.toFixed(1)+'%'});
+    drawTooltip(ctx,W,H,mx,my,'('+TRAMO_LABELS[ci]+')',lines,210);
+  });
+  canvas.addEventListener('mouseleave',irpfDrawChart);
+})();
+
+/* IRPF donuts */
+const ch1=makeDonut('c1','#1a5f9a'),ch2=makeDonut('c2','#b06000'),ch3=makeDonut('c3','#276749'),ch4=makeDonut('c4','#862e9c');
+
+/* ═══════════════════════════════════════════════════════════
+   INSTANCIA SALARIOS
+   ═══════════════════════════════════════════════════════════ */
+const salSelected=new Set();
+const salActiveSeries=new Set(['asal','sal','ret','tipo']);
+const SAL_PAD={top:14,bot:30,left:72,right:60};
+
+function salDrawChart(){
+  const wrap=document.getElementById('sAreaWrap'),canvas=document.getElementById('sAreaChart');
+  if(!wrap||!canvas)return;
+  const d=SAL_DATA[salCfg.currentYear];if(!d||!d.rows)return;
+  const W=wrap.clientWidth||700,H=wrap.clientHeight||300,dpr=window.devicePixelRatio||1;
+  const bsW=Math.round(W*dpr),bsH=Math.round(H*dpr);
+  if(canvas.width!==bsW||canvas.height!==bsH){canvas.width=bsW;canvas.height=bsH;}
+  const ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+  const P=SAL_PAD,rows=d.rows,N=rows.length;
+  const selArr=rows.map((_,i)=>salSelected.has(i)),anySelected=selArr.some(Boolean);
+  const PW=W-P.left-P.right,PH=H-P.top-P.bot,baseY=P.top+PH;
+  const maxAsal=Math.max(...rows.map(r=>r.asal))*1.1;
+  const maxLeft=Math.max(...rows.map(r=>Math.max(r.sal,r.ret)))*1.1;
+  const maxRight=42;
+  function xOf(i){return P.left+PW*(i/(N-1));}
+  function yLeft(v,mx){return P.top+PH*(1-v/mx);}
+  function yRight(v){return P.top+PH*(1-v/maxRight);}
+  function yAsal(v){return P.top+PH*(1-v/maxAsal);}
+  ctx.strokeStyle='rgba(128,128,128,0.1)';ctx.lineWidth=.5;
+  for(let t=1;t<=5;t++){const y=P.top+(PH/5)*(5-t);ctx.beginPath();ctx.moveTo(P.left,y);ctx.lineTo(P.left+PW,y);ctx.stroke();}
+  function drawArea(key,yFn,fill,stroke){
+    if(!salActiveSeries.has(key))return;
+    const data=rows.map(r=>r[key]);
+    ctx.globalAlpha=anySelected?.07:.45;
+    ctx.beginPath();ctx.moveTo(xOf(0),baseY);
+    data.forEach((v,i)=>ctx.lineTo(xOf(i),yFn(v)));
+    ctx.lineTo(xOf(N-1),baseY);ctx.closePath();ctx.fillStyle=fill;ctx.fill();
+    if(anySelected){
+      selArr.forEach((sel,i)=>{
+        if(!sel)return;
+        const i0=Math.max(0,i-1),x0=xOf(i0),x1=xOf(i),v0=yFn(data[i0]),v1=yFn(data[i]);
+        ctx.globalAlpha=.6;ctx.beginPath();ctx.moveTo(x0,baseY);ctx.lineTo(x0,v0);ctx.lineTo(x1,v1);ctx.lineTo(x1,baseY);ctx.closePath();ctx.fillStyle=fill;ctx.fill();
+      });
+    }
+    ctx.globalAlpha=1;ctx.beginPath();
+    data.forEach((v,i)=>i===0?ctx.moveTo(xOf(i),yFn(v)):ctx.lineTo(xOf(i),yFn(v)));
+    ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();
+  }
+  drawArea('asal',v=>yAsal(v),'rgba(38,115,190,0.7)','#1a5f9a');
+  drawArea('sal', v=>yLeft(v,maxLeft),'rgba(210,140,0,0.6)','#b06000');
+  drawArea('ret', v=>yLeft(v,maxLeft),'rgba(39,103,73,0.65)','#276749');
+  ctx.globalAlpha=1;
+  if(salActiveSeries.has('tipo')){
+    ctx.beginPath();rows.forEach((r,i)=>{i===0?ctx.moveTo(xOf(i),yRight(r.tipo)):ctx.lineTo(xOf(i),yRight(r.tipo));});
+    ctx.strokeStyle='#c0392b';ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.stroke();
+    rows.forEach((r,i)=>{const isSel=!anySelected||selArr[i];ctx.beginPath();ctx.arc(xOf(i),yRight(r.tipo),isSel?3:1.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#c0392b';ctx.lineWidth=isSel?2:1;ctx.stroke();});
+  }
+  ctx.strokeStyle='rgba(128,128,128,0.3)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P.left,baseY);ctx.lineTo(P.left+PW,baseY);ctx.stroke();
+  ctx.fillStyle='rgba(80,80,80,0.75)';ctx.font='8.5px system-ui,sans-serif';ctx.textAlign='center';
+  [1,10,20,30,40,50,60,70,80,90,100].forEach(c=>{ctx.fillText(c,xOf(c-1),baseY+12);});
+  ctx.fillText('Centil',P.left+PW/2,baseY+24);
+  if(salActiveSeries.has('sal')||salActiveSeries.has('ret')){ctx.textAlign='right';ctx.fillStyle='rgba(140,80,0,0.8)';ctx.font='8px system-ui,sans-serif';for(let t=0;t<=5;t++){const v=(maxLeft/5)*t,y=P.top+PH*(1-t/5);ctx.fillText(v>=1e9?(v/1e9).toFixed(0)+' MM€':v>=1e6?(v/1e6).toFixed(0)+' M€':'0',P.left-5,y+3);}}
+  if(salActiveSeries.has('tipo')){ctx.textAlign='left';ctx.fillStyle='rgba(160,40,30,0.8)';ctx.font='8px system-ui,sans-serif';for(let t=0;t<=5;t++){const v=(maxRight/5)*t,y=P.top+PH*(1-t/5);ctx.fillText(v.toFixed(0)+'%',P.left+PW+4,y+3);}}
+}
+
+function salUpdateDonuts(){
+  const d=SAL_DATA[salCfg.currentYear];if(!d||!d.rows)return;
+  let sA=0,sS=0,sR=0,sumT=0,n=0;
+  salSelected.forEach(i=>{sA+=d.rows[i].asal;sS+=d.rows[i].sal;sR+=d.rows[i].ret;sumT+=d.rows[i].tipo;n++;});
+  const pA=sA/d.totalAsal*100,pS=sS/d.totalSal*100,pR=sR/d.totalRet*100,avgT=n>0?sumT/n:null;
+  const fd=(v,dec=1)=>v.toLocaleString('es-ES',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+  document.getElementById('spct1').textContent=fd(pA)+'%';
+  document.getElementById('spct2').textContent=fd(pS)+'%';
+  document.getElementById('spct3').textContent=fd(pR)+'%';
+  document.getElementById('spct4').textContent=avgT!==null?fd(avgT,2)+'%':'—';
+  sc1.data.datasets[0].data=[pA,100-pA];sc1.update('none');
+  sc2.data.datasets[0].data=[pS,100-pS];sc2.update('none');
+  sc3.data.datasets[0].data=[pR,100-pR];sc3.update('none');
+  sc4.data.datasets[0].data=[avgT!==null?Math.min(avgT/40*100,100):0,avgT!==null?Math.max(0,100-avgT/40*100):100];sc4.update('none');
+}
+
+const SAL_SOURCES={
+  2022:'Fuentes: <a href="https://sede.agenciatributaria.gob.es/Sede/datosabiertos/catalogo/hacienda/Informes_anuales_de_Recaudacion_Tributaria.shtml?faqId=49d31969475e2710VgnVCM100000dc381e0aRCRD" target="_blank">AEAT — Estructura salarial por centiles 2022</a> · <a href="https://www.ine.es/dyngs/Prensa/EES2022.htm" target="_blank">INE — Encuesta de Estructura Salarial 2022</a> (salario mediano: 22.383,11€; salario medio: 26.934,98€)',
+  2023:'Fuentes: <a href="https://sede.agenciatributaria.gob.es/Sede/datosabiertos/catalogo/hacienda/Informes_anuales_de_Recaudacion_Tributaria.shtml?faqId=49d31969475e2710VgnVCM100000dc381e0aRCRD" target="_blank">AEAT — Estructura salarial por centiles 2023</a> · <a href="https://www.ine.es/dyngs/Prensa/EAES2023.htm" target="_blank">INE — Encuesta de Estructura Salarial 2023</a> (salario mediano: 23.349,00€; salario medio: 28.049,94€)'
+};
+const salCfg={
+  years:SAL_YEARS, data:SAL_DATA, currentYear:2022,
+  selected:salSelected, activeSeries:salActiveSeries,
+  theadId:'sal-thead', tbodyId:'sal-tbody', tfootId:'sal-tfoot',
+  prevBtnId:'sBtnPrev', nextBtnId:'sBtnNext', selectId:'sYearSelect',
+  cols:SAL_COLS.map(c=>({...c,isLabel:c.id==='centil'})),
+  fmtVal:fmtSalVal, fmtTotal:fmtSalTotal,
+  seriesBtnsPrefix:'ssbtn-',
+  drawChart:salDrawChart, updateDonuts:salUpdateDonuts,
+  onClear:function(){sTopState=-1;sBotState=0;sSMIState=0;sActiveSpecial=null;document.getElementById('sBtnTop').textContent=S_TOP_CYCLES[0].label;document.getElementById('sBtnBot').textContent='Bottom 50%';document.getElementById('sBtnSMI').textContent='SMI';},
+  afterRender:function(){const el=document.getElementById('salSourceEl');if(el)el.innerHTML=SAL_SOURCES[salCfg.currentYear]||'';},
+  onManualToggle:function(){ sActiveSpecial=null; }, // selección manual → desconectar botón especial
+  onYearChange:function(){
+    // Si hay un botón especial activo, reaplicar su selección en el año nuevo.
+    // Así SMI, Sal.medio, etc. se actualizan al año correcto automáticamente.
+    if(sActiveSpecial){
+      sApplySpecial(sActiveSpecial);
+      // Sincronizar labels de botones que dependen del estado (bot toggle)
+      if(sActiveSpecial==='bot-0')document.getElementById('sBtnBot').textContent='Top 50%';
+      else if(sActiveSpecial==='bot-1')document.getElementById('sBtnBot').textContent='Bottom 50%';
+    }
+  }
+};
+T.sal=new TabEngine(salCfg);
+
+/* Salarios-specific buttons */
+let sTopState=-1,sBotState=0,sSMIState=0;
+// Rastrea el último botón especial activo para reaplicarlo al cambiar año.
+// null = selección manual (no se toca al cambiar de año).
+let sActiveSpecial=null;
+
+function sApplySpecial(key){
+  // Reaplicar la selección especial guardada en el año actual.
+  if(!key)return;
+  salSelected.clear();
+  if(key==='smi'||key==='medio'||key==='mediano'||key==='modal'){
+    const ref=S_SALARY_REF[salCfg.currentYear];if(!ref)return;
+    const entry=ref[key];
+    salSelected.add(entry.idx);
+    if(entry.extraIdx!=null)salSelected.add(entry.extraIdx);
+  } else if(key.startsWith('top-')){
+    const idx=parseInt(key.split('-')[1]);
+    S_TOP_CYCLES[idx].rows.forEach(i=>salSelected.add(i));
+  } else if(key==='bot-0'){
+    Array.from({length:50},(_,i)=>i).forEach(i=>salSelected.add(i));
+  } else if(key==='bot-1'){
+    Array.from({length:50},(_,i)=>50+i).forEach(i=>salSelected.add(i));
+  }
+}
+const S_TOP_CYCLES=[
+  {label:'Top 70%',       rows:Array.from({length:70},(_,i)=>30+i)},
+  {label:'Rentas medias', rows:Array.from({length:22},(_,i)=>7+i)},
+  {label:'Bottom 7%',     rows:Array.from({length:7}, (_,i)=>i)},
+];
+const S_SALARY_REF={
+  2022:{
+    smi:    {idx:7,  label:'SMI (14.000€/año)',         next:'Sal. medio'},
+    medio:  {idx:12, label:'Sal. medio (24.965€/año)',  next:'Sal. mediano'},
+    mediano:{idx:11, label:'Sal. mediano (22.383€/año)',next:'Sal. modal'},
+    modal:  {idx:8,  label:'Sal. modal (centil 9)',     next:'SMI',  extraIdx:null}
+  },
+  2023:{
+    smi:    {idx:7,  label:'SMI (15.120€/año)',         next:'Sal. medio'},
+    medio:  {idx:14, label:'Sal. medio (28.049€/año)',  next:'Sal. mediano'},
+    mediano:{idx:11, label:'Sal. mediano (23.349€/año)',next:'Sal. modal'},
+    modal:  {idx:8,  label:'Sal. modal (centiles 9-10)',next:'SMI',  extraIdx:9}
+  }
+};
+const S_SMI_CYCLE=['smi','medio','mediano','modal'];
+function sCycleTop(){
+  sTopState=(sTopState+1)%S_TOP_CYCLES.length;
+  sActiveSpecial='top-'+sTopState;
+  salSelected.clear();S_TOP_CYCLES[sTopState].rows.forEach(i=>salSelected.add(i));
+  document.getElementById('sBtnTop').textContent=S_TOP_CYCLES[(sTopState+1)%S_TOP_CYCLES.length].label;
+  T.sal.render();
+}
+function sCycleBot(){
+  sTopState=-1;document.getElementById('sBtnTop').textContent=S_TOP_CYCLES[0].label;
+  salSelected.clear();
+  if(sBotState===0){
+    sActiveSpecial='bot-0';
+    Array.from({length:50},(_,i)=>i).forEach(i=>salSelected.add(i));
+    document.getElementById('sBtnBot').textContent='Top 50%';sBotState=1;
+  } else {
+    sActiveSpecial='bot-1';
+    Array.from({length:50},(_,i)=>50+i).forEach(i=>salSelected.add(i));
+    document.getElementById('sBtnBot').textContent='Bottom 50%';sBotState=0;
+  }
+  T.sal.render();
+}
+function sCycleSMI(){
+  const ref=S_SALARY_REF[salCfg.currentYear];if(!ref)return;
+  const key=S_SMI_CYCLE[sSMIState],entry=ref[key];
+  sActiveSpecial=key; // guardar qué referencia salarial está activa
+  salSelected.clear();sTopState=-1;sBotState=0;
+  document.getElementById('sBtnTop').textContent=S_TOP_CYCLES[0].label;
+  document.getElementById('sBtnBot').textContent='Bottom 50%';
+  salSelected.add(entry.idx);
+  if(entry.extraIdx!=null)salSelected.add(entry.extraIdx);
+  document.getElementById('sBtnSMI').textContent=entry.next;
+  sSMIState=(sSMIState+1)%4;
+  T.sal.render();
+}
+
+/* Salarios tooltip */
+(function(){
+  const canvas=document.getElementById('sAreaChart');
+  canvas.addEventListener('mousemove',function(e){
+    const d=SAL_DATA[salCfg.currentYear];if(!d||!d.rows)return;
+    const rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    const W=rect.width,H=rect.height,P=SAL_PAD;
+    const rows=d.rows,N=rows.length,PW=W-P.left-P.right,PH=H-P.top-P.bot;
+    if(mx<P.left||mx>P.left+PW){salDrawChart();return;}
+    let ci=Math.max(0,Math.min(N-1,Math.round((mx-P.left)/PW*(N-1))));
+    salDrawChart();
+    const ctx=canvas.getContext('2d'),r=rows[ci],f=n=>n.toLocaleString('es-ES',{useGrouping:true}),lines=[];
+    if(salActiveSeries.has('asal'))lines.push({color:'#1a5f9a',label:'Asalariados',        val:f(r.asal)});
+    if(salActiveSeries.has('sal')) lines.push({color:'#b06000',label:'Suma salarios',       val:(r.sal/1e9).toFixed(2)+' MM€'});
+    if(salActiveSeries.has('ret')) lines.push({color:'#276749',label:'Suma de retenciones', val:(r.ret/1e9).toFixed(2)+' MM€'});
+    if(salActiveSeries.has('tipo'))lines.push({color:'#c0392b',label:'Tipo medio',          val:r.tipo.toFixed(2)+'%'});
+    lines.push({color:'#888',label:'Salario medio',val:f(r.salMed)+'€'});
+    drawTooltip(ctx,W,H,mx,my,'Centil '+r.centil,lines,225);
+  });
+  canvas.addEventListener('mouseleave',salDrawChart);
+})();
+
+/* Salarios donuts */
+const sc1=makeDonut('sc1','#1a5f9a'),sc2=makeDonut('sc2','#b06000'),sc3=makeDonut('sc3','#276749'),sc4=makeDonut('sc4','#c0392b');
+
+/* ── Arranque ── */
+T.irpf.render();
+T.sal.render();
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   OBSERVATORIO FEDEA — datos y configuración
+   Sigue el mismo patrón TabEngine que IRPF y Salarios.
+   ═══════════════════════════════════════════════════════════ */
+const FEDEA_YEARS=[2022,2023];
+
+const FEDEA_DATA={"2022":[{"segmento":"Quintil 1","Número de Hogares":3829801.0,"Renta de mercado ampliada":4095.0,"Jubilación":3646.0,"Supervivencia":2215.0,"Desempleo Público":855.0,"Invalidez":487.0,"Ingresos asistencia social":564.0,"Resto":252.0,"Total Prestaciones monetarias":8019.0,"Renta Bruta":12114.0,"Subsidio medio efectivo (SME)":66.2,"Cotización social trabajadores":428.0,"Cotización Social Empresas y SEPE":835.0,"Cotizaciones Sociales":1263.0,"IRPF":126.0,"Impuesto de Patrimonio":37.0,"Impuesto sobre Sociedades":15.0,"Impuestos directos":1441.0,"IVA":1380.0,"ITPAJD":137.0,"II.EE. e I. Primas de Seguros":191.0,"Impuestos Indirectos":1708.0,"Impuestos totales":3149.0,"Tipo medio efectivo (TME)":26.0,"Renta Disponible":8965.0,"Sanidad":4037.0,"Educación":1595.0,"Prestaciones en especie":5632.0,"Subsidio Especie medio efectivo (SEME)":46.49,"Renta disponible extendida":14597.0,"IBI":180.0,"I.E. Bebidas Alcohólicas":6.0,"I.E. Labores del Tabaco":58.0,"I.E. Hidrocarburos":83.0,"I.E. Electricidad":4.0,"I. Primas de Seguros":40.0},{"segmento":"Quintil 2","Número de Hogares":3829800.0,"Renta de mercado ampliada":15876.0,"Jubilación":6746.0,"Supervivencia":1649.0,"Desempleo Público":1178.0,"Invalidez":861.0,"Ingresos asistencia social":233.0,"Resto":483.0,"Total Prestaciones monetarias":11150.0,"Renta Bruta":27026.0,"Subsidio medio efectivo (SME)":41.26,"Cotización social trabajadores":1038.0,"Cotización Social Empresas y SEPE":3349.0,"Cotizaciones Sociales":4387.0,"IRPF":1284.0,"Impuesto de Patrimonio":33.0,"Impuesto sobre Sociedades":27.0,"Impuestos directos":5731.0,"IVA":2012.0,"ITPAJD":223.0,"II.EE. e I. Primas de Seguros":316.0,"Impuestos Indirectos":2551.0,"Impuestos totales":8282.0,"Tipo medio efectivo (TME)":30.64,"Renta Disponible":18744.0,"Sanidad":4619.0,"Educación":2346.0,"Prestaciones en especie":6965.0,"Subsidio Especie medio efectivo (SEME)":25.77,"Renta disponible extendida":25709.0,"IBI":225.0,"I.E. Bebidas Alcohólicas":10.0,"I.E. Labores del Tabaco":73.0,"I.E. Hidrocarburos":172.0,"I.E. Electricidad":5.0,"I. Primas de Seguros":56.0},{"segmento":"Quintil 3","Número de Hogares":3829800.0,"Renta de mercado ampliada":28484.0,"Jubilación":9261.0,"Supervivencia":1197.0,"Desempleo Público":1290.0,"Invalidez":862.0,"Ingresos asistencia social":103.0,"Resto":551.0,"Total Prestaciones monetarias":13264.0,"Renta Bruta":41748.0,"Subsidio medio efectivo (SME)":31.77,"Cotización social trabajadores":1663.0,"Cotización Social Empresas y SEPE":6020.0,"Cotizaciones Sociales":7683.0,"IRPF":3186.0,"Impuesto de Patrimonio":36.0,"Impuesto sobre Sociedades":55.0,"Impuestos directos":10960.0,"IVA":2590.0,"ITPAJD":289.0,"II.EE. e I. Primas de Seguros":463.0,"Impuestos Indirectos":3342.0,"Impuestos totales":14302.0,"Tipo medio efectivo (TME)":34.26,"Renta Disponible":27446.0,"Sanidad":4885.0,"Educación":2698.0,"Prestaciones en especie":7583.0,"Subsidio Especie medio efectivo (SEME)":18.16,"Renta disponible extendida":35029.0,"IBI":265.0,"I.E. Bebidas Alcohólicas":15.0,"I.E. Labores del Tabaco":123.0,"I.E. Hidrocarburos":248.0,"I.E. Electricidad":5.0,"I. Primas de Seguros":71.0},{"segmento":"Quintil 4","Número de Hogares":3829800.0,"Renta de mercado ampliada":51071.0,"Jubilación":7642.0,"Supervivencia":1074.0,"Desempleo Público":1344.0,"Invalidez":866.0,"Ingresos asistencia social":64.0,"Resto":666.0,"Total Prestaciones monetarias":11656.0,"Renta Bruta":62727.0,"Subsidio medio efectivo (SME)":18.58,"Cotización social trabajadores":2729.0,"Cotización Social Empresas y SEPE":10456.0,"Cotizaciones Sociales":13185.0,"IRPF":6066.0,"Impuesto de Patrimonio":46.0,"Impuesto sobre Sociedades":129.0,"Impuestos directos":19426.0,"IVA":3303.0,"ITPAJD":417.0,"II.EE. e I. Primas de Seguros":616.0,"Impuestos Indirectos":4336.0,"Impuestos totales":23762.0,"Tipo medio efectivo (TME)":37.88,"Renta Disponible":38965.0,"Sanidad":5205.0,"Educación":3480.0,"Prestaciones en especie":8685.0,"Subsidio Especie medio efectivo (SEME)":13.85,"Renta disponible extendida":47650.0,"IBI":298.0,"I.E. Bebidas Alcohólicas":22.0,"I.E. Labores del Tabaco":168.0,"I.E. Hidrocarburos":336.0,"I.E. Electricidad":6.0,"I. Primas de Seguros":85.0},{"segmento":"Decil 9","Número de Hogares":1914900.0,"Renta de mercado ampliada":77250.0,"Jubilación":8482.0,"Supervivencia":900.0,"Desempleo Público":1130.0,"Invalidez":714.0,"Ingresos asistencia social":88.0,"Resto":687.0,"Total Prestaciones monetarias":12001.0,"Renta Bruta":89251.0,"Subsidio medio efectivo (SME)":13.45,"Cotización social trabajadores":3724.0,"Cotización Social Empresas y SEPE":14699.0,"Cotizaciones Sociales":18423.0,"IRPF":10945.0,"Impuesto de Patrimonio":70.0,"Impuesto sobre Sociedades":347.0,"Impuestos directos":29785.0,"IVA":4030.0,"ITPAJD":539.0,"II.EE. e I. Primas de Seguros":766.0,"Impuestos Indirectos":5335.0,"Impuestos totales":35120.0,"Tipo medio efectivo (TME)":39.35,"Renta Disponible":54131.0,"Sanidad":5561.0,"Educación":4159.0,"Prestaciones en especie":9720.0,"Subsidio Especie medio efectivo (SEME)":10.89,"Renta disponible extendida":63851.0,"IBI":373.0,"I.E. Bebidas Alcohólicas":27.0,"I.E. Labores del Tabaco":206.0,"I.E. Hidrocarburos":432.0,"I.E. Electricidad":7.0,"I. Primas de Seguros":94.0},{"segmento":"Centiles 91-99","Número de Hogares":1723410.0,"Renta de mercado ampliada":129951.0,"Jubilación":8203.0,"Supervivencia":716.0,"Desempleo Público":1114.0,"Invalidez":642.0,"Ingresos asistencia social":61.0,"Resto":752.0,"Total Prestaciones monetarias":11488.0,"Renta Bruta":141439.0,"Subsidio medio efectivo (SME)":8.12,"Cotización social trabajadores":5015.0,"Cotización Social Empresas y SEPE":20001.0,"Cotizaciones Sociales":25016.0,"IRPF":23043.0,"Impuesto de Patrimonio":127.0,"Impuesto sobre Sociedades":1531.0,"Impuestos directos":49717.0,"IVA":5094.0,"ITPAJD":722.0,"II.EE. e I. Primas de Seguros":1013.0,"Impuestos Indirectos":6829.0,"Impuestos totales":56546.0,"Tipo medio efectivo (TME)":39.98,"Renta Disponible":84893.0,"Sanidad":5692.0,"Educación":4659.0,"Prestaciones en especie":10351.0,"Subsidio Especie medio efectivo (SEME)":7.32,"Renta disponible extendida":95244.0,"IBI":472.0,"I.E. Bebidas Alcohólicas":35.0,"I.E. Labores del Tabaco":293.0,"I.E. Hidrocarburos":565.0,"I.E. Electricidad":8.0,"I. Primas de Seguros":113.0},{"segmento":"Centil 100","Número de Hogares":191490.0,"Renta de mercado ampliada":388465.0,"Jubilación":11781.0,"Supervivencia":1274.0,"Desempleo Público":784.0,"Invalidez":1061.0,"Ingresos asistencia social":744.0,"Resto":520.0,"Total Prestaciones monetarias":16164.0,"Renta Bruta":404629.0,"Subsidio medio efectivo (SME)":3.99,"Cotización social trabajadores":5031.0,"Cotización Social Empresas y SEPE":19236.0,"Cotizaciones Sociales":24267.0,"IRPF":50898.0,"Impuesto de Patrimonio":554.0,"Impuesto sobre Sociedades":27257.0,"Impuestos directos":102976.0,"IVA":6637.0,"ITPAJD":932.0,"II.EE. e I. Primas de Seguros":1108.0,"Impuestos Indirectos":8677.0,"Impuestos totales":111653.0,"Tipo medio efectivo (TME)":27.59,"Renta Disponible":292976.0,"Sanidad":5730.0,"Educación":4484.0,"Prestaciones en especie":10214.0,"Subsidio Especie medio efectivo (SEME)":2.52,"Renta disponible extendida":303189.0,"IBI":662.0,"I.E. Bebidas Alcohólicas":49.0,"I.E. Labores del Tabaco":215.0,"I.E. Hidrocarburos":699.0,"I.E. Electricidad":8.0,"I. Primas de Seguros":138.0},{"segmento":"Total","Número de Hogares":19149001.0,"Renta de mercado ampliada":43210.0,"Jubilación":7163.0,"Supervivencia":1394.0,"Desempleo Público":1154.0,"Invalidez":755.0,"Ingresos asistencia social":215.0,"Resto":532.0,"Total Prestaciones monetarias":11213.0,"Renta Bruta":54423.0,"Subsidio medio efectivo (SME)":20.6,"Cotización social trabajadores":2046.0,"Cotización Social Empresas y SEPE":7594.0,"Cotizaciones Sociales":9640.0,"IRPF":5810.0,"Impuesto de Patrimonio":54.0,"Impuesto sobre Sociedades":490.0,"Impuestos directos":15994.0,"IVA":2785.0,"ITPAJD":341.0,"II.EE. e I. Primas de Seguros":496.0,"Impuestos Indirectos":3622.0,"Impuestos totales":19616.0,"Tipo medio efectivo (TME)":36.04,"Renta Disponible":34807.0,"Sanidad":4875.0,"Educación":2904.0,"Prestaciones en especie":7779.0,"Subsidio Especie medio efectivo (SEME)":14.29,"Renta disponible extendida":42586.0,"IBI":280.0,"I.E. Bebidas Alcohólicas":17.0,"I.E. Labores del Tabaco":133.0,"I.E. Hidrocarburos":269.0,"I.E. Electricidad":6.0,"I. Primas de Seguros":71.0}],"2023":[{"segmento":"Quintil 1","Número de Hogares":3863370.0,"Renta de mercado ampliada":4678.0,"Jubilación":3842.0,"Supervivencia":2280.0,"Desempleo Público":882.0,"Invalidez":544.0,"Ingresos asistencia social":552.0,"Resto":233.0,"Total Prestaciones monetarias":8333.0,"Renta Bruta":13011.0,"Subsidio medio efectivo (SME)":64.05,"Cotización social trabajadores":689.0,"Cotización Social Empresas y SEPE":954.0,"Cotizaciones Sociales":1643.0,"IRPF":121.0,"Impuesto de Patrimonio":37.0,"Impuesto sobre Sociedades":15.0,"Impuestos directos":1816.0,"IVA":1308.0,"ITPAJD":115.0,"II.EE. e I. Primas de Seguros":175.0,"Impuestos Indirectos":1598.0,"Impuestos totales":3414.0,"Tipo medio efectivo (TME)":26.24,"Renta Disponible":9597.0,"Sanidad":4110.0,"Educación":1577.0,"Prestaciones en especie":5687.0,"Subsidio Especie medio efectivo (SEME)":43.71,"Renta disponible extendida":15284.0,"IBI":180.0,"I.E. Bebidas Alcohólicas":5.0,"I.E. Labores del Tabaco":46.0,"I.E. Hidrocarburos":81.0,"I.E. Electricidad":4.0,"I. Primas de Seguros":40.0},{"segmento":"Quintil 2","Número de Hogares":3863369.0,"Renta de mercado ampliada":17371.0,"Jubilación":6942.0,"Supervivencia":1765.0,"Desempleo Público":1244.0,"Invalidez":835.0,"Ingresos asistencia social":277.0,"Resto":408.0,"Total Prestaciones monetarias":11471.0,"Renta Bruta":28842.0,"Subsidio medio efectivo (SME)":39.77,"Cotización social trabajadores":1349.0,"Cotización Social Empresas y SEPE":3717.0,"Cotizaciones Sociales":5066.0,"IRPF":1356.0,"Impuesto de Patrimonio":32.0,"Impuesto sobre Sociedades":29.0,"Impuestos directos":6483.0,"IVA":1981.0,"ITPAJD":196.0,"II.EE. e I. Primas de Seguros":304.0,"Impuestos Indirectos":2481.0,"Impuestos totales":8964.0,"Tipo medio efectivo (TME)":31.08,"Renta Disponible":19878.0,"Sanidad":4706.0,"Educación":2614.0,"Prestaciones en especie":7320.0,"Subsidio Especie medio efectivo (SEME)":25.38,"Renta disponible extendida":27198.0,"IBI":216.0,"I.E. Bebidas Alcohólicas":9.0,"I.E. Labores del Tabaco":79.0,"I.E. Hidrocarburos":156.0,"I.E. Electricidad":4.0,"I. Primas de Seguros":56.0},{"segmento":"Quintil 3","Número de Hogares":3863370.0,"Renta de mercado ampliada":30844.0,"Jubilación":9679.0,"Supervivencia":1254.0,"Desempleo Público":1272.0,"Invalidez":945.0,"Ingresos asistencia social":99.0,"Resto":526.0,"Total Prestaciones monetarias":13775.0,"Renta Bruta":44619.0,"Subsidio medio efectivo (SME)":30.87,"Cotización social trabajadores":2005.0,"Cotización Social Empresas y SEPE":6416.0,"Cotizaciones Sociales":8421.0,"IRPF":3441.0,"Impuesto de Patrimonio":37.0,"Impuesto sobre Sociedades":66.0,"Impuestos directos":11965.0,"IVA":2558.0,"ITPAJD":268.0,"II.EE. e I. Primas de Seguros":425.0,"Impuestos Indirectos":3251.0,"Impuestos totales":15216.0,"Tipo medio efectivo (TME)":34.1,"Renta Disponible":29403.0,"Sanidad":5088.0,"Educación":3010.0,"Prestaciones en especie":8098.0,"Subsidio Especie medio efectivo (SEME)":18.15,"Renta disponible extendida":37501.0,"IBI":258.0,"I.E. Bebidas Alcohólicas":13.0,"I.E. Labores del Tabaco":113.0,"I.E. Hidrocarburos":225.0,"I.E. Electricidad":5.0,"I. Primas de Seguros":70.0},{"segmento":"Quintil 4","Número de Hogares":3863369.0,"Renta de mercado ampliada":53823.0,"Jubilación":8770.0,"Supervivencia":1100.0,"Desempleo Público":1311.0,"Invalidez":924.0,"Ingresos asistencia social":102.0,"Resto":590.0,"Total Prestaciones monetarias":12797.0,"Renta Bruta":66620.0,"Subsidio medio efectivo (SME)":19.21,"Cotización social trabajadores":3038.0,"Cotización Social Empresas y SEPE":11150.0,"Cotizaciones Sociales":14188.0,"IRPF":6387.0,"Impuesto de Patrimonio":45.0,"Impuesto sobre Sociedades":140.0,"Impuestos directos":20760.0,"IVA":3244.0,"ITPAJD":361.0,"II.EE. e I. Primas de Seguros":611.0,"Impuestos Indirectos":4216.0,"Impuestos totales":24976.0,"Tipo medio efectivo (TME)":37.49,"Renta Disponible":41644.0,"Sanidad":5565.0,"Educación":3559.0,"Prestaciones en especie":9124.0,"Subsidio Especie medio efectivo (SEME)":13.7,"Renta disponible extendida":50768.0,"IBI":296.0,"I.E. Bebidas Alcohólicas":16.0,"I.E. Labores del Tabaco":173.0,"I.E. Hidrocarburos":334.0,"I.E. Electricidad":5.0,"I. Primas de Seguros":82.0},{"segmento":"Decil 9","Número de Hogares":1931685.0,"Renta de mercado ampliada":82430.0,"Jubilación":9162.0,"Supervivencia":938.0,"Desempleo Público":1387.0,"Invalidez":758.0,"Ingresos asistencia social":35.0,"Resto":585.0,"Total Prestaciones monetarias":12865.0,"Renta Bruta":95295.0,"Subsidio medio efectivo (SME)":13.5,"Cotización social trabajadores":4221.0,"Cotización Social Empresas y SEPE":16334.0,"Cotizaciones Sociales":20555.0,"IRPF":11516.0,"Impuesto de Patrimonio":63.0,"Impuesto sobre Sociedades":405.0,"Impuestos directos":32539.0,"IVA":3910.0,"ITPAJD":464.0,"II.EE. e I. Primas de Seguros":734.0,"Impuestos Indirectos":5108.0,"Impuestos totales":37647.0,"Tipo medio efectivo (TME)":39.51,"Renta Disponible":57648.0,"Sanidad":5968.0,"Educación":4331.0,"Prestaciones en especie":10299.0,"Subsidio Especie medio efectivo (SEME)":10.81,"Renta disponible extendida":67947.0,"IBI":361.0,"I.E. Bebidas Alcohólicas":22.0,"I.E. Labores del Tabaco":197.0,"I.E. Hidrocarburos":415.0,"I.E. Electricidad":6.0,"I. Primas de Seguros":94.0},{"segmento":"Centiles 91-99","Número de Hogares":1738516.0,"Renta de mercado ampliada":142039.0,"Jubilación":9536.0,"Supervivencia":1112.0,"Desempleo Público":1147.0,"Invalidez":795.0,"Ingresos asistencia social":126.0,"Resto":542.0,"Total Prestaciones monetarias":13258.0,"Renta Bruta":155297.0,"Subsidio medio efectivo (SME)":8.54,"Cotización social trabajadores":5523.0,"Cotización Social Empresas y SEPE":21451.0,"Cotizaciones Sociales":26974.0,"IRPF":24332.0,"Impuesto de Patrimonio":147.0,"Impuesto sobre Sociedades":2303.0,"Impuestos directos":53756.0,"IVA":4938.0,"ITPAJD":630.0,"II.EE. e I. Primas de Seguros":961.0,"Impuestos Indirectos":6529.0,"Impuestos totales":60285.0,"Tipo medio efectivo (TME)":38.82,"Renta Disponible":95012.0,"Sanidad":6249.0,"Educación":4877.0,"Prestaciones en especie":11126.0,"Subsidio Especie medio efectivo (SEME)":7.16,"Renta disponible extendida":106138.0,"IBI":483.0,"I.E. Bebidas Alcohólicas":27.0,"I.E. Labores del Tabaco":264.0,"I.E. Hidrocarburos":553.0,"I.E. Electricidad":6.0,"I. Primas de Seguros":111.0},{"segmento":"Centil 100","Número de Hogares":193168.0,"Renta de mercado ampliada":458850.0,"Jubilación":12971.0,"Supervivencia":1207.0,"Desempleo Público":1163.0,"Invalidez":1044.0,"Ingresos asistencia social":265.0,"Resto":721.0,"Total Prestaciones monetarias":17371.0,"Renta Bruta":476221.0,"Subsidio medio efectivo (SME)":3.65,"Cotización social trabajadores":5614.0,"Cotización Social Empresas y SEPE":19369.0,"Cotizaciones Sociales":24983.0,"IRPF":51883.0,"Impuesto de Patrimonio":931.0,"Impuesto sobre Sociedades":35109.0,"Impuestos directos":112906.0,"IVA":6823.0,"ITPAJD":792.0,"II.EE. e I. Primas de Seguros":1221.0,"Impuestos Indirectos":8836.0,"Impuestos totales":121742.0,"Tipo medio efectivo (TME)":25.56,"Renta Disponible":354479.0,"Sanidad":6230.0,"Educación":4309.0,"Prestaciones en especie":10539.0,"Subsidio Especie medio efectivo (SEME)":2.21,"Renta disponible extendida":365018.0,"IBI":665.0,"I.E. Bebidas Alcohólicas":39.0,"I.E. Labores del Tabaco":387.0,"I.E. Hidrocarburos":670.0,"I.E. Electricidad":8.0,"I. Primas de Seguros":116.0},{"segmento":"Total","Número de Hogares":19316847.0,"Renta de mercado ampliada":46958.0,"Jubilación":7751.0,"Supervivencia":1486.0,"Desempleo Público":1195.0,"Invalidez":807.0,"Ingresos asistencia social":224.0,"Resto":466.0,"Total Prestaciones monetarias":11929.0,"Renta Bruta":58887.0,"Subsidio medio efectivo (SME)":20.26,"Cotización social trabajadores":2391.0,"Cotización Social Empresas y SEPE":8205.0,"Cotizaciones Sociales":10596.0,"IRPF":6121.0,"Impuesto de Patrimonio":59.0,"Impuesto sobre Sociedades":649.0,"Impuestos directos":17425.0,"IVA":2722.0,"ITPAJD":299.0,"II.EE. e I. Primas de Seguros":475.0,"Impuestos Indirectos":3496.0,"Impuestos totales":20921.0,"Tipo medio efectivo (TME)":35.53,"Renta Disponible":37966.0,"Sanidad":5115.0,"Educación":3067.0,"Prestaciones en especie":8182.0,"Subsidio Especie medio efectivo (SEME)":13.89,"Renta disponible extendida":46148.0,"IBI":276.0,"I.E. Bebidas Alcohólicas":14.0,"I.E. Labores del Tabaco":129.0,"I.E. Hidrocarburos":257.0,"I.E. Electricidad":5.0,"I. Primas de Seguros":70.0}]};
+
+// Adaptar FEDEA_DATA para TabEngine: cada año necesita rows[] y un campo total
+// La fila "Total" la usaremos como tfoot, el resto como rows
+const FEDEA_TDATA={};
+Object.keys(FEDEA_DATA).forEach(y=>{
+  const all=FEDEA_DATA[y];
+  const total=all.find(r=>r.segmento==='Total');
+  const rows=all.filter(r=>r.segmento!=='Total');
+  FEDEA_TDATA[parseInt(y)]={rows, total};
+});
+
+// Columnas con grupos para cabecera de dos niveles (igual que IRPF)
+// group:null = sin grupo (cabecera simple)
+// fullOnly:true = solo en vista completa; reducedOnly:true = solo en vista reducida
+const FEDEA_GROUPS={
+  base:      {label:'',                           sep:false},
+  prest_mon: {label:'Prestaciones monetarias',    sep:true},
+  sme:       {label:'',                           sep:false},
+  rbruta:    {label:'',                           sep:false},
+  cotiz:     {label:'Cotizaciones sociales',      sep:true},
+  imp_dir:   {label:'Impuestos directos',         sep:true},
+  imp_ind:   {label:'Impuestos indirectos',       sep:true},
+  imp_tot:   {label:'Impuestos totales',          sep:true},
+  rdisp:     {label:'Renta disponible',           sep:true},
+  prest_esp: {label:'Prestaciones en especie',    sep:true},
+  seme:      {label:'',                           sep:false},
+  rext:      {label:'',                           sep:false},
+  desglose:  {label:'Desglose II.EE. (informativo — no suman al total)', sep:true},
+};
+
+const FEDEA_ALL_COLS=[
+  // ── Sin grupo ──
+  {id:'segmento',                              label:'Segmento',               group:'base',     align:'left', isLabel:true, rowspan:true},
+  {id:'Número de Hogares',                     label:'Nº hogares',             group:'base',     align:'right', rowspan:true},
+  {id:'Renta de mercado ampliada',             label:'R. mercado',             group:'base',     align:'right',  tooltip:'Renta de mercado ampliada: incluye rentas del trabajo, del capital y de actividades económicas, antes de impuestos y transferencias públicas', rowspan:true},
+  // ── Prestaciones monetarias ──
+  {id:'Jubilación',                            label:'Jubilación',             group:'prest_mon',align:'right', fullOnly:true},
+  {id:'Supervivencia',                         label:'Supervivencia',          group:'prest_mon',align:'right', fullOnly:true},
+  {id:'Desempleo Público',                     label:'Desempleo',              group:'prest_mon',align:'right', fullOnly:true},
+  {id:'Invalidez',                             label:'Invalidez',              group:'prest_mon',align:'right', fullOnly:true},
+  {id:'Ingresos asistencia social',            label:'Asist. social',          group:'prest_mon',align:'right', fullOnly:true},
+  {id:'Resto',                                 label:'Resto',                  group:'prest_mon',align:'right', fullOnly:true, tooltip:'Incluye: prestaciones por enfermedad, estudios, ayuda familia, ayuda vivienda y para el año 2022 las bonificaciones para la adquisición de combustibles'},
+  {id:'Total Prestaciones monetarias',         label:'Total',                  group:'prest_mon',align:'right'},
+  {id:'Subsidio medio efectivo (SME)',         label:'SME %',                  group:'sme',      align:'right', tooltip:'Subsidio medio efectivo: prestaciones monetarias recibidas como porcentaje de la renta bruta', rowspan:true},
+  // ── Renta bruta ──
+  {id:'Renta Bruta',                           label:'Renta bruta',            group:'rbruta',   align:'right', rowspan:true, tooltip:'Renta bruta: renta de mercado más prestaciones monetarias recibidas (pensiones, desempleo, prestaciones sociales)'},
+  // ── Cotizaciones sociales ──
+  {id:'Cotización social trabajadores',        label:'Trabajadores',           group:'cotiz',    align:'right', fullOnly:true, tooltip:'Incluye: las cotizaciones sociales de los asalariados, las cotizaciones sociales realizadas por autónomos y las cotizaciones sociales de los perceptores de prestaciones por desempleo'},
+  {id:'Cotización Social Empresas y SEPE',     label:'Empresas+SEPE',          group:'cotiz',    align:'right', fullOnly:true},
+  {id:'Cotizaciones Sociales',                 label:'Total',                  group:'cotiz',    align:'right'},
+  // ── Impuestos directos ──
+  {id:'IRPF',                                  label:'IRPF',                   group:'imp_dir',  align:'right'},
+  {id:'Impuesto de Patrimonio',                label:'Patrimonio',             group:'imp_dir',  align:'right', fullOnly:true},
+  {id:'Impuesto sobre Sociedades',             label:'Sociedades',             group:'imp_dir',  align:'right', fullOnly:true},
+  {id:'Impuestos directos',                    label:'Total',                  group:'imp_dir',  align:'right', fullOnly:true},
+  // ── Impuestos indirectos ──
+  {id:'IVA',                                   label:'IVA',                    group:'imp_ind',  align:'right', fullOnly:true},
+  {id:'ITPAJD',                                label:'ITPAJD',                 group:'imp_ind',  align:'right', fullOnly:true},
+  {id:'II.EE. e I. Primas de Seguros',         label:'II.EE.+Seguros',         group:'imp_ind',  align:'right', fullOnly:true},
+  {id:'Impuestos Indirectos',                  label:'Total',                  group:'imp_ind',  align:'right', fullOnly:true},
+  // ── Impuestos totales ──
+  {id:'_resto_imp',                            label:'Resto imp.',             group:'imp_tot',  align:'right', reducedOnly:true},
+  {id:'Impuestos totales',                     label:'Total',                  group:'imp_tot',  align:'right'},
+  {id:'Tipo medio efectivo (TME)',             label:'TME %',                  group:'rdisp',    align:'right',  tooltip:'Tipo medio efectivo: impuestos totales pagados como porcentaje de la renta bruta', rowspan:true},
+  // ── Renta disponible ──
+  {id:'Renta Disponible',                      label:'R. disponible',          group:'rdisp',    align:'right',  tooltip:'Renta disponible: renta bruta menos impuestos directos, cotizaciones sociales e impuestos indirectos', rowspan:true},
+  // ── Prestaciones en especie ──
+  {id:'Sanidad',                               label:'Sanidad',                group:'prest_esp',align:'right', fullOnly:true},
+  {id:'Educación',                             label:'Educación',              group:'prest_esp',align:'right', fullOnly:true},
+  {id:'Prestaciones en especie',               label:'Total',                  group:'prest_esp',align:'right'},
+  {id:'Subsidio Especie medio efectivo (SEME)',label:'SEME %',                 group:'seme',     align:'right', fullOnly:true, tooltip:'Subsidio Especie medio efectivo: prestaciones en especie recibidas como porcentaje de la renta disponible', rowspan:true},
+  // ── Renta disponible extendida ──
+  {id:'Renta disponible extendida',            label:'R. disp. extendida',     group:'rext',     align:'right',  tooltip:'Renta disponible extendida: renta disponible más el valor monetario de las prestaciones en especie (sanidad y educación públicas)', rowspan:true},
+  // ── Desglose II.EE. informativo (no suman al total) ──
+  {id:'IBI',                                   label:'IBI',                    group:'desglose', align:'right', fullOnly:true},
+  {id:'I.E. Bebidas Alcohólicas',              label:'Bebidas',                group:'desglose', align:'right', fullOnly:true},
+  {id:'I.E. Labores del Tabaco',               label:'Tabaco',                 group:'desglose', align:'right', fullOnly:true},
+  {id:'I.E. Hidrocarburos',                    label:'Hidrocarb.',             group:'desglose', align:'right', fullOnly:true},
+  {id:'I.E. Electricidad',                     label:'Electricidad',           group:'desglose', align:'right', fullOnly:true},
+  {id:'I. Primas de Seguros',                  label:'Seguros',                group:'desglose', align:'right', fullOnly:true},
+];
+
+let fedeaFullMode=false;
+
+function fedeaVisibleCols(){
+  if(fedeaFullMode) return FEDEA_ALL_COLS.filter(c=>!c.reducedOnly);
+  return FEDEA_ALL_COLS.filter(c=>!c.fullOnly);
+}
+
+function fedeaGetVal(cid,r){
+  if(cid==='_resto_imp'){
+    return (r['Impuestos totales']||0)-(r['Cotizaciones Sociales']||0)-(r['IRPF']||0);
+  }
+  return r[cid];
+}
+
+// buildHeader de dos niveles, reutilizando colores de IRPF
+// Columnas con rowspan:true ocupan ambas filas centradas verticalmente (verde oscuro)
+// En vista reducida: una sola fila pero con padding doble para mantener altura coherente
+function fedeaBuildHeader(thead){
+  const vis=fedeaVisibleCols();
+
+  if(!fedeaFullMode){
+    // ── Vista reducida: fila única con altura equivalente a dos filas ──
+    const r1=document.createElement('tr');r1.className='hdr1';
+    let prevGroup=null, i=0;
+    while(i<vis.length){
+      const c=vis[i];
+      const g=c.group;
+      const grpMeta=FEDEA_GROUPS[g]||{label:'',sep:false};
+      const needsSep=grpMeta.sep && prevGroup!==null && g!==prevGroup;
+
+      if(c.rowspan){
+        // Columna solitaria → mostrar su label
+        const th=document.createElement('th');
+        th.textContent=c.label;
+        th.style.cssText='background:#2d6a4f;color:#e8f5ee;vertical-align:middle;padding:16.25px 7px;line-height:1.2;border-bottom:.5px solid #3a8562;'+(c.align==='left'?'text-align:left;':'text-align:center;');
+        if(needsSep) th.classList.add('sep');
+        if(c.tooltip){ th.classList.add('th-tip'); th.dataset.tip=c.tooltip; }
+        r1.appendChild(th); prevGroup=g; i++;
+      } else {
+        // Grupo con cols no-rowspan → contar cuántas
+        let span=0;
+        while(i+span<vis.length && vis[i+span].group===g && !vis[i+span].rowspan) span++;
+        for(let j=0;j<span;j++){
+          const col=vis[i+j];
+          const th=document.createElement('th');
+          // Mostrar label de la columna en vez del grupo (más informativo en fila única)
+          // Excepción: si solo hay 1 col en el grupo y su label es "Total", usar el nombre del grupo
+          const showLabel = (span===1 && col.label==='Total') ? grpMeta.label : col.label;
+          th.textContent=showLabel;
+          th.style.cssText='background:#2d6a4f;color:#e8f5ee;vertical-align:middle;padding:16.25px 7px;line-height:1.2;border-bottom:.5px solid #3a8562;text-align:right;';
+          if(j===0 && needsSep) th.classList.add('sep');
+          if(col.tooltip){ th.classList.add('th-tip'); th.dataset.tip=col.tooltip; }
+          r1.appendChild(th);
+        }
+        prevGroup=g; i+=span;
+      }
+    }
+    thead.appendChild(r1);
+    return;
+  }
+
+  // ── Vista completa: dos filas ──
+  const r1=document.createElement('tr');r1.className='hdr1';
+  const r2=document.createElement('tr');r2.className='hdr2';
+  let prevGroup=null, i=0;
+
+  while(i<vis.length){
+    const c=vis[i];
+    const g=c.group;
+    const grpMeta=FEDEA_GROUPS[g]||{label:'',sep:false};
+    const needsSep=grpMeta.sep && prevGroup!==null && g!==prevGroup;
+
+    if(c.rowspan){
+      const th=document.createElement('th');
+      th.rowSpan=2;
+      th.textContent=c.label;
+      th.style.cssText='background:#2d6a4f;color:#e8f5ee;vertical-align:middle;'+(c.align==='left'?'text-align:left;':'text-align:center;');
+      if(needsSep) th.classList.add('sep');
+      if(c.tooltip){ th.classList.add('th-tip'); th.dataset.tip=c.tooltip; }
+      r1.appendChild(th);
+      prevGroup=g; i++;
+    } else {
+      let span=0;
+      while(i+span<vis.length && vis[i+span].group===g && !vis[i+span].rowspan) span++;
+      const th1=document.createElement('th');
+      th1.colSpan=span;
+      th1.textContent=grpMeta.label;
+      if(needsSep) th1.classList.add('sep');
+      if(g==='desglose') th1.style.cssText='background:#1a4a35;font-style:italic;';
+      r1.appendChild(th1);
+      for(let j=0;j<span;j++){
+        const col=vis[i+j];
+        const th2=document.createElement('th');
+        th2.textContent=col.label;
+        if(j===0 && needsSep) th2.classList.add('sep');
+        if(g==='desglose') th2.style.cssText='background:#3a7a60;font-style:italic;';
+        if(col.tooltip){ th2.classList.add('th-tip'); th2.dataset.tip=col.tooltip; }
+        r2.appendChild(th2);
+      }
+      prevGroup=g; i+=span;
+    }
+  }
+  thead.appendChild(r1);
+  thead.appendChild(r2);
+  requestAnimationFrame(()=>{
+    const h1=thead.querySelector('tr.hdr1');
+    if(!h1)return;
+    const h=h1.getBoundingClientRect().height;
+    thead.querySelectorAll('tr.hdr2 th').forEach(th=>th.style.top=Math.round(h)+'px');
+  });
+}
+
+
+function fmtFedea(cid,r){
+  const v=fedeaGetVal(cid,r);
+  if(v==null)return '—';
+  if(cid==='segmento') return v;
+  if(cid==='Número de Hogares') return Math.round(v).toLocaleString('es-ES',{useGrouping:true});
+  if(cid==='Tipo medio efectivo (TME)'||cid==='Subsidio medio efectivo (SME)'||cid==='Subsidio Especie medio efectivo (SEME)')
+    return v.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+  return Math.round(v).toLocaleString('es-ES',{useGrouping:true})+' €';
+}
+function fmtFedeaTotal(cid,d){
+  return d.total ? fmtFedea(cid,d.total) : (cid==='segmento'?'Total':'—');
+}
+
+/* Gráfico de barras agrupadas para Fedea */
+const fedeaActiveSeries=new Set(['sme_jub','sme_resto','seme','tme_dir','tme_ind','neto']);
+const FEDEA_PAD={top:14,bot:40,left:68,right:55};
+const FEDEA_SERIES=[
+  {key:'rmercado',field:'Renta de mercado ampliada',color:'#1a5f9a',label:'R. mercado'},
+  {key:'rbruta',  field:'Renta Bruta',               color:'#b06000',label:'R. bruta'},
+  {key:'rdisp',   field:'Renta Disponible',           color:'#276749',label:'R. disponible'},
+  {key:'rext',    field:'Renta disponible extendida', color:'#5a2d9a',label:'R. disp. ext.'},
+];
+const FEDEA_LINE={key:'tme',field:'Tipo medio efectivo (TME)',color:'#c0392b',label:'TME %'};
+
+function fedeaGetRows(){
+  // Devuelve las filas a mostrar (con Q5 agrupado si está activo)
+  const d=FEDEA_TDATA[fedeaCfg.currentYear];if(!d)return[];
+  if(!fedeaQ5Mode) return d.rows;
+  // Agrupar Decil9 + C91-99 + C100 en un "Quintil 5"
+  const base=d.rows.filter(r=>r.segmento.startsWith('Quintil'));
+  const q5rows=d.rows.filter(r=>!r.segmento.startsWith('Quintil'));
+  if(!q5rows.length) return d.rows;
+  // Weighted aggregate: sum hogares, weighted avg of rates
+  const totalHog=q5rows.reduce((s,r)=>s+(r['Número de Hogares']||0),0);
+  const q5={segmento:'Quintil 5'};
+  const sumFields=['Número de Hogares','Renta de mercado ampliada','Jubilación','Supervivencia',
+    'Desempleo Público','Invalidez','Ingresos asistencia social','Resto',
+    'Total Prestaciones monetarias','Renta Bruta','Cotizaciones Sociales','IRPF',
+    'Impuesto de Patrimonio','Impuesto sobre Sociedades','Impuestos directos','IVA',
+    'ITPAJD','II.EE. e I. Primas de Seguros','Impuestos Indirectos','Impuestos totales',
+    'Renta Disponible','Sanidad','Educación','Prestaciones en especie',
+    'Renta disponible extendida','IBI','I.E. Bebidas Alcohólicas','I.E. Labores del Tabaco',
+    'I.E. Hidrocarburos','I.E. Electricidad','I. Primas de Seguros'];
+  sumFields.forEach(f=>{
+    q5[f]=q5rows.reduce((s,r)=>s+(r[f]||0)*((r['Número de Hogares']||0)/totalHog),0);
+  });
+  // Recompute rates from aggregated values
+  const rb=q5['Renta Bruta']||1;
+  q5['Tipo medio efectivo (TME)']=q5['Impuestos totales']/rb*100;
+  q5['Subsidio medio efectivo (SME)']=q5['Total Prestaciones monetarias']/rb*100;
+  q5['Subsidio Especie medio efectivo (SEME)']=q5['Prestaciones en especie']/(q5['Renta Disponible']||1)*100;
+  q5['Número de Hogares']=totalHog;
+  return [...base, q5];
+}
+
+
+function fedeaUpdateDonuts(){
+  const d=FEDEA_TDATA[fedeaCfg.currentYear];if(!d||!d.rows)return;
+  let nSel=0,sumTme=0,sumSme=0,sumRm=0,sumRd=0,sumImp=0,sumRb=0;
+  fedeaSelected.forEach(i=>{
+    const r=d.rows[i];
+    sumTme+=r['Tipo medio efectivo (TME)']||0;
+    sumSme+=r['Subsidio medio efectivo (SME)']||0;
+    sumRm+=r['Renta de mercado ampliada']||0;
+    sumRd+=r['Renta Disponible']||0;
+    sumImp+=r['Impuestos totales']||0;
+    sumRb+=r['Renta Bruta']||0;
+    nSel++;
+  });
+  const fd=(v,dec=1)=>v.toLocaleString('es-ES',{minimumFractionDigits:dec,maximumFractionDigits:dec,useGrouping:true});
+  const avgTme=nSel?sumTme/nSel:null, avgSme=nSel?sumSme/nSel:null;
+  const ratioRd=nSel&&sumRm?sumRd/sumRm*100:null;
+  const pctImp=nSel&&sumRb?sumImp/sumRb*100:null;
+  document.getElementById('fpct1').textContent=ratioRd!==null?fd(ratioRd)+'%':'—';
+  fc1.data.datasets[0].data=[ratioRd!==null?Math.min(ratioRd,100):0,ratioRd!==null?Math.max(0,100-ratioRd):100];
+  fc1.data.datasets[0].backgroundColor=ratioRd!==null&&ratioRd>100?['#52b788','#D3D1C7']:['#0C447C','#D3D1C7'];
+  fc1.update('none');
+  document.getElementById('fpct2').textContent=avgTme!==null?fd(avgTme,2)+'%':'—';
+  fc2.data.datasets[0].data=[avgTme!==null?Math.min(avgTme/50*100,100):0,avgTme!==null?Math.max(0,100-avgTme/50*100):100];fc2.update('none');
+  let sumSmeSeme=0,nSmeSeme=0;
+  fedeaSelected.forEach(i=>{
+    const r=d.rows[i];
+    sumSmeSeme+=(r['Subsidio medio efectivo (SME)']||0)+(r['Subsidio Especie medio efectivo (SEME)']||0);
+    nSmeSeme++;
+  });
+  const avgSmeSeme=nSmeSeme?sumSmeSeme/nSmeSeme:null;
+  document.getElementById('fpct3').textContent=avgSmeSeme!==null?fd(avgSmeSeme,2)+'%':'—';
+  fc3.data.datasets[0].data=[avgSmeSeme!==null?Math.min(avgSmeSeme,100):0,avgSmeSeme!==null?Math.max(0,100-avgSmeSeme):100];
+  fc3.data.datasets[0].backgroundColor=['#52b788','#D3D1C7'];fc3.update('none');
+  document.getElementById('fpct4').textContent=pctImp!==null?fd(pctImp,1)+'%':'—';
+  fc4.data.datasets[0].data=[pctImp!==null?Math.min(pctImp,100):0,pctImp!==null?Math.max(0,100-pctImp):100];
+  fc4.data.datasets[0].backgroundColor=['#b06000','#D3D1C7'];fc4.update('none');
+}
+
+const fedeaSelected=new Set();
+const fedeaCfg={
+  years:FEDEA_YEARS, data:FEDEA_TDATA, currentYear:2022,
+  selected:fedeaSelected, activeSeries:fedeaActiveSeries,
+  theadId:'fedea-thead', tbodyId:'fedea-tbody', tfootId:'fedea-tfoot',
+  prevBtnId:'fBtnPrev', nextBtnId:'fBtnNext', selectId:'fYearSelect',
+  get cols(){return fedeaVisibleCols();}, fmtVal:fmtFedea, fmtTotal:fmtFedeaTotal,
+  buildHeader:fedeaBuildHeader,
+  seriesBtnsPrefix:'fsbtn-',
+  drawChart:fedeaDrawChart, updateDonuts:fedeaUpdateDonuts,
+};
+T.fedea=new TabEngine(fedeaCfg);
+function fedeaDrawChart(){
+  const wrap=document.getElementById('fAreaWrap'),canvas=document.getElementById('fAreaChart');
+  if(!wrap||!canvas)return;
+  const d=FEDEA_TDATA[fedeaCfg.currentYear];if(!d||!d.rows)return;
+  const rows=fedeaGetRows(),N=rows.length;
+  const W=wrap.clientWidth||700,H=wrap.clientHeight||300,dpr=window.devicePixelRatio||1;
+  const bsW=Math.round(W*dpr),bsH=Math.round(H*dpr);
+  if(canvas.width!==bsW||canvas.height!==bsH){canvas.width=bsW;canvas.height=bsH;}
+  const ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+
+  const P=FEDEA_PAD,PW=W-P.left-P.right,PH=H-P.top-P.bot;
+  const baseRows=d.rows;
+  const selArr=rows.map(r=>{
+    if(!fedeaQ5Mode){const i=baseRows.indexOf(r);return fedeaSelected.has(i);}
+    if(r.segmento==='Quintil 5'){
+      return baseRows.map((br,i)=>!br.segmento.startsWith('Quintil')?i:-1).filter(i=>i>=0).some(i=>fedeaSelected.has(i));
+    }
+    return fedeaSelected.has(baseRows.indexOf(r));
+  });
+  const anySelected=selArr.some(Boolean);
+  const catW=PW/N, BAR_W=Math.min(32,catW*0.6);
+  const MAX_POS=120,MAX_NEG=40,TOTAL=MAX_POS+MAX_NEG;
+  const zeroY=P.top+PH*(MAX_POS/TOTAL), pxPerPct=PH/TOTAL;
+  function yVal(v){return zeroY-v*pxPerPct;}
+
+  // Grid
+  ctx.lineWidth=.5;ctx.strokeStyle='rgba(128,128,128,0.1)';
+  [20,40,60,80,100,120].forEach(v=>{ctx.beginPath();ctx.moveTo(P.left,yVal(v));ctx.lineTo(P.left+PW,yVal(v));ctx.stroke();});
+  [20,40].forEach(v=>{ctx.beginPath();ctx.moveTo(P.left,yVal(-v));ctx.lineTo(P.left+PW,yVal(-v));ctx.stroke();});
+
+  // Draw one stacked bar (array of {v, color}, direction: 'up'|'down')
+  // Each segment is a plain fillRect. Only the outermost tip gets a rounded corner,
+  // drawn as a single path that exactly covers only the top/bottom 3px — no overlap.
+  function drawStack(bx, bw, segments, direction, alpha){
+    if(!segments.length) return;
+    let cursor = zeroY;
+    segments.forEach((s, si) => {
+      const px = s.v * pxPerPct;
+      if(px < 0.5) return;
+      const isLast = si === segments.length - 1;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = s.color;
+      if(direction === 'up'){
+        const top = cursor - px;
+        if(isLast){
+          // Rounded top, flat bottom — single path, no rectangle overlap
+          const rr = Math.min(3, px/2);
+          ctx.beginPath();
+          ctx.moveTo(bx, cursor);
+          ctx.lineTo(bx + bw, cursor);
+          ctx.lineTo(bx + bw, top + rr);
+          ctx.quadraticCurveTo(bx + bw, top, bx + bw - rr, top);
+          ctx.lineTo(bx + rr, top);
+          ctx.quadraticCurveTo(bx, top, bx, top + rr);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          ctx.fillRect(bx, top, bw, px);
+        }
+        cursor = top;
+      } else {
+        const bot = cursor + px;
+        if(isLast){
+          // Rounded bottom, flat top — single path
+          const rr = Math.min(3, px/2);
+          ctx.beginPath();
+          ctx.moveTo(bx, cursor);
+          ctx.lineTo(bx + bw, cursor);
+          ctx.lineTo(bx + bw, bot - rr);
+          ctx.quadraticCurveTo(bx + bw, bot, bx + bw - rr, bot);
+          ctx.lineTo(bx + rr, bot);
+          ctx.quadraticCurveTo(bx, bot, bx, bot - rr);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          ctx.fillRect(bx, cursor, bw, px);
+        }
+        cursor = bot;
+      }
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  rows.forEach((r, ci) => {
+    const cx = P.left + catW*(ci+.5), bx = cx - BAR_W/2;
+    const sel = anySelected ? selArr[ci] : true, alpha = sel ? .85 : .12;
+    const rb = r['Renta Bruta'] || 1;
+
+    // Positive stack (upward)
+    const pos = [];
+    if(fedeaActiveSeries.has('sme_jub')){const v=r['Jubilación']/rb*100;if(v>0)pos.push({v,color:'#1a5f9a'});}
+    if(fedeaActiveSeries.has('sme_resto')){const v=(r['Total Prestaciones monetarias']-r['Jubilación'])/rb*100;if(v>0)pos.push({v,color:'#5ba3d9'});}
+    if(fedeaActiveSeries.has('seme')){const v=r['Subsidio Especie medio efectivo (SEME)']||0;if(v>0)pos.push({v,color:'#27ae60'});}
+    drawStack(bx, BAR_W, pos, 'up', alpha);
+
+    // Negative stack (downward)
+    const neg = [];
+    if(fedeaActiveSeries.has('tme_dir')){const v=r['Impuestos directos']/rb*100;if(v>0)neg.push({v,color:'#c0392b'});}
+    if(fedeaActiveSeries.has('tme_ind')){const v=r['Impuestos Indirectos']/rb*100;if(v>0)neg.push({v,color:'#e07070'});}
+    drawStack(bx, BAR_W, neg, 'down', alpha);
+  });
+
+  // Neto line
+  if(fedeaActiveSeries.has('neto')){
+    ctx.beginPath();
+    rows.forEach((r,ci)=>{
+      const x=P.left+catW*(ci+.5),rb=r['Renta Bruta']||1;
+      const sj=fedeaActiveSeries.has('sme_jub')?r['Jubilación']/rb*100:0;
+      const sr=fedeaActiveSeries.has('sme_resto')?(r['Total Prestaciones monetarias']-r['Jubilación'])/rb*100:0;
+      const se=fedeaActiveSeries.has('seme')?r['Subsidio Especie medio efectivo (SEME)']||0:0;
+      const td=fedeaActiveSeries.has('tme_dir')?r['Impuestos directos']/rb*100:0;
+      const ti=fedeaActiveSeries.has('tme_ind')?r['Impuestos Indirectos']/rb*100:0;
+      ci===0?ctx.moveTo(x,yVal(sj+sr+se-td-ti)):ctx.lineTo(x,yVal(sj+sr+se-td-ti));
+    });
+    ctx.strokeStyle='#e8a020';ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
+    rows.forEach((r,ci)=>{
+      const x=P.left+catW*(ci+.5),rb=r['Renta Bruta']||1;
+      const sj=fedeaActiveSeries.has('sme_jub')?r['Jubilación']/rb*100:0;
+      const sr=fedeaActiveSeries.has('sme_resto')?(r['Total Prestaciones monetarias']-r['Jubilación'])/rb*100:0;
+      const se=fedeaActiveSeries.has('seme')?r['Subsidio Especie medio efectivo (SEME)']||0:0;
+      const td=fedeaActiveSeries.has('tme_dir')?r['Impuestos directos']/rb*100:0;
+      const ti=fedeaActiveSeries.has('tme_ind')?r['Impuestos Indirectos']/rb*100:0;
+      const net=sj+sr+se-td-ti,isSel=!anySelected||selArr[ci];
+      ctx.beginPath();ctx.arc(x,yVal(net),isSel?4:2.5,0,Math.PI*2);
+      ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#e8a020';ctx.lineWidth=isSel?2:1;ctx.stroke();
+    });
+  }
+
+  updateFedeaRangeIndicator();
+  // Zero line
+  ctx.strokeStyle='rgba(80,80,80,0.45)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(P.left,zeroY);ctx.lineTo(P.left+PW,zeroY);ctx.stroke();
+
+  // Y axis
+  ctx.textAlign='right';ctx.font='8px system-ui,sans-serif';
+  [0,20,40,60,80,100,120].forEach(v=>{
+    ctx.fillStyle=v===0?'rgba(80,80,80,0.6)':'rgba(26,95,154,0.75)';
+    ctx.fillText((v>0?'+':'')+v+'%',P.left-5,yVal(v)+3);
+  });
+  [20,40].forEach(v=>{
+    ctx.fillStyle='rgba(192,57,43,0.75)';
+    ctx.fillText('-'+v+'%',P.left-5,yVal(-v)+3);
+  });
+
+  // X axis
+  ctx.font='8px system-ui,sans-serif';ctx.textAlign='center';ctx.fillStyle='rgba(80,80,80,0.75)';
+  rows.forEach((r,ci)=>{
+    const x=P.left+catW*(ci+.5);
+    const rm=Math.round(r['Renta de mercado ampliada']).toLocaleString('es-ES',{useGrouping:true})+'€';
+    const words=r.segmento.split(' ');
+    if(words.length<=2){ctx.fillText(r.segmento,x,P.top+PH+P.bot*0.28);}
+    else{ctx.fillText(words.slice(0,2).join(' '),x,P.top+PH+P.bot*0.22);ctx.fillText(words.slice(2).join(' '),x,P.top+PH+P.bot*0.48);}
+    ctx.fillStyle='rgba(120,120,120,0.65)';ctx.font='7.5px system-ui,sans-serif';
+    ctx.fillText(rm,x,P.top+PH+P.bot*0.78);
+    ctx.fillStyle='rgba(80,80,80,0.75)';ctx.font='8px system-ui,sans-serif';
+  });
+}
+
+
+// Tooltip Fedea
+(function(){
+  const canvas=document.getElementById('fAreaChart');
+  canvas.addEventListener('mousemove',function(e){
+    const d=FEDEA_TDATA[fedeaCfg.currentYear];if(!d||!d.rows)return;
+    const rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    const W=rect.width,H=rect.height,P=FEDEA_PAD;
+    const rows=fedeaGetRows(),N=rows.length,PW=W-P.left-P.right,catW=PW/N;
+    if(mx<P.left||mx>P.left+PW){fedeaDrawChart();return;}
+    const ci=Math.max(0,Math.min(N-1,Math.floor((mx-P.left)/catW)));
+    fedeaDrawChart();
+    const ctx=canvas.getContext('2d'),r=rows[ci],f=v=>Math.round(v).toLocaleString('es-ES',{useGrouping:true}),lines=[];
+    const rb=r['Renta Bruta']||1;
+    if(fedeaActiveSeries.has('sme_jub'))  lines.push({color:'#1a5f9a',label:'Jubilación',       val:'+'+(r['Jubilación']/rb*100).toFixed(1)+'%'});
+    if(fedeaActiveSeries.has('sme_resto'))lines.push({color:'#5ba3d9',label:'Resto pres. monetarias',      val:'+'+((r['Total Prestaciones monetarias']-r['Jubilación'])/rb*100).toFixed(1)+'%'});
+    if(fedeaActiveSeries.has('seme'))     lines.push({color:'#27ae60',label:'Prest. especie',    val:'+'+(r['Subsidio Especie medio efectivo (SEME)']).toFixed(1)+'%'});
+    if(fedeaActiveSeries.has('tme_dir'))  lines.push({color:'#c0392b',label:'Imp. directos',     val:'-'+(r['Impuestos directos']/rb*100).toFixed(1)+'%'});
+    if(fedeaActiveSeries.has('tme_ind'))  lines.push({color:'#e07070',label:'Imp. indirectos',   val:'-'+(r['Impuestos Indirectos']/rb*100).toFixed(1)+'%'});
+    const sj=fedeaActiveSeries.has('sme_jub')?r['Jubilación']/rb*100:0;
+    const sr=fedeaActiveSeries.has('sme_resto')?(r['Total Prestaciones monetarias']-r['Jubilación'])/rb*100:0;
+    const se=fedeaActiveSeries.has('seme')?r['Subsidio Especie medio efectivo (SEME)']:0;
+    const td=fedeaActiveSeries.has('tme_dir')?r['Impuestos directos']/rb*100:0;
+    const ti=fedeaActiveSeries.has('tme_ind')?r['Impuestos Indirectos']/rb*100:0;
+    const net=sj+sr+se-td-ti;
+    lines.push({color:'#e8a020',label:'Neto',val:(net>=0?'+':'')+net.toFixed(1)+'%'});
+    drawTooltip(ctx,W,H,mx,my,r.segmento,lines,230);
+  });
+  canvas.addEventListener('mouseleave',fedeaDrawChart);
+})();
+
+// Donuts Fedea
+const fc1=makeDonut('fc1'),fc2=makeDonut('fc2'),fc3=makeDonut('fc3'),fc4=makeDonut('fc4');
+
+// Registrar fedea en switchTab y resize
+const _origSwitch=switchTab;
+window.switchTab=function(id,btn){
+  _origSwitch(id,btn);
+  if(id==='fedea')requestAnimationFrame(()=>{fedeaDrawChart();});
+};
+window.addEventListener('resize',fedeaDrawChart);
+
+let fedeaQ5Mode=false;
+
+function updateFedeaRangeIndicator(){
+  const el=document.getElementById('fedeaRangeIndicator');
+  if(!el)return;
+  const wrap=document.getElementById('fAreaWrap');
+  const W=wrap?wrap.clientWidth:700;
+  const P=FEDEA_PAD,PW=W-P.left-P.right;
+  const N=fedeaQ5Mode?5:7;
+  const catW=PW/N;
+  const x0=P.left+catW*0.5;
+  const x1=P.left+catW*3.5;
+  const bracketW=x1-x0, bracketLeft=x0;
+  // Q1 center and last column center
+  const xQ1=P.left+catW*0.5;
+  const xLast=P.left+catW*(N-0.5);
+  const annotW=catW*0.9; // max width for annotation text
+  el.innerHTML=
+    // 80% bracket row
+    '<div style="position:relative;width:100%;height:22px;font-size:10px;">'
+    +'<div style="position:absolute;left:'+bracketLeft+'px;width:'+bracketW+'px;top:0;height:8px;'
+    +'border-left:1.5px solid #000;border-right:1.5px solid #000;border-bottom:1.5px solid #000;border-radius:0 0 3px 3px;"></div>'
+    +'<div style="position:absolute;left:'+(bracketLeft+bracketW/2)+'px;transform:translateX(-50%);top:10px;'
+    +'color:var(--color-text-secondary,#555);white-space:nowrap;"><strong>80%</strong> de la población</div>'
+    +'</div>'
+    // Annotations row
+    +'<div style="position:relative;width:100%;margin-top:10px;">'
+    // Q1 annotation
+    +'<div style="position:absolute;left:'+xQ1+'px;transform:translateX(-50%);text-align:center;width:'+annotW+'px;">'
+    +'<div style="font-size:16px;color:#2d6a4f;line-height:1;">↑</div>'
+    +'<div style="font-size:9px;color:var(--color-text-secondary,#555);line-height:1.3;margin-top:2px;">Ingresan más por prestaciones<br>que por renta</div>'
+    +'</div>'
+    // Last column annotation (Centil 100 or Q5)
+    + (fedeaQ5Mode ? '' :
+      '<div style="position:absolute;left:'+xLast+'px;transform:translateX(-50%);text-align:center;width:'+annotW+'px;">'
+      +'<div style="font-size:16px;color:#c0392b;line-height:1;">↑</div>'
+      +'<div style="font-size:9px;color:var(--color-text-secondary,#555);line-height:1.3;margin-top:2px;">Las prestaciones que reciben<br>son insignificantes respecto<br>a su renta</div>'
+      +'</div>')
+    +'</div>';
+}
+function toggleFedeaQ5(){
+  fedeaQ5Mode=!fedeaQ5Mode;
+  document.getElementById('fedeaQ5Btn').textContent=fedeaQ5Mode?'Desagrupar Q5':'Agrupar Q5';
+  fedeaSelected.clear();
+  T.fedea.render();
+  updateFedeaRangeIndicator();
+}
+
+function toggleFedeaMode(){
+  fedeaFullMode=!fedeaFullMode;
+  document.getElementById('fedeaModeBtn').textContent=fedeaFullMode?'Vista reducida':'Vista completa';
+  T.fedea.render();
+}
+
+T.fedea.render();
+
+/* ── Tooltip de cabeceras (th-tip) — div flotante centrado bajo el cursor ── */
+(function(){
+  const tip=document.getElementById('thTooltip');
+  document.addEventListener('mouseover',function(e){
+    const th=e.target.closest('.th-tip');
+    if(!th){tip.style.opacity='0';return;}
+    tip.textContent=th.dataset.tip||'';
+    tip.style.opacity='1';
+  });
+  document.addEventListener('mousemove',function(e){
+    const th=e.target.closest('.th-tip');
+    if(!th){tip.style.opacity='0';return;}
+    // Centrar horizontalmente bajo el cursor, evitar salirse de la ventana
+    const W=window.innerWidth, tw=tip.offsetWidth||220;
+    let x=e.clientX-tw/2;
+    x=Math.max(8,Math.min(x,W-tw-8));
+    tip.style.left=x+'px';
+    tip.style.top=(e.clientY+18)+'px';
+  });
+  document.addEventListener('mouseleave',function(){ tip.style.opacity='0'; },true);
+})();
+</script>
+
+<script>
+/* ── Indicador de rangos bajo el gráfico IRPF ── */
+function updateIrpfRangeIndicator(){
+  const el=document.getElementById('irpfRangeIndicator');
+  if(!el)return;
+  const wrap=document.getElementById('barWrap');
+  const W=wrap?wrap.clientWidth:600;
+  const P=IRPF_PAD, PW=W-P.left-P.right;
+  const N=10, catW=PW/N;
+
+  // Tramos:
+  // 0=Neg/0, 1=(0-1.5], 2=(1.5-6], 3=(6-12], 4=(12-21], 5=(21-30], 6=(30-60], 7=(60-150], 8=(150-601], 9=>601
+  // Rentas >12k y <60k: tramos 4,5,6 → cols 4,5,6  (center 4 to center 6)
+  // Rentas >60k:        tramos 7,8,9 → cols 7,8,9  (center 7 to center 9)
+
+  function cx(i){ return P.left + catW*(i+0.5); }
+
+  const x60_left  = cx(7), x60_right  = cx(9);
+  const x12_left  = cx(4), x12_right  = cx(6);
+  const brac60W   = x60_right - x60_left;
+  const brac12W   = x12_right - x12_left;
+
+  const annotW60 = catW*3.2;
+  const annotW12 = catW*3.2;
+
+  el.style.position='relative';
+  const textStyle='text-align:center;color:var(--color-text-secondary,#555);line-height:1.35;';
+  el.innerHTML=
+    '<div style="position:relative;width:100%;height:68px;">'
+    // Bracket >60k — negro
+    +'<div style="position:absolute;left:'+x60_left+'px;width:'+brac60W+'px;top:0;height:8px;'
+    +'border-left:1.5px solid #000;border-right:1.5px solid #000;border-bottom:1.5px solid #000;border-radius:0 0 3px 3px;"></div>'
+    +'<div style="position:absolute;left:'+(x60_left+brac60W/2)+'px;width:'+brac60W+'px;transform:translateX(-50%);top:10px;'+textStyle+'">'
+    +'<strong>≈5%</strong> de la población<br>aporta <strong>≈40%</strong><br>de la recaudación</div>'
+    // Bracket 12k-60k — negro
+    +'<div style="position:absolute;left:'+x12_left+'px;width:'+brac12W+'px;top:0;height:8px;'
+    +'border-left:1.5px solid #000;border-right:1.5px solid #000;border-bottom:1.5px solid #000;border-radius:0 0 3px 3px;"></div>'
+    +'<div style="position:absolute;left:'+(x12_left+brac12W/2)+'px;width:'+brac12W+'px;transform:translateX(-50%);top:10px;'+textStyle+'">'
+    +'<strong>≈60%</strong> de la población<br>aporta <strong>≈60%</strong><br>de la recaudación</div>'
+    +'</div>';
+}
+
+// Hook into irpfDrawChart via resize and render
+const _origIrpfDraw = irpfDrawChart;
+window.irpfDrawChart = function(){
+  _origIrpfDraw();
+  updateIrpfRangeIndicator();
+};
+irpfCfg.drawChart = window.irpfDrawChart;
+
+// Also hook resize
+window.addEventListener('resize', updateIrpfRangeIndicator);
+
+// Initial render
+updateIrpfRangeIndicator();
+</script>
