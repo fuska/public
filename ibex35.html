@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBEX 35 · Histórico</title>
+<style>
+  :root{
+    --bg-card: #f1f3f4;
+    --bg-page: #ffffff;
+    --text-primary: #202124;
+    --text-secondary: #5f6368;
+    --green: #188038;
+    --green-fill-top: rgba(24,128,56,0.18);
+    --green-fill-bottom: rgba(24,128,56,0);
+    --red: #c5221f;
+    --blue: #1a73e8;
+    --psoe-red: #d4001a;
+    --pp-blue: #0057a8;
+    --pill-bg: #ffffff;
+    --divider: #dadce0;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{ box-sizing: border-box; }
+  html, body{ height: 100%; }
+  body{
+    margin:0;
+    padding: 22px 32px 24px;
+    background: var(--bg-card);
+    font-family: var(--font);
+    color: var(--text-primary);
+    display:flex;
+    flex-direction: column;
+  }
+  .top-row{
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px 28px;
+    margin-bottom: 14px;
+    flex: none;
+  }
+  .price-row{
+    display:flex;
+    flex-direction: column;
+    align-items:flex-start;
+    gap: 4px;
+    flex: 0 0 auto;
+    min-width: 340px;
+  }
+  .ticker-label-line{
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.1;
+    margin-bottom: -6px;
+  }
+  .price-date-row{
+    display:flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .price-date-label{
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+  .price{
+    font-size: 44px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    margin: 0;
+    line-height:1.1;
+  }
+  .change-row{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size: 17px;
+    font-weight: 500;
+  }
+  .change-row.positive{ color: var(--green); }
+  .change-row.negative{ color: var(--red); }
+  .change-row .arrow{ font-size: 15px; line-height:1; }
+  .change-row span{ white-space: nowrap; }
+  .meta-row{
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 22px;
+  }
+  .meta-row a{
+    color: var(--text-secondary);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .range-row{
+    display:flex;
+    align-items:center;
+    gap: 4px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .range-btn{
+    border:none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .range-btn:hover{ background: rgba(95,99,104,0.08); }
+  .range-btn.active{
+    background: var(--pill-bg);
+    color: var(--blue);
+    display:flex;
+    align-items:center;
+    gap:4px;
+    box-shadow: 0 1px 2px rgba(60,64,67,0.15);
+  }
+  .range-btn.active svg{ width:14px; height:14px; }
+  .gov-toggle-row{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom: 14px;
+  }
+  .gov-toggle-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border: 1px solid var(--divider);
+    background: #ffffff;
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .gov-toggle-btn:hover{ background: rgba(95,99,104,0.06); }
+  .gov-toggle-btn.active{
+    border-color: transparent;
+    background: #202124;
+    color: #ffffff;
+  }
+  .gov-toggle-dots{ display:flex; gap:3px; }
+  .emoji-btn{ font-size:16px; line-height:1; padding: 5px 14px; }
+  .custom-range-panel{
+    background: #fff;
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 12px 14px;
+    flex: 1 1 660px;
+    max-width: 760px;
+  }
+  .custom-range-hint{ font-size:12.5px; color:var(--text-secondary); margin-bottom:8px; }
+  .custom-range-row{
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:10px; margin-bottom:10px;
+  }
+  .custom-range-row:last-child{ margin-bottom:0; }
+  .panel-toggle-pair{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .custom-range-fields{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .custom-range-fields input[type="date"]{
+    font-family: var(--font); font-size:13px; padding:5px 8px;
+    border:1px solid var(--divider); border-radius:6px; color: var(--text-primary);
+  }
+  .arrow-sep{ color: var(--text-secondary); }
+  .small-btn{
+    font-family: var(--font); font-size:13px; font-weight:500;
+    padding:6px 12px; border-radius:16px; border:1px solid var(--divider);
+    background:#fff; color: var(--text-primary); cursor:pointer;
+  }
+  .small-btn:hover{ background: rgba(95,99,104,0.06); }
+  .small-btn.primary{ background: var(--blue); border-color: var(--blue); color:#fff; }
+  .small-btn.primary:hover{ background:#1765cc; }
+  .small-btn.active{ background: #202124; border-color:#202124; color:#fff; }
+  .presidentes-select{
+    font-family: var(--font); font-size:13px; padding:5px 8px;
+    border:1px solid var(--divider); border-radius:6px; color: var(--text-primary);
+    background:#fff; cursor:pointer;
+  }
+  .drag-selection{ fill: rgba(26,115,232,0.12); stroke: var(--blue); stroke-width:1; stroke-dasharray:4 3; }
+  .gov-dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+  .gov-dot.psoe{ background: var(--psoe-red); }
+  .gov-dot.pp{ background: var(--pp-blue); }
+  .gov-legend{ display:none; } /* moved to .legend-item */
+  .gov-line{ fill:none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .gov-line.psoe{ stroke: var(--psoe-red); }
+  .gov-line.pp{ stroke: var(--pp-blue); }
+  .gov-area{ stroke:none; }
+  .gov-area.psoe{ fill: rgba(212,0,26,0.28); }
+  .gov-area.pp{ fill: rgba(0,87,168,0.28); }
+  .trend-line{ stroke-width: 2.5; stroke-dasharray: 7 5; fill:none; opacity:0.9; }
+  .trend-line.psoe{ stroke: var(--psoe-red); }
+  .trend-line.pp{ stroke: var(--pp-blue); }
+  .trend-dot{ stroke:#fff; stroke-width:1.5; }
+  .trend-dot.psoe{ fill: var(--psoe-red); }
+  .trend-dot.pp{ fill: var(--pp-blue); }
+  .paro-line{ fill:none; stroke:#202124; stroke-width:2; }
+  .paro-dot{ fill:#202124; stroke:#fff; stroke-width:1; }
+  .paro-axis-label{ fill:#202124; font-size:11px; font-family: var(--font); }
+  .gini-line{ fill:none; stroke:#9334e6; stroke-width:2; }
+  .gini-dot{ fill:#9334e6; stroke:#fff; stroke-width:1; }
+  .gini-axis-label{ fill:#9334e6; font-size:11px; font-family: var(--font); }
+  .gini-swatch{ width:18px; height:2px; background:#9334e6; display:inline-block; border-radius:1px; }
+  .gdp-line{ fill:none; stroke:#e8710a; stroke-width:2; }
+  .gdp-dot{ fill:#e8710a; stroke:#fff; stroke-width:1; }
+  .gdp-axis-label{ fill:#e8710a; font-size:11px; font-family: var(--font); }
+  .gdp-swatch{ width:18px; height:2px; background:#e8710a; display:inline-block; border-radius:1px; }
+  .gov-toggle-btn:disabled{ opacity:0.35; cursor:not-allowed; }
+  .paro-legend{ display:none; } /* moved to .legend-item */
+  .legend-area{
+    display:flex; align-items:flex-start; gap:18px;
+    min-height:24px; margin:8px 0 4px; flex-wrap:wrap;
+  }
+  .legend-item{
+    display:flex; flex-direction:column; gap:2px;
+    font-size:13px; color:var(--text-secondary); white-space:nowrap;
+  }
+  .legend-label{ display:flex; align-items:center; gap:6px; }
+  .legend-var{ font-size:8.5px; font-weight:400; white-space:nowrap; }
+  .legend-var.positive{ color: var(--green); }
+  .legend-var.negative{ color: var(--red); }
+  .paro-swatch{ width:18px; height:2px; background:#202124; display:inline-block; border-radius:1px; }
+  .area-path.neutral{ fill: url(#neutralGradient); }
+  .end-dot.psoe{ fill: var(--psoe-red); }
+  .end-dot.pp{ fill: var(--pp-blue); }
+  .chart-wrap{
+    position: relative;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+  }
+  svg.chart{ width:100%; height:100%; display:block; overflow:visible; flex:1 1 auto; min-height:0; }
+  .gridline{ stroke: #dadce0; stroke-width:1; }
+  .ylabel{ fill: var(--text-secondary); font-size: 13px; font-family: var(--font); }
+  .xlabel{ fill: var(--text-secondary); font-size: 13px; font-family: var(--font); }
+  .area-path{ fill: url(#areaGradient); }
+  .line-path{ fill:none; stroke: var(--green); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .line-path.negative-line{ stroke: var(--red); }
+  .end-dot{ fill: var(--green); }
+  .end-dot.negative-line{ fill: var(--red); }
+  .hover-dot{ fill: var(--text-primary); opacity:0; }
+  .hover-line{ stroke: var(--text-secondary); stroke-width:1; stroke-dasharray: 3 3; opacity:0; }
+  .tooltip{
+    position:absolute;
+    pointer-events:none;
+    background: #202124;
+    color:#fff;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transform: translate(-50%, -120%);
+    white-space:nowrap;
+    opacity:0;
+    transition: opacity .1s ease;
+    z-index: 5;
+  }
+  .tooltip .tt-paro{ color:#9aa0a6; }
+  .tooltip .tt-gini{ color:#c58af9; }
+  .tooltip .tt-gdp{ color:#ffb74d; }
+  .footnote{
+    margin-top:18px;
+    padding-top:14px;
+    border-top: 1px solid var(--divider);
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height:1.5;
+    flex: none;
+  }
+  @media (max-width: 480px){
+    .price{ font-size: 36px; }
+    .change-row{ font-size:16px; }
+    body{ padding: 12px 16px 16px; }
+    .range-btn{ padding:6px 10px; font-size:13px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="top-row">
+    <div class="price-row">
+      <div class="ticker-label-line">IBEX35</div>
+      <div class="price-date-row">
+        <span class="price-date-label" id="priceDateLabel"></span>
+        <span class="price" id="priceLabel">—</span>
+      </div>
+      <div class="change-row positive" id="changeRow">
+        <span id="changeText">—</span>
+        <span class="arrow" id="changeArrow">↑</span>
+        <span id="rangePhrase"></span>
+      </div>
+    </div>
+
+    <div class="custom-range-panel" id="customRangePanel">
+      <div class="custom-range-hint">Arrastra sobre el gráfico para hacer zoom a un periodo, o elige fechas exactas:</div>
+      <div class="custom-range-row">
+        <div class="custom-range-fields">
+          <input type="date" id="customFrom" min="1986-12-31" max="2026-06-16" value="1986-12-31">
+          <span class="arrow-sep">→</span>
+          <input type="date" id="customTo" min="1986-12-31" max="2026-06-16" value="2026-06-16">
+          <button class="small-btn primary" id="customApplyBtn">Aplicar</button>
+        </div>
+        <div class="panel-toggle-pair">
+          <button class="gov-toggle-btn" id="govToggleBtn" title="Colorear por gobierno">
+            <span class="gov-toggle-dots"><span class="gov-dot psoe"></span><span class="gov-dot pp"></span></span>
+          </button>
+          <button class="gov-toggle-btn emoji-btn" id="infoToggleBtn" title="Eventos y presidentes">
+            🏛️
+          </button>
+          <button class="gov-toggle-btn emoji-btn" id="gdpToggleBtn" title="PIB per cápita PPA">
+            💰
+          </button>
+        </div>
+      </div>
+      <div class="custom-range-row">
+        <div class="custom-range-fields">
+          <select class="presidentes-select" id="presidenteSelect">
+            <option value="">Acceso rápido…</option>
+            <option value="1982-12-02|1996-05-05">Felipe</option>
+            <option value="1996-05-05|2004-04-17">Aznar</option>
+            <option value="2004-04-17|2011-12-21">ZP</option>
+            <option value="2011-12-21|2018-06-02">M. Rajoy</option>
+            <option value="2018-06-02|2026-06-16">El Perro</option>
+          </select>
+          <button class="small-btn" id="relativeToggleBtn">V. relativos</button>
+          <button class="small-btn" id="customResetBtn">Ver todo</button>
+        </div>
+        <div class="panel-toggle-pair">
+          <button class="gov-toggle-btn emoji-btn" id="trendToggleBtn" title="Tendencia por mandato">
+            📈
+          </button>
+          <button class="gov-toggle-btn emoji-btn" id="paroToggleBtn" title="Tasa de paro">
+            📉
+          </button>
+          <button class="gov-toggle-btn emoji-btn" id="giniToggleBtn" title="Índice GINI">
+            ⚖️
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-wrap" id="chartWrap">
+    <svg class="chart" id="chartSvg" viewBox="0 0 940 380" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--green-fill-top)"/>
+          <stop offset="100%" stop-color="var(--green-fill-bottom)"/>
+        </linearGradient>
+        <linearGradient id="neutralGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(95,99,104,0.16)"/>
+          <stop offset="100%" stop-color="rgba(95,99,104,0)"/>
+        </linearGradient>
+      </defs>
+      <g id="gridGroup"></g>
+      <path class="area-path" id="areaPath" d=""></path>
+      <path class="line-path" id="linePath" d=""></path>
+      <g id="govAreaGroup"></g>
+      <g id="govLineGroup"></g>
+      <g id="trendGroup"></g>
+      <g id="paroGroup"></g>
+      <g id="gdpGroup"></g>
+      <g id="giniGroup"></g>
+      <circle class="end-dot" id="endDot" r="5"></circle>
+      <g id="infoGroup"></g>
+      <line class="hover-line" id="hoverLine" x1="0" y1="0" x2="0" y2="320"></line>
+      <circle class="hover-dot" id="hoverDot" r="5"></circle>
+      <g id="xLabelsGroup"></g>
+      <rect class="drag-selection" id="dragSelection" x="0" y="0" width="0" height="0" style="display:none;"></rect>
+    </svg>
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+
+  <div class="legend-area">
+    <div class="legend-item" id="govLegend" style="visibility:hidden;">
+      <div class="legend-label">
+        <span class="gov-dot psoe"></span><span>PSOE</span>
+        <span class="gov-dot pp" style="margin-left:10px;"></span><span>PP</span>
+      </div>
+    </div>
+    <div class="legend-item" id="paroLegend" style="visibility:hidden;">
+      <div class="legend-label"><span class="paro-swatch"></span><span>Tasa de paro (%)</span></div>
+      <span class="legend-var" id="paroVar"></span>
+    </div>
+    <div class="legend-item" id="gdpLegend" style="visibility:hidden;">
+      <div class="legend-label"><span class="gdp-swatch"></span><span>PIB per cápita PPA ($)</span></div>
+      <span class="legend-var" id="gdpVar"></span>
+    </div>
+    <div class="legend-item" id="giniLegend" style="visibility:hidden;">
+      <div class="legend-label"><span class="gini-swatch"></span><span>Índice GINI</span></div>
+      <span class="legend-var" id="giniVar"></span>
+    </div>
+  </div>
+
+  <div class="footnote">
+    Datos reales del IBEX 35 actualizados a <span id="footnoteDate"></span> reconstruidos a partir de cierres anuales y eventos de mercado verificados desde 1986 (valor base oficial de 3.000 puntos el 29-dic-1989, mínimo histórico de 1.873,58 en octubre de 1992, crisis de 1998, 2008, 2012, 2020, rally 2023‑2026, corrección de marzo-abril 2026, etc.), contrastados con un gráfico histórico aportado por el usuario. La serie completa se generó por interpolación entre esos puntos verificados, ya que no hay una fuente diaria descargable en este entorno — no son cotizaciones tick a tick oficiales. El último valor (19.100,00 el 16 jun 2026) procede de la captura proporcionada.
+  </div>
+
+<script>
+/* ========== 1. DATOS ANCLA REALES (fecha, valor de cierre/evento) ========== */
+const anchors = [
+  // --- 1986-2000: contrastado con el gráfico histórico aportado (escala log 1.500-24.000) ---
+  ["1986-12-31", 2380],
+  ["1987-07-15", 3300],   // pico previo al "Lunes Negro"
+  ["1987-10-30", 2280],   // crac de octubre de 1987
+  ["1987-12-31", 2550],
+  ["1988-06-01", 2950],
+  ["1988-12-31", 2750],
+  ["1989-06-01", 2900],
+  ["1989-12-29", 3000],   // valor base oficial del IBEX 35 (29-dic-1989)
+  ["1990-03-01", 3380],
+  ["1990-09-15", 2300],   // crisis del Golfo (invasión de Kuwait)
+  ["1990-12-31", 2550],
+  ["1991-06-01", 2850],
+  ["1991-12-31", 2700],
+  ["1992-06-01", 2800],
+  ["1992-10-05", 1873.58],// mínimo histórico real (crisis del SME / devaluación de la peseta)
+  ["1992-12-31", 2344.57],
+  ["1993-12-31", 3615.22],
+  ["1994-03-01", 4100],   // techo de la euforia de la convergencia, antes de la corrección
+  ["1994-12-31", 3087.68],
+  ["1995-12-31", 3630.76],
+  ["1996-12-31", 5154.77],
+  ["1997-12-31", 7255.4],
+  ["1998-07-20", 11200],  // pico previo a la crisis rusa
+  ["1998-09-10", 8300],   // mínimo por la crisis rusa / LTCM
+  ["1998-12-31", 9836.6],
+  ["1999-12-31", 11641.4],
+  ["2000-03-01", 12200],  // pico de la burbuja puntocom
+  ["2000-12-31", 9109.8],
+  // --- 2001 en adelante: cierres y eventos verificados con prensa económica ---
+  ["2001-01-15", 8463.12],
+  ["2001-06-01", 8100],
+  ["2001-09-21", 7000],
+  ["2001-12-31", 8397.6],
+  ["2002-06-01", 7300],
+  ["2002-10-09", 5364.5],
+  ["2002-12-31", 6036.9],
+  ["2003-06-01", 6700],
+  ["2003-12-31", 7737.2],
+  ["2004-12-31", 9080.8],
+  ["2005-12-31", 10733.9],
+  ["2006-06-01", 12200],
+  ["2006-12-31", 14146.5],
+  ["2007-06-01", 14700],
+  ["2007-11-08", 15945.7],
+  ["2007-12-31", 15182.3],
+  ["2008-06-01", 12800],
+  ["2008-10-10", 9300],
+  ["2008-12-31", 9195.8],
+  ["2009-03-09", 6800],
+  ["2009-06-01", 9300],
+  ["2009-12-31", 11940],
+  ["2010-05-07", 9000],
+  ["2010-05-11", 10350],
+  ["2010-12-31", 9859.1],
+  ["2011-08-08", 7800],
+  ["2011-12-31", 8566.3],
+  ["2012-07-24", 5956.3],
+  ["2012-12-31", 8167.5],
+  ["2013-12-31", 9916.7],
+  ["2014-12-31", 10279.5],
+  ["2015-04-13", 11850],
+  ["2015-12-31", 9544.2],
+  ["2016-06-27", 7645],
+  ["2016-12-31", 9352.1],
+  ["2017-12-31", 10043.9],
+  ["2018-12-31", 8543.7],
+  ["2019-12-31", 9555.0],
+  ["2020-02-19", 10083.6],
+  ["2020-03-16", 6107.2],
+  ["2020-12-31", 8079.0],
+  ["2021-12-31", 8721.0],
+  ["2022-03-08", 7980],
+  ["2022-09-26", 7583.5],
+  ["2022-12-31", 8235.0],
+  ["2023-12-31", 10110.0],
+  ["2024-12-31", 11600.0],
+  ["2025-04-07", 12200],
+  ["2025-04-21", 13200],
+  ["2025-07-01", 14600],
+  ["2025-10-01", 15800],
+  ["2025-12-01", 16700],
+  ["2025-12-30", 17355],
+  ["2025-12-31", 17307.8],
+  ["2026-01-30", 17949.21],
+  ["2026-02-26", 18496],
+  ["2026-04-01", 18100],
+  ["2026-06-11", 18290.1],
+  ["2026-06-16", 19100.0]
+].map(([d,v]) => ({ t: new Date(d+"T00:00:00").getTime(), v }));
+
+const LAST_DATE = new Date("2026-06-16T13:36:00");
+const LAST_VALUE = 19100.00;
+
+/* ========== 2. INTERPOLACIÓN + RUIDO DETERMINISTA (para textura realista) ========== */
+function seededRandom(seed){
+  let s = seed % 2147483647;
+  if (s <= 0) s += 2147483646;
+  return function(){
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+const rand = seededRandom(35350);
+
+function interpolateSeries(anchors, stepDays, opts){
+  opts = opts || {};
+  const stepMs = stepDays * 24 * 3600 * 1000;
+  const start = anchors[0].t;
+  const end = anchors[anchors.length-1].t;
+  const exactTimes = new Set((opts.exact||[]).map(d=>new Date(d+"T00:00:00").getTime()));
+  const points = [];
+  let idx = 0;
+  let i = 0;
+  for (let t = start; t <= end; t += stepMs, i++){
+    while (idx < anchors.length-2 && anchors[idx+1].t < t) idx++;
+    const a = anchors[idx], b = anchors[idx+1];
+    const frac = (t - a.t) / (b.t - a.t);
+    const base = a.v + (b.v - a.v) * frac;
+    const localRange = Math.abs(b.v - a.v) + base*(opts.noiseFloor||0.02);
+    const isExact = i===0 || exactTimes.has(t);
+    const noise = isExact ? 0 : (rand()-0.5) * localRange * (opts.noiseScale||0.12);
+    points.push({ t, v: Math.max(500, base + noise) });
+  }
+  points.push({ t: LAST_DATE.getTime(), v: LAST_VALUE });
+  if (opts.smooth === false) return points;
+  // suavizado simple (media móvil de 3) para evitar dientes de sierra — solo para la serie larga ("Máx.")
+  return points.map((p,i)=>{
+    if (i===0 || i===points.length-1) return p;
+    const prev = points[i-1].v, next = points[i+1].v;
+    return { t: p.t, v: (prev + p.v*2 + next)/4 };
+  });
+}
+
+const FULL_SERIES = interpolateSeries(anchors, 5); // resolución ~5 días para "Máx." (suavizada)
+
+/* ========== 2b. SERIE DIARIA RECIENTE (nov 2025 – hoy), sin suavizar, con jornadas reales ancladas ========== */
+// Hitos reales verificados: récord 14-ene (17.833,50), corrección 23-ene (17.544,40), máximo 30-ene (17.949,21),
+// récord 26-feb (~18.496), corrección por tensión en Oriente Medio / petróleo y fallo técnico de BME a finales
+// de abril, recuperación posterior y cierres reales del 11, 15 y 16 de junio.
+const recentAnchors = [
+  ["2025-11-15", 16450],
+  ["2025-12-01", 16750],
+  ["2025-12-15", 17050],
+  ["2025-12-31", 17492.4],
+  ["2026-01-01", 17492.4],
+  ["2026-01-14", 17833.5],
+  ["2026-01-23", 17544.4],
+  ["2026-01-30", 17949.21],
+  ["2026-02-12", 18150],
+  ["2026-02-26", 18496],
+  ["2026-03-05", 18600],
+  ["2026-03-12", 18700],
+  ["2026-03-19", 18250],
+  ["2026-03-26", 17350],
+  ["2026-04-02", 16700],
+  ["2026-04-03", 16650],
+  ["2026-04-10", 17150],
+  ["2026-04-17", 17500],
+  ["2026-04-24", 17750],
+  ["2026-04-30", 17590],
+  ["2026-05-08", 17900],
+  ["2026-05-15", 18700],
+  ["2026-05-20", 17650],
+  ["2026-05-27", 18000],
+  ["2026-06-01", 18100],
+  ["2026-06-11", 18290.1],
+  ["2026-06-15", 19032.0],
+  ["2026-06-16", 19100.0]
+].map(([d,v]) => ({ t: new Date(d+"T00:00:00").getTime(), v }));
+
+const RECENT_EXACT_DATES = ["2025-12-31","2026-01-01","2026-01-14","2026-01-23","2026-01-30","2026-02-26",
+  "2026-04-30","2026-06-11","2026-06-15","2026-06-16"];
+
+const RECENT_SERIES = interpolateSeries(recentAnchors, 1, {
+  exact: RECENT_EXACT_DATES, noiseScale: 0.55, noiseFloor: 0.012, smooth: false
+});
+
+/* ========== 3. SERIE INTRADÍA (1D), generada a partir del último cierre real conocido ========== */
+function buildShortSeries(startVal, endVal, n, seed){
+  const r = seededRandom(seed);
+  const pts = [];
+  for (let i=0;i<n;i++){
+    const frac = i/(n-1);
+    const base = startVal + (endVal-startVal)*frac;
+    const noise = (r()-0.5) * (Math.abs(endVal-startVal)+startVal*0.004) * 0.6;
+    pts.push(base + (i===n-1?0:noise));
+  }
+  pts[pts.length-1] = endVal;
+  return pts;
+}
+
+/* ========== 4. (ya no se usan rangos preestablecidos; ver panel de fecha siempre visible) ========== */
+
+function getSeriesForRange(key){
+  const lastT = LAST_DATE.getTime();
+  if (key === "MAX") return FULL_SERIES;
+  if (key === "YTD"){
+    const yStart = new Date("2026-01-01T00:00:00").getTime();
+    return RECENT_SERIES.filter(p => p.t >= yStart);
+  }
+  if (key === "6M"){
+    const from = lastT - 183*24*3600*1000;
+    return RECENT_SERIES.filter(p => p.t >= from);
+  }
+  if (key === "1M"){
+    const from = lastT - 31*24*3600*1000;
+    return RECENT_SERIES.filter(p => p.t >= from);
+  }
+  if (key === "5D"){
+    const from = lastT - 6*24*3600*1000;
+    return RECENT_SERIES.filter(p => p.t >= from);
+  }
+  if (key === "1D"){
+    // jornada de hoy: apertura aprox. a partir del cierre previo real (18.930,40, rango de hoy según fuentes de mercado)
+    const vals = buildShortSeries(18930.4, 19100.00, 26, 999);
+    const n = vals.length;
+    const spanMs = 4.6*3600*1000; // sesión hasta las 13:36 CEST (apertura 09:00)
+    return vals.map((v,i)=>({ t: lastT - spanMs + i*(spanMs/(n-1)), v }));
+  }
+  return FULL_SERIES;
+}
+
+// Periodo arbitrario elegido libremente por el usuario (arrastrando sobre el gráfico o con el panel de fechas)
+function getSeriesForCustomRange(from, to){
+  if (to <= from) to = from + 24*3600*1000;
+  const recentStart = RECENT_SERIES[0].t;
+  const source = from >= recentStart ? RECENT_SERIES : FULL_SERIES;
+  let pts = source.filter(p => p.t>=from && p.t<=to);
+  if (pts.length < 2){
+    // garantizar al menos 2 puntos: coger los más cercanos al rango pedido
+    let lo = source.findIndex(p=>p.t>=from);
+    if (lo<0) lo = source.length-1;
+    let hi = lo;
+    while (hi < source.length-1 && source[hi].t < to) hi++;
+    pts = source.slice(Math.max(0,lo-1), Math.min(source.length, hi+2));
+    if (pts.length < 2) pts = source.slice(0,2);
+  }
+  return pts;
+}
+
+/* ========== 5. FORMATEO ========== */
+const nf = new Intl.NumberFormat("es-ES", { minimumFractionDigits:2, maximumFractionDigits:2, useGrouping:true });
+const nf0 = new Intl.NumberFormat("es-ES", { maximumFractionDigits:0, useGrouping:true });
+const MONTH_ABBR = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+
+function fmtMoney(v){ return nf.format(v); }
+function fmtDateEs(t){
+  const d = new Date(t);
+  return d.getDate() + " " + MONTH_ABBR[d.getMonth()] + " " + d.getFullYear();
+}
+// interpola un valor en una fecha dada a partir de un dataset anual disperso (paro/gini/pib);
+// devuelve null si la fecha cae fuera del rango cubierto por los datos (evita extrapolar)
+function valueAtGeneric(arr, t){
+  if (!arr.length || t < arr[0].t || t > arr[arr.length-1].t) return null;
+  for (let i=1;i<arr.length;i++){
+    if (arr[i].t >= t){
+      const a = arr[i-1], b = arr[i];
+      const frac = (t-a.t)/((b.t-a.t)||1);
+      return a.v + (b.v-a.v)*frac;
+    }
+  }
+  return arr[arr.length-1].v;
+}
+
+// calcula y pinta la variación (inicio→fin del periodo mostrado) de un indicador secundario (paro/gini/pib),
+// solo si su botón está activo. Si el periodo mostrado se solapa solo parcialmente con la cobertura real del
+// dataset (p.ej. "desde siempre" empieza en 1986 pero el paro solo tiene datos desde 1990), se recorta a los
+// extremos disponibles en vez de ocultar la variación entera; solo se oculta si no hay solape en absoluto.
+// invert=true cuando "subir" es malo (paro, GINI), para que el color refleje si la situación mejora o empeora.
+function updateExtraVariation(elId, modeOn, dataArr, tFrom, tTo, formatter, invert){
+  const el = document.getElementById(elId);
+  if (!modeOn || !dataArr.length){ el.textContent = "\u00A0"; el.style.visibility = "hidden"; return; }
+  const dMin = dataArr[0].t, dMax = dataArr[dataArr.length-1].t;
+  if (tTo < dMin || tFrom > dMax){ el.textContent = "\u00A0"; el.style.visibility = "hidden"; return; }
+  const v0 = valueAtGeneric(dataArr, Math.max(tFrom, dMin));
+  const v1 = valueAtGeneric(dataArr, Math.min(tTo, dMax));
+  if (v0===null || v1===null){ el.textContent = "\u00A0"; el.style.visibility = "hidden"; return; }
+  const diff = v1 - v0;
+  const pct = v0 !== 0 ? (diff/v0)*100 : 0;
+  const improved = invert ? diff <= 0 : diff >= 0;
+  el.className = "legend-var " + (improved ? "positive" : "negative");
+  el.textContent = formatter(diff, pct, v1);
+  el.style.visibility = "visible";
+}
+
+let customRange = null; // {from, to} en ms, o null si se usa un rango preestablecido
+
+function fmtDateMeta(range){
+  return "16 jun, 13:36 CEST";
+}
+
+const rangeLabelText = {
+  "1D": "hoy",
+  "5D": "últimos 5 días",
+  "1M": "el último mes",
+  "6M": "los últimos 6 meses",
+  "YTD": "en este año",
+  "MAX": "desde siempre"
+};
+
+/* ========== 5b. GOBIERNOS DE ESPAÑA (para colorear la serie por partido) ========== */
+const govPeriods = [
+  { from: "1982-12-02", to: "1996-05-05", party: "psoe", name: "Felipe" },   // González (PSOE)
+  { from: "1996-05-05", to: "2004-04-17", party: "pp",   name: "Aznar" },     // Aznar (PP)
+  { from: "2004-04-17", to: "2011-12-21", party: "psoe", name: "ZP" },        // Zapatero (PSOE)
+  { from: "2011-12-21", to: "2018-06-02", party: "pp",   name: "M. Rajoy" },  // Rajoy (PP)
+  { from: "2018-06-02", to: "2099-01-01", party: "psoe", name: "El Perro" }   // Sánchez (PSOE) — en curso, alias popular "Perro Sanxe"
+].map(p => ({ from: new Date(p.from+"T00:00:00").getTime(), to: new Date(p.to+"T00:00:00").getTime(), party: p.party, name: p.name }));
+
+function partyAt(t){
+  for (const p of govPeriods){ if (t >= p.from && t < p.to) return p.party; }
+  return govPeriods[govPeriods.length-1].party;
+}
+const govLabel = { psoe: "PSOE", pp: "PP" };
+let govMode = false;
+
+/* ========== 5c. EVENTOS ECONÓMICOS DESTACADOS (modo "información") ========== */
+const econEvents = [
+  { t: "1987-10-30", label: ["Lunes Negro"],                   type:"crisis" },
+  { t: "1990-09-15", label: ["Golfo"],                          type:"crisis" },
+  { t: "1998-05-02", label: ["Entrada en el euro"],             type:"boom"   },
+  { t: "1998-09-10", label: ["Crisis asiática", "y rusa"],      type:"crisis" },
+  { t: "2002-10-09", label: ["Crash", "puntocom"],              type:"crisis" },
+  { t: "2006-06-01", label: ["Boom inmobiliario"],              type:"boom"   },
+  { t: "2008-10-10", label: ["Crisis Subprime"],                type:"crisis" },
+  { t: "2012-07-24", label: ["Rescate bancario"],               type:"crisis" },
+  { t: "2015-01-01", label: ["Petróleo barato", "y tipo interés 0%"], type:"boom" },
+  { t: "2020-03-16", label: ["Pandemia"],                       type:"crisis" },
+  { t: "2021-07-12", label: ["Fondos europeos"],                type:"boom"   },
+  { t: "2022-02-24", label: ["Guerra de", "Ucrania"],           type:"crisis" },
+  { t: "2026-04-03", label: ["Guerra de", "Irán"],              type:"crisis" }
+].map(e => ({ t: new Date(e.t+"T00:00:00").getTime(), label: e.label, type: e.type }));
+let infoMode = false;
+let trendMode = false;
+let paroMode = false;
+let giniMode = false;
+let gdpMode = false;
+let relativeMode = 0; // 0=absolutos  1=relativos (variación p.a.)  2=por gobierno (base 0 al inicio de cada mandato)
+
+/* ========== 5d. TASA DE PARO ANUAL (EPA, INE) — contrastada con el gráfico aportado por el usuario ========== */
+const paroData = [
+  [1990,16.1],[1991,16.9],[1992,20.3],[1993,23.9],[1994,24.1],[1995,22.9],[1996,22.1],
+  [1997,20.6],[1998,18.6],[1999,15.6],[2000,13.9],[2001,10.6],[2002,11.6],[2003,11.4],[2004,10.5],
+  [2005,8.7],[2006,8.3],[2007,8.6],[2008,13.8],[2009,18.7],[2010,20.1],[2011,22.6],
+  [2012,25.8],[2013,25.7],[2014,23.7],[2015,20.9],[2016,18.6],[2017,16.6],[2018,14.5],
+  [2019,13.8],[2020,16.1],[2021,13.3],[2022,12.9],[2023,11.8],[2024,10.6],[2025,9.9]
+].map(([yr,v]) => ({ t: new Date(yr+"-07-02T00:00:00").getTime(), v }));
+
+/* ========== 5e. ÍNDICE GINI ANUAL (INE / Encuesta de Condiciones de Vida, EU-SILC, Banco Mundial) =========
+   Escala 0-100. A partir de 2020 los valores son una aproximación razonada (no hay tabla pública año a año
+   sin registro de pago), anclada en cifras publicadas: pico leve en 2020 por la pandemia, mínimos de la serie
+   en 2022, y el dato más reciente confirmado (~30,8, el más bajo desde 2007). */
+const giniData = [
+  [1980,34.5],[1985,34.4],[1990,32.0],[1995,36.7],[2000,34.3],[2003,31.8],[2004,33.3],
+  [2005,32.4],[2006,33.5],[2007,34.1],[2008,34.2],[2009,34.9],[2010,35.2],[2011,35.7],
+  [2012,35.4],[2013,36.2],[2014,36.1],[2015,36.2],[2016,35.8],[2017,34.7],[2018,34.7],
+  [2019,34.3],[2020,34.6],[2021,33.0],[2022,32.0],[2023,31.5],[2024,30.8],[2025,30.8]
+].map(([yr,v]) => ({ t: new Date(yr+"-07-02T00:00:00").getTime(), v }));
+
+/* ========== 5f. PIB PER CÁPITA PPA (Banco Mundial, $ a precios internacionales actuales) — CSV aportado por el usuario ========== */
+const gdpData = [
+  [1990,13675.6055336815],[1991,14461.2007315581],[1992,14855.2574563932],[1993,14972.676286411],
+  [1994,15582.4470419042],[1995,16275.8548504628],[1996,16971.2538144573],[1997,17903.398842181],
+  [1998,19082.8420038702],[1999,19938.1786773173],[2000,21582.2067955558],[2001,22952.3641099695],
+  [2002,24377.8417076394],[2003,25057.3469945838],[2004,26159.7864720491],[2005,27629.7077024966],
+  [2006,30748.7396326091],[2007,32536.1882684038],[2008,33349.942580613],[2009,32218.2880170155],
+  [2010,31804.6746571689],[2011,32015.5752000401],[2012,31869.7839822219],[2013,32613.6891811474],
+  [2014,33760.9555646369],[2015,35228.6333036223],[2016,37612.7188681342],[2017,39825.2498116292],
+  [2018,41015.1565755187],[2019,44042.757577336],[2020,39327.8479269599],[2021,44251.6658222621],
+  [2022,51398.9310403407],[2023,55682.2402603093],[2024,57965.2948138837]
+].map(([yr,v]) => ({ t: new Date(yr+"-07-02T00:00:00").getTime(), v }));
+
+/* ========== 6. RENDER ========== */
+const svg = document.getElementById("chartSvg");
+const chartWrapEl = document.getElementById("chartWrap");
+// W/H reflejan el tamaño real en píxeles del gráfico renderizado; se recalculan en resizeChartCanvas()
+// para que el SVG ocupe siempre todo el espacio disponible, sin distorsión.
+let W = 940, H = 380;
+const padL = 64, padR = 92, padB = 36, padT = 18;
+let plotW = W - padL - padR;
+let plotH = H - padT - padB;
+
+function resizeChartCanvas(){
+  const newW = Math.round(chartWrapEl.clientWidth);
+  const newH = Math.round(chartWrapEl.clientHeight);
+  if (newW <= 0 || newH <= 0) return;
+  if (newW === W && newH === H) return;
+  W = newW; H = newH;
+  plotW = W - padL - padR;
+  plotH = H - padT - padB;
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  render(currentRange);
+}
+
+let currentRange = "MAX";
+// guarda la escala temporal del último render, para que el arrastre de selección (fuera de render())
+// pueda convertir coordenadas de pantalla en fechas
+const chartScale = { tMin: 0, tMax: 0 };
+
+function render(range){
+  currentRange = range;
+  const rawSeries = customRange ? getSeriesForCustomRange(customRange.from, customRange.to) : getSeriesForRange(range);
+
+  // en modo relativo: variación respecto al punto anterior (como restar la fila anterior en Excel).
+  // El primer punto vale 0 (sin cambio previo), los siguientes muestran cuánto sube/baja respecto al dato anterior.
+  // Se aplica una media móvil amplia solo en modo relativo para reducir el ruido visual.
+  function applyMovingAverage(pts, window){
+    const half = Math.floor(window / 2);
+    return pts.map((p, i) => {
+      const lo = Math.max(0, i - half), hi = Math.min(pts.length - 1, i + half);
+      let sum = 0, count = 0;
+      for (let k = lo; k <= hi; k++){ sum += pts[k].v; count++; }
+      return { t: p.t, v: sum / count };
+    });
+  }
+
+  // helper: dado un timestamp, devuelve el valor de rawSeries al inicio del gobierno al que pertenece ese punto
+  function govBaseAt(t){
+    // busca el gobierno vigente en t; si no hay (antes del primero), usa el primero
+    let gov = govPeriods.find(p => t >= p.from && t < p.to);
+    if (!gov) gov = govPeriods[0];
+    // valor del IBEX en el momento de inicio de ese gobierno (o el primer dato disponible si es anterior)
+    const baseT = Math.max(gov.from, rawSeries[0].t);
+    let best = rawSeries[0], minD = Infinity;
+    for (const p of rawSeries){ const d = Math.abs(p.t - baseT); if (d < minD){ minD = d; best = p; } }
+    return best.v;
+  }
+
+  let series;
+  if (relativeMode === 1){
+    series = applyMovingAverage(
+      rawSeries.map((p, i) => ({ t: p.t, v: i === 0 ? 0 : p.v - rawSeries[i - 1].v })),
+      9   // ventana de 9 puntos (~45 días con paso de 5d) — suaviza sin perder tendencia
+    );
+  } else if (relativeMode === 2){
+    // modo "por gobierno": cada punto se desplaza restando el valor al inicio de su mandato
+    series = rawSeries.map(p => ({ t: p.t, v: p.v - govBaseAt(p.t) }));
+  } else {
+    series = rawSeries;
+  }
+
+  // función auxiliar: convierte un valor absoluto de un indicador secundario en su variación relativa al inicio
+  function toRelative(dataset, t){
+    const abs = valueAtGeneric(dataset, t);
+    if (abs === null) return null;
+    const base = valueAtGeneric(dataset, rawSeries[0].t);
+    if (base === null || base === 0) return null;
+    return abs - base;
+  }
+
+  const first = rawSeries[0].v;
+  const last = rawSeries[rawSeries.length-1].v;
+  const diff = last - first;
+  const pct = (diff/first)*100;
+  const positive = diff >= 0;
+
+  // cabecera: mismo formato en ambos modos: +XXX (XX %)
+  document.getElementById("priceLabel").textContent = fmtMoney(last);
+  const pctStr = pct.toFixed(2).replace(".", ",");
+  document.getElementById("changeText").textContent =
+    (positive ? "+" : "") + fmtMoney(diff) + " (" + pctStr + " %)";
+  document.getElementById("priceDateLabel").textContent = fmtDateEs(rawSeries[rawSeries.length-1].t);
+  const changeRow = document.getElementById("changeRow");
+  changeRow.className = "change-row " + (positive ? "positive" : "negative");
+  document.getElementById("changeArrow").textContent = positive ? "↑" : "↓";
+  document.getElementById("rangePhrase").textContent = " " + (customRange ? (fmtDateEs(customRange.from) + " – " + fmtDateEs(customRange.to)) : rangeLabelText[range]);
+
+  // variaciones en la leyenda (siempre en términos absolutos del indicador, no normalizados)
+  updateExtraVariation("paroVar", paroMode, paroData, rawSeries[0].t, rawSeries[rawSeries.length-1].t,
+    (diff)=> "Paro: " + (diff>=0?"+":"") + diff.toFixed(1).replace(".",",") + " pts", true);
+  updateExtraVariation("giniVar", giniMode, giniData, rawSeries[0].t, rawSeries[rawSeries.length-1].t,
+    (diff)=> "GINI: " + (diff>=0?"+":"") + diff.toFixed(1).replace(".",",") + " pts", true);
+  updateExtraVariation("gdpVar", gdpMode, gdpData, rawSeries[0].t, rawSeries[rawSeries.length-1].t,
+    (diff,pct2)=> "PIB p.c.: " + (diff>=0?"+":"") + Math.round(diff).toLocaleString("es-ES") + " $ (" + (diff>=0?"+":"") + pct2.toFixed(1).replace(".",",") + " %)", false);
+
+  // escalas y
+  const minV = Math.min(...series.map(p=>p.v));
+  const maxV = Math.max(...series.map(p=>p.v));
+  let yStep, yMinFinal, yMaxFinal;
+  if (relativeMode === 1 || relativeMode === 2) {
+    // escala centrada en 0: rangos de variación en puntos del IBEX
+    const absMax = Math.max(Math.abs(maxV), Math.abs(minV), 100);
+    const niceSteps = [50, 100, 200, 250, 500, 1000, 2000, 2500, 5000];
+    yStep = niceSteps.find(s => absMax / s <= 5) || 5000;
+    yMinFinal = Math.floor(minV / yStep) * yStep - yStep;
+    yMaxFinal = Math.ceil(maxV / yStep) * yStep + yStep;
+    // garantizar que el 0 sea visible
+    if (yMinFinal > 0) yMinFinal = -yStep;
+    if (yMaxFinal < 0) yMaxFinal = yStep;
+  } else if (!customRange && range === "MAX"){
+    yStep = 5000; yMinFinal = 0; yMaxFinal = 20000;
+  } else {
+    const span = Math.max(maxV - minV, maxV*0.02);
+    const mag = Math.pow(10, Math.floor(Math.log10(span)));
+    const norm = span/mag;
+    if (norm < 1.5) yStep = 1*mag;
+    else if (norm < 3.5) yStep = 2*mag;
+    else if (norm < 7.5) yStep = 5*mag;
+    else yStep = 10*mag;
+    yMinFinal = Math.floor(minV/yStep)*yStep;
+    yMaxFinal = Math.ceil(maxV/yStep)*yStep;
+    if (yMinFinal === yMaxFinal) yMaxFinal = yMinFinal + yStep;
+  }
+
+  const tMin = series[0].t, tMax = series[series.length-1].t;
+  chartScale.tMin = tMin; chartScale.tMax = tMax;
+  syncDateFields(customRange ? customRange.from : tMin, customRange ? customRange.to : tMax);
+
+  // paro, GINI y GDP tienen ejes secundarios propios en ambos modos; no afectan al eje Y principal
+
+  const x = t => padL + ( (t-tMin)/(tMax-tMin) ) * plotW;
+  const y = v => padT + plotH - ( (v-yMinFinal)/(yMaxFinal-yMinFinal) ) * plotH;
+  function valueAtSeries(t){
+    if (t <= series[0].t) return series[0].v;
+    if (t >= series[series.length-1].t) return series[series.length-1].v;
+    for (let i=1;i<series.length;i++){
+      if (series[i].t >= t){
+        const a = series[i-1], b = series[i];
+        const frac = (t-a.t)/((b.t-a.t)||1);
+        return a.v + (b.v-a.v)*frac;
+      }
+    }
+    return series[series.length-1].v;
+  }
+
+  // grid + y labels
+  const gridGroup = document.getElementById("gridGroup");
+  gridGroup.innerHTML = "";
+  const gridValues = [];
+  if (relativeMode === 1 || relativeMode === 2) {
+    // en modo variación/gobierno siempre generamos ticks a partir de yMinFinal en pasos de yStep
+    for (let gv=Math.ceil(yMinFinal/yStep)*yStep; gv<=yMaxFinal; gv+=yStep) gridValues.push(gv);
+    // asegurarse de que el 0 está siempre presente
+    if (!gridValues.includes(0)) gridValues.push(0);
+  } else if (!customRange && range === "MAX"){
+    for (let gv=5000; gv<=20000; gv+=5000) gridValues.push(gv);
+  } else {
+    for (let gv=Math.ceil(yMinFinal/yStep)*yStep; gv<=yMaxFinal; gv+=yStep) gridValues.push(gv);
+  }
+  gridValues.forEach(gv=>{
+    const gy = y(gv);
+    const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+    // la línea del 0 en modo relativo/gobierno se resalta en negro sólido
+    if ((relativeMode === 1 || relativeMode === 2) && gv === 0) {
+      line.setAttribute("stroke", "#202124");
+      line.setAttribute("stroke-width", "1.5");
+      line.setAttribute("x1", padL); line.setAttribute("x2", W-padR);
+      line.setAttribute("y1", gy); line.setAttribute("y2", gy);
+    } else {
+      line.setAttribute("class","gridline");
+      line.setAttribute("x1", padL); line.setAttribute("x2", W-padR);
+      line.setAttribute("y1", gy); line.setAttribute("y2", gy);
+    }
+    gridGroup.appendChild(line);
+    const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+    label.setAttribute("class","ylabel");
+    label.setAttribute("x", 0); label.setAttribute("y", gy+4);
+    label.textContent = nf0.format(gv).replace(/,/g,".");
+    gridGroup.appendChild(label);
+  });
+
+  // x labels: ticks "bonitos" según el tipo de rango (igual criterio que Google Finance)
+  const xLabelsGroup = document.getElementById("xLabelsGroup");
+  xLabelsGroup.innerHTML = "";
+  const xLabels = [];
+  if (customRange){
+    // periodo arbitrario: elegimos el tipo de tick según la duración real seleccionada
+    const spanDays = (tMax - tMin) / (24*3600*1000);
+    if (spanDays > 730){
+      const minD = new Date(tMin);
+      const startYear = minD.getFullYear() + (minD.getMonth()===11 ? 1 : 0);
+      const maxYear = new Date(tMax).getFullYear();
+      const span = Math.max(1, maxYear - startYear);
+      const niceSteps = [1,2,5,10,20,25,50];
+      const rawStep = span/5;
+      const step = niceSteps.find(s=>s>=rawStep) || 50;
+      const yrs = [];
+      for (let yr=maxYear; yr>=startYear; yr-=step) yrs.unshift(yr);
+      if (yrs.length===0 || yrs[0] !== startYear) yrs.unshift(startYear);
+      yrs.forEach(yr=>{
+        const t = Math.max(tMin, new Date(yr+"-06-01").getTime());
+        if (t<=tMax) xLabels.push({t, text: String(yr)});
+      });
+    } else if (spanDays > 80){
+      const months = [];
+      let d = new Date(tMin); d.setDate(1); d.setHours(0,0,0,0);
+      if (d.getTime() < tMin) d.setMonth(d.getMonth()+1);
+      while (d.getTime() <= tMax){ months.push(new Date(d)); d.setMonth(d.getMonth()+1); }
+      const targetCount = 4;
+      const step = Math.max(1, Math.round(months.length/targetCount));
+      const picked = [];
+      for (let i=months.length-1; i>=0; i-=step) picked.unshift(months[i]);
+      picked.forEach(md=>{
+        xLabels.push({ t: md.getTime(), text: MONTH_ABBR[md.getMonth()] + " " + md.getFullYear() });
+      });
+    } else {
+      const count = 4;
+      for (let i=1;i<=count;i++){
+        const t = tMin + (tMax-tMin)*(i/(count+1));
+        const d = new Date(t);
+        xLabels.push({ t, text: d.getDate() + " " + MONTH_ABBR[d.getMonth()] + (spanDays>30 ? " " + d.getFullYear() : "") });
+      }
+    }
+  } else if (range === "MAX"){
+    const minD = new Date(tMin);
+    const startYear = minD.getFullYear() + (minD.getMonth()===11 ? 1 : 0); // 31-dic se trata como año siguiente
+    const maxYear = new Date(tMax).getFullYear();
+    const span = maxYear - startYear;
+    const niceSteps = [5,10,20,25,50];
+    const rawStep = span/4;
+    const step = niceSteps.find(s=>s>=rawStep) || 50;
+    const yrs = [];
+    for (let yr=maxYear; yr>=startYear; yr-=step) yrs.unshift(yr);
+    if (yrs[0] !== startYear) yrs.unshift(startYear);
+    yrs.forEach(yr=>{
+      const t = Math.max(tMin, new Date(yr+"-06-01").getTime());
+      if (t<=tMax) xLabels.push({t, text: String(yr)});
+    });
+  } else if (range === "YTD" || range === "6M"){
+    // ticks en el día 1 de cada mes, contando hacia atrás desde el más reciente
+    const months = [];
+    let d = new Date(tMin); d.setDate(1); d.setHours(0,0,0,0);
+    if (d.getTime() < tMin) d.setMonth(d.getMonth()+1);
+    while (d.getTime() <= tMax){ months.push(new Date(d)); d.setMonth(d.getMonth()+1); }
+    const targetCount = 3;
+    const step = Math.max(1, Math.round(months.length/targetCount));
+    const picked = [];
+    for (let i=months.length-1; i>=0; i-=step) picked.unshift(months[i]);
+    picked.forEach(md=>{
+      const text = range==="YTD"
+        ? MONTH_ABBR[md.getMonth()] + " " + md.getFullYear()
+        : MONTH_ABBR[md.getMonth()];
+      xLabels.push({ t: md.getTime(), text });
+    });
+  } else if (range === "1M" || range === "5D"){
+    const count = 4;
+    for (let i=1;i<=count;i++){
+      const t = tMin + (tMax-tMin)*(i/(count+1));
+      const d = new Date(t);
+      xLabels.push({ t, text: d.getDate() + " " + MONTH_ABBR[d.getMonth()] });
+    }
+  } else if (range === "1D"){
+    const count = 4;
+    for (let i=1;i<=count;i++){
+      const t = tMin + (tMax-tMin)*(i/(count+1));
+      xLabels.push({ t, text: new Date(t).toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"}) });
+    }
+  }
+  xLabels.forEach(l=>{
+    const lx = x(l.t);
+    const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+    label.setAttribute("class","xlabel");
+    label.setAttribute("x", lx); label.setAttribute("y", H-10);
+    label.setAttribute("text-anchor","middle");
+    label.textContent = l.text;
+    xLabelsGroup.appendChild(label);
+  });
+
+  // path
+  let d = "";
+  series.forEach((p,i)=>{
+    const cmd = i===0 ? "M" : "L";
+    d += cmd + x(p.t).toFixed(2) + "," + y(p.v).toFixed(2) + " ";
+  });
+
+  // en modo relativo el área se cierra sobre la línea del 0, no sobre el borde inferior
+  const zeroY = (relativeMode === 1 || relativeMode === 2) ? y(0) : (padT + plotH);
+  const areaD = d + `L${x(series[series.length-1].t).toFixed(2)},${zeroY.toFixed(2)} L${x(series[0].t).toFixed(2)},${zeroY.toFixed(2)} Z`;
+
+  const linePath = document.getElementById("linePath");
+  const areaPath = document.getElementById("areaPath");
+  const endDot = document.getElementById("endDot");
+  const govAreaGroup = document.getElementById("govAreaGroup");
+  const govLineGroup = document.getElementById("govLineGroup");
+
+  if (govMode){
+    linePath.style.display = "none";
+    areaPath.style.display = "none";
+    govAreaGroup.style.display = "";
+    govLineGroup.style.display = "";
+    govAreaGroup.innerHTML = "";
+    govLineGroup.innerHTML = "";
+    // construir segmentos partidos por la fecha exacta de cambio de gobierno
+    let segPoints = [series[0]];
+    let segParty = partyAt(series[0].t);
+    for (let i=1;i<series.length;i++){
+      const p = series[i];
+      const party = partyAt(p.t);
+      if (party === segParty){
+        segPoints.push(p);
+      } else {
+        // insertar un punto interpolado exactamente en la fecha de transición para que no haya hueco
+        const prev = series[i-1];
+        const boundary = govPeriods.find(gp => gp.from > prev.t && gp.from <= p.t);
+        const bt = boundary ? boundary.from : p.t;
+        const frac = (bt - prev.t) / (p.t - prev.t || 1);
+        const bv = prev.v + (p.v - prev.v) * frac;
+        segPoints.push({ t: bt, v: bv });
+        drawGovSegment(segPoints, segParty);
+        segPoints = [{ t: bt, v: bv }, p];
+        segParty = party;
+      }
+    }
+    drawGovSegment(segPoints, segParty);
+    endDot.setAttribute("class", "end-dot " + segParty);
+  } else {
+    linePath.style.display = "";
+    areaPath.style.display = "";
+    govAreaGroup.style.display = "none";
+    govLineGroup.style.display = "none";
+    areaPath.setAttribute("d", areaD);
+    linePath.setAttribute("d", d);
+    linePath.classList.toggle("negative-line", !positive);
+    areaPath.className = (relativeMode === 1 || relativeMode === 2) ? "area-path neutral" : "area-path";
+    endDot.setAttribute("class", "end-dot " + (positive ? "" : "negative-line"));
+  }
+  function drawGovSegment(pts, party){
+    if (pts.length < 2) return;
+    let dd = "";
+    pts.forEach((p,i)=>{ dd += (i===0?"M":"L") + x(p.t).toFixed(2) + "," + y(p.v).toFixed(2) + " "; });
+    const areaDD = dd + `L${x(pts[pts.length-1].t).toFixed(2)},${padT+plotH} L${x(pts[0].t).toFixed(2)},${padT+plotH} Z`;
+    const areaSeg = document.createElementNS("http://www.w3.org/2000/svg","path");
+    areaSeg.setAttribute("class","gov-area "+party);
+    areaSeg.setAttribute("d", areaDD);
+    govAreaGroup.appendChild(areaSeg);
+    const lineSeg = document.createElementNS("http://www.w3.org/2000/svg","path");
+    lineSeg.setAttribute("class","gov-line "+party);
+    lineSeg.setAttribute("d", dd);
+    govLineGroup.appendChild(lineSeg);
+  }
+  endDot.setAttribute("cx", x(series[series.length-1].t));
+  endDot.setAttribute("cy", y(series[series.length-1].v));
+
+  // info adicional: eventos económicos + nombres informales de los presidentes
+  const infoGroup = document.getElementById("infoGroup");
+  infoGroup.innerHTML = "";
+  if (infoMode){
+    const svgNS = "http://www.w3.org/2000/svg";
+    // presidentes: nombre centrado en el tramo visible de cada mandato, dentro de la gráfica.
+    // Felipe conserva su altura natural (pegada a su tramo); el resto se alinea a esa misma altura.
+    let sharedTy = null;
+    govPeriods.forEach((p, idx)=>{
+      const from = Math.max(p.from, tMin), to = Math.min(p.to, tMax);
+      if (to <= from) return;
+      const cx = (x(from)+x(to))/2;
+      let ty;
+      if (idx === 0 || sharedTy === null){
+        const segVals = series.filter(pt => pt.t>=from && pt.t<=to).map(pt=>pt.v);
+        const segMax = segVals.length ? Math.max(...segVals) : valueAtSeries(from);
+        ty = Math.min(Math.max(y(segMax) - 12, padT + 12), padT + plotH - 10);
+        if (idx === 0) sharedTy = ty;
+      } else {
+        ty = sharedTy;
+      }
+      const color = p.party==="psoe" ? "var(--psoe-red)" : "var(--pp-blue)";
+      const txt = document.createElementNS(svgNS,"text");
+      txt.setAttribute("x", cx); txt.setAttribute("y", ty);
+      txt.setAttribute("text-anchor","middle");
+      txt.setAttribute("font-size","12.5");
+      txt.setAttribute("font-weight","700");
+      txt.setAttribute("fill", color);
+      txt.textContent = p.name;
+      infoGroup.appendChild(txt);
+      const tw = txt.getBBox().width;
+      const bg = document.createElementNS(svgNS,"rect");
+      bg.setAttribute("x", cx-tw/2-5); bg.setAttribute("y", ty-12);
+      bg.setAttribute("width", tw+10); bg.setAttribute("height", 16);
+      bg.setAttribute("rx", 4);
+      bg.setAttribute("fill", "#ffffff");
+      bg.setAttribute("opacity","0.85");
+      infoGroup.insertBefore(bg, txt);
+    });
+    // eventos económicos: línea de referencia + etiqueta. Negativos siempre abajo, positivos siempre arriba.
+    const visibleEvents = econEvents.filter(ev => ev.t>=tMin && ev.t<=tMax);
+    const prevRight = [-Infinity, -Infinity];
+    visibleEvents.forEach(ev=>{
+      const isBoom = ev.type === "boom";
+      const lineColor = isBoom ? "#188038" : "#5f6368";
+      const ex = x(ev.t);
+      const row = isBoom ? 1 : 0; // 0 = fila inferior (crisis), 1 = fila superior (eventos positivos)
+      const isMultiline = ev.label.length > 1;
+      const ty = row===0 ? (padT + plotH - 8) : (padT + plotH - (isMultiline ? 30 : 27));
+      const line = document.createElementNS(svgNS,"line");
+      line.setAttribute("x1", ex); line.setAttribute("x2", ex);
+      line.setAttribute("y1", padT); line.setAttribute("y2", padT+plotH);
+      line.setAttribute("stroke", lineColor);
+      line.setAttribute("stroke-width","1");
+      line.setAttribute("stroke-dasharray","2 3");
+      line.setAttribute("opacity","0.6");
+      infoGroup.appendChild(line);
+
+      // etiqueta de una o dos líneas con <tspan>
+      const lineH = 12; // separación entre líneas
+      const txt = document.createElementNS(svgNS,"text");
+      txt.setAttribute("text-anchor","middle");
+      txt.setAttribute("font-size","10.5");
+      txt.setAttribute("font-weight","500");
+      txt.setAttribute("fill", isBoom ? "#188038" : "#3c4043");
+      const tyFirst = isMultiline ? ty - lineH/2 : ty;
+      ev.label.forEach((line, li)=>{
+        const ts = document.createElementNS(svgNS,"tspan");
+        ts.setAttribute("x","0"); // placeholder, repositioned after measurement
+        ts.setAttribute("dy", li===0 ? "0" : lineH+"px");
+        ts.textContent = line;
+        txt.appendChild(ts);
+      });
+      txt.setAttribute("y", tyFirst);
+      infoGroup.appendChild(txt);
+      // medir el ancho real del texto ya en el DOM
+      const bbox = txt.getBBox();
+      const tw = bbox.width;
+      const th = bbox.height;
+      const approxW = tw + 12;
+      let labelCx = Math.min(Math.max(ex, padL + approxW/2), W - padR - approxW/2);
+      if (labelCx - approxW/2 < prevRight[row] + 4) labelCx = prevRight[row] + 4 + approxW/2;
+      prevRight[row] = labelCx + approxW/2;
+      // reposicionar texto medido
+      txt.querySelectorAll("tspan").forEach(ts => ts.setAttribute("x", labelCx));
+      const bgTop = isMultiline ? tyFirst - 13 : ty - 13;
+      const bgH   = isMultiline ? th + 6 : 16;
+      const bg = document.createElementNS(svgNS,"rect");
+      bg.setAttribute("x", labelCx - approxW/2); bg.setAttribute("y", bgTop);
+      bg.setAttribute("width", approxW); bg.setAttribute("height", bgH);
+      bg.setAttribute("rx", 4);
+      bg.setAttribute("fill", isBoom ? "#e6f4ea" : "#f1f3f4");
+      bg.setAttribute("opacity","0.95");
+      infoGroup.insertBefore(bg, txt);
+    });
+  }
+
+  // líneas de tendencia: une el nivel del IBEX al inicio y al final de cada mandato visible
+  const trendGroup = document.getElementById("trendGroup");
+  trendGroup.innerHTML = "";
+  if (trendMode){
+    const svgNS = "http://www.w3.org/2000/svg";
+    govPeriods.forEach(p=>{
+      const from = Math.max(p.from, tMin), to = Math.min(p.to, tMax);
+      if (to <= from) return;
+      const v1 = valueAtSeries(from), v2 = valueAtSeries(to);
+      const seg = document.createElementNS(svgNS,"line");
+      seg.setAttribute("class","trend-line "+p.party);
+      seg.setAttribute("x1", x(from)); seg.setAttribute("y1", y(v1));
+      seg.setAttribute("x2", x(to));   seg.setAttribute("y2", y(v2));
+      trendGroup.appendChild(seg);
+      [[from,v1],[to,v2]].forEach(([t,v])=>{
+        const dot = document.createElementNS(svgNS,"circle");
+        dot.setAttribute("class","trend-dot "+p.party);
+        dot.setAttribute("cx", x(t)); dot.setAttribute("cy", y(v));
+        dot.setAttribute("r", 4);
+        trendGroup.appendChild(dot);
+      });
+    });
+  }
+
+  // (paro, GINI y GDP: en modo 2 comparten el eje Y principal con base 0 por gobierno)
+
+  // helper genérico: dado un dataset anual, devuelve el valor en el inicio del gobierno de t
+  function govBaseForDataset(dataArr, t){
+    let gov = govPeriods.find(p => t >= p.from && t < p.to);
+    if (!gov) gov = govPeriods[0];
+    const baseT = Math.max(gov.from, dataArr[0].t);
+    let best = dataArr[0], minD = Infinity;
+    for (const p of dataArr){ const d = Math.abs(p.t - baseT); if (d < minD){ minD = d; best = p; } }
+    return best.v;
+  }
+
+  // helper: transforma un dataset en modo "por gobierno" insertando saltos a 0 en cada cambio de mandato
+  // Devuelve segmentos separados (arrays de puntos) para poder dibujar con "M" al inicio de cada uno
+  function byGovSegments(dataArr){
+    const transformed = dataArr.map(p => ({ t: p.t, v: p.v - govBaseForDataset(dataArr, p.t) }));
+    // insertar punto a 0 justo en cada frontera de gobierno (entre el último punto del mandato anterior
+    // y el primero del nuevo) para que la línea baje visualmente hasta el eje en la transición
+    const pts = [];
+    for (let i = 0; i < transformed.length; i++){
+      // detectar si entre este punto y el anterior cambia el gobierno
+      if (i > 0){
+        const prevGov = govPeriods.find(p => transformed[i-1].t >= p.from && transformed[i-1].t < p.to) || govPeriods[0];
+        const currGov = govPeriods.find(p => transformed[i].t >= p.from && transformed[i].t < p.to) || govPeriods[govPeriods.length-1];
+        if (prevGov !== currGov){
+          // punto de cierre del gobierno anterior (en el tiempo de inicio del nuevo gobierno, valor 0)
+          pts.push({ t: currGov.from, v: 0, jump: true });
+        }
+      }
+      pts.push(transformed[i]);
+    }
+    return pts;
+  }
+
+  // helper: construye el path SVG a partir de los puntos con saltos (jump=true reinicia con M)
+  function buildPathWithJumps(pts, xFn, yFn){
+    let dd = "";
+    pts.forEach((p, i) => {
+      const cmd = (i === 0 || p.jump) ? "M" : "L";
+      dd += cmd + xFn(p.t).toFixed(2) + "," + yFn(p.v).toFixed(2) + " ";
+    });
+    return dd;
+  }
+
+  // tasa de paro
+  const paroGroup = document.getElementById("paroGroup");
+  paroGroup.innerHTML = "";
+  if (paroMode){
+    const svgNS = "http://www.w3.org/2000/svg";
+    if (relativeMode === 2){
+      // eje propio centrado en 0, donde ±15 puntos porcentuales ocupan todo el alto del gráfico
+      // el píxel del 0 coincide con y(0) del eje principal
+      const paroRange = 15; // ±15 pp cubre el máximo histórico de variación dentro de un gobierno
+      const yParo = v => y(0) - (v / paroRange) * (plotH / 2);
+      const pts = byGovSegments(paroData).filter(p => p.t>=tMin && p.t<=tMax);
+      if (pts.length){
+        const dd = buildPathWithJumps(pts, x, yParo);
+        const line = document.createElementNS(svgNS,"path");
+        line.setAttribute("class","paro-line"); line.setAttribute("d", dd);
+        paroGroup.appendChild(line);
+        pts.filter(p=>!p.jump).forEach(p=>{
+          const dot = document.createElementNS(svgNS,"circle");
+          dot.setAttribute("class","paro-dot");
+          dot.setAttribute("cx", x(p.t)); dot.setAttribute("cy", yParo(p.v)); dot.setAttribute("r", 2.5);
+          paroGroup.appendChild(dot);
+        });
+      }
+      // etiquetas del eje secundario de paro en modo 2
+      [-15,-10,-5,0,5,10,15].forEach(v=>{
+        const ly = yParo(v);
+        if (ly < padT || ly > padT+plotH) return;
+        const txt = document.createElementNS(svgNS,"text");
+        txt.setAttribute("x", W - padR + 4); txt.setAttribute("y", ly + 3);
+        txt.setAttribute("class","paro-axis-label");
+        txt.textContent = (v>0?"+":"") + v + "pp";
+        paroGroup.appendChild(txt);
+      });
+    } else {
+      // modos 0 y 1: eje secundario propio (0-30%)
+      const paroMin = 0, paroMax = 30;
+      const y2 = v => padT + plotH - ( (v-paroMin)/(paroMax-paroMin) ) * plotH;
+      const visibleParo = paroData.filter(p => p.t>=tMin && p.t<=tMax);
+      if (visibleParo.length){
+        let dd = "";
+        visibleParo.forEach((p,i)=>{ dd += (i===0?"M":"L") + x(p.t).toFixed(2) + "," + y2(p.v).toFixed(2) + " "; });
+        const line = document.createElementNS(svgNS,"path");
+        line.setAttribute("class","paro-line"); line.setAttribute("d", dd);
+        paroGroup.appendChild(line);
+        visibleParo.forEach(p=>{
+          const dot = document.createElementNS(svgNS,"circle");
+          dot.setAttribute("class","paro-dot");
+          dot.setAttribute("cx", x(p.t)); dot.setAttribute("cy", y2(p.v)); dot.setAttribute("r", 2.5);
+          paroGroup.appendChild(dot);
+        });
+      }
+      [0,10,20,30].forEach(v=>{
+        const ly = y2(v);
+        const txt = document.createElementNS(svgNS,"text");
+        txt.setAttribute("x", W - padR + 4); txt.setAttribute("y", ly + 3);
+        txt.setAttribute("class","paro-axis-label");
+        txt.textContent = v + "%";
+        paroGroup.appendChild(txt);
+      });
+    }
+  }
+
+  // índice GINI
+  const giniGroup = document.getElementById("giniGroup");
+  giniGroup.innerHTML = "";
+  if (giniMode){
+    const svgNS = "http://www.w3.org/2000/svg";
+    if (relativeMode === 2){
+      // eje propio centrado en 0, donde ±8 puntos GINI ocupan todo el alto del gráfico
+      const giniRange = 8;
+      const yGini = v => y(0) - (v / giniRange) * (plotH / 2);
+      const pts = byGovSegments(giniData).filter(p => p.t>=tMin && p.t<=tMax);
+      if (pts.length){
+        const dd = buildPathWithJumps(pts, x, yGini);
+        const line = document.createElementNS(svgNS,"path");
+        line.setAttribute("class","gini-line"); line.setAttribute("d", dd);
+        giniGroup.appendChild(line);
+        pts.filter(p=>!p.jump).forEach(p=>{
+          const dot = document.createElementNS(svgNS,"circle");
+          dot.setAttribute("class","gini-dot");
+          dot.setAttribute("cx", x(p.t)); dot.setAttribute("cy", yGini(p.v)); dot.setAttribute("r", 2.5);
+          giniGroup.appendChild(dot);
+        });
+      }
+      // etiquetas del eje secundario de GINI en modo 2
+      [-8,-4,0,4,8].forEach(v=>{
+        const ly = yGini(v);
+        if (ly < padT || ly > padT+plotH) return;
+        const txt = document.createElementNS(svgNS,"text");
+        txt.setAttribute("x", W - padR + 36); txt.setAttribute("y", ly + 3);
+        txt.setAttribute("class","gini-axis-label");
+        txt.textContent = (v>0?"+":"") + v;
+        giniGroup.appendChild(txt);
+      });
+    } else {
+      // modos 0 y 1: eje secundario propio (25-40)
+      const giniMin = 25, giniMax = 40;
+      const y2 = v => padT + plotH - ( (v-giniMin)/(giniMax-giniMin) ) * plotH;
+      const visibleGini = giniData.filter(p => p.t>=tMin && p.t<=tMax);
+      if (visibleGini.length){
+        let dd = "";
+        visibleGini.forEach((p,i)=>{ dd += (i===0?"M":"L") + x(p.t).toFixed(2) + "," + y2(p.v).toFixed(2) + " "; });
+        const line = document.createElementNS(svgNS,"path");
+        line.setAttribute("class","gini-line"); line.setAttribute("d", dd);
+        giniGroup.appendChild(line);
+        visibleGini.forEach(p=>{
+          const dot = document.createElementNS(svgNS,"circle");
+          dot.setAttribute("class","gini-dot");
+          dot.setAttribute("cx", x(p.t)); dot.setAttribute("cy", y2(p.v)); dot.setAttribute("r", 2.5);
+          giniGroup.appendChild(dot);
+        });
+      }
+      [25,30,35,40].forEach(v=>{
+        const ly = y2(v);
+        const txt = document.createElementNS(svgNS,"text");
+        txt.setAttribute("x", W - padR + 36); txt.setAttribute("y", ly + 3);
+        txt.setAttribute("class","gini-axis-label");
+        txt.textContent = v;
+        giniGroup.appendChild(txt);
+      });
+    }
+  }
+
+  // PIB per cápita PPA
+  const gdpGroup = document.getElementById("gdpGroup");
+  gdpGroup.innerHTML = "";
+  if (gdpMode && gdpData.length){
+    const svgNS = "http://www.w3.org/2000/svg";
+    if (relativeMode === 1){
+      // variación anual: cada punto menos el anterior + media móvil ventana 3, eje secundario propio
+      const gdpDiff = gdpData.map((p,i) => ({ t: p.t, v: i===0 ? 0 : p.v - gdpData[i-1].v }));
+      const gdpSmooth = applyMovingAverage(gdpDiff, 3);
+      const visibleGdp = gdpSmooth.filter(p => p.t>=tMin && p.t<=tMax);
+      if (visibleGdp.length){
+        const vals = visibleGdp.map(p=>p.v);
+        const absMax = Math.max(Math.abs(Math.min(...vals)), Math.abs(Math.max(...vals)), 500);
+        const gdpMin2 = -absMax * 1.1, gdpMax2 = absMax * 1.1;
+        const y2 = v => padT + plotH - ( (v-gdpMin2)/(gdpMax2-gdpMin2) ) * plotH;
+        let dd = "";
+        visibleGdp.forEach((p,i)=>{ dd += (i===0?"M":"L") + x(p.t).toFixed(2) + "," + y2(p.v).toFixed(2) + " "; });
+        const line = document.createElementNS(svgNS,"path");
+        line.setAttribute("class","gdp-line"); line.setAttribute("d", dd);
+        gdpGroup.appendChild(line);
+        visibleGdp.forEach(p=>{
+          const dot = document.createElementNS(svgNS,"circle");
+          dot.setAttribute("class","gdp-dot");
+          dot.setAttribute("cx", x(p.t)); dot.setAttribute("cy", y2(p.v)); dot.setAttribute("r", 2.5);
+          gdpGroup.appendChild(dot);
+        });
+        [gdpMin2*0.6, 0, gdpMax2*0.6].forEach(v=>{
+          const ly = y2(v);
+          const txt = document.createElementNS(svgNS,"text");
+          txt.setAttribute("x", W - padR + 68); txt.setAttribute("y", ly + 3);
+          txt.setAttribute("class","gdp-axis-label");
+          txt.textContent = (v>=0?"+":"") + Math.round(v/1000*10)/10 + "k$";
+          gdpGroup.appendChild(txt);
+        });
+      }
+    } else if (relativeMode === 2){
+      // modo por gobierno: eje principal compartido (y), saltos a 0 en cada cambio de mandato
+      const pts = byGovSegments(gdpData).filter(p => p.t>=tMin && p.t<=tMax);
+      if (pts.length){
+        const dd = buildPathWithJumps(pts, x, y);
+        const line = document.createElementNS(svgNS,"path");
+        line.setAttribute("class","gdp-line"); line.setAttribute("d", dd);
+        gdpGroup.appendChild(line);
+        pts.filter(p=>!p.jump).forEach(p=>{
+          const dot = document.createElementNS(svgNS,"circle");
+          dot.setAttribute("class","gdp-dot");
+          dot.setAttribute("cx", x(p.t)); dot.setAttribute("cy", y(p.v)); dot.setAttribute("r", 2.5);
+          gdpGroup.appendChild(dot);
+        });
+      }
+    } else {
+      const visibleGdp = gdpData.filter(p => p.t>=tMin && p.t<=tMax);
+      if (visibleGdp.length){
+        const vals = visibleGdp.map(p=>p.v);
+        const gdpMin = Math.min(...vals)*0.95, gdpMax = Math.max(...vals)*1.05;
+        const y2 = v => padT + plotH - ( (v-gdpMin)/(gdpMax-gdpMin) ) * plotH;
+        let dd = "";
+        visibleGdp.forEach((p,i)=>{ dd += (i===0?"M":"L") + x(p.t).toFixed(2) + "," + y2(p.v).toFixed(2) + " "; });
+        const line = document.createElementNS(svgNS,"path");
+        line.setAttribute("class","gdp-line");
+        line.setAttribute("d", dd);
+        gdpGroup.appendChild(line);
+        visibleGdp.forEach(p=>{
+          const dot = document.createElementNS(svgNS,"circle");
+          dot.setAttribute("class","gdp-dot");
+          dot.setAttribute("cx", x(p.t)); dot.setAttribute("cy", y2(p.v));
+          dot.setAttribute("r", 2.5);
+          gdpGroup.appendChild(dot);
+        });
+        [gdpMin, (gdpMin+gdpMax)/2, gdpMax].forEach(v=>{
+          const ly = y2(v);
+          const txt = document.createElementNS(svgNS,"text");
+          txt.setAttribute("x", W - padR + 68); txt.setAttribute("y", ly + 3);
+          txt.setAttribute("class","gdp-axis-label");
+          txt.textContent = Math.round(v/1000) + "k";
+          gdpGroup.appendChild(txt);
+        });
+      }
+    }
+  }
+
+  // hover interaction
+  const hoverLine = document.getElementById("hoverLine");
+  const hoverDot = document.getElementById("hoverDot");
+  const tooltip = document.getElementById("tooltip");
+  hoverLine.setAttribute("y1", padT);
+  hoverLine.setAttribute("y2", padT+plotH);
+
+  svg.onmousemove = function(evt){
+    if (dragState.active){ hideHover(); return; }
+    const rect = svg.getBoundingClientRect();
+    const scaleX = W/rect.width;
+    const mx = (evt.clientX - rect.left) * scaleX;
+    if (mx < padL || mx > W-padR){ hideHover(); return; }
+    const t = tMin + ( (mx-padL)/plotW ) * (tMax-tMin);
+    let nearest = series[0], minDist = Infinity;
+    for (const p of series){
+      const dist = Math.abs(p.t - t);
+      if (dist < minDist){ minDist = dist; nearest = p; }
+    }
+    const px = x(nearest.t), py = y(nearest.v);
+    hoverLine.setAttribute("x1", px); hoverLine.setAttribute("x2", px);
+    hoverLine.style.opacity = 1;
+    hoverDot.setAttribute("cx", px); hoverDot.setAttribute("cy", py);
+    hoverDot.style.opacity = 1;
+    const rectWrap = document.getElementById("chartWrap").getBoundingClientRect();
+    const ttX = (px/W) * rectWrap.width;
+    const ttY = (py/H) * rectWrap.height;
+    tooltip.style.left = ttX + "px";
+    tooltip.style.top = ttY + "px";
+    const dateStr = new Date(nearest.t).toLocaleDateString("es-ES",{day:"2-digit",month:"short",year:"numeric"});
+    let ttHtml;
+    if (relativeMode === 1) {
+      const sign = nearest.v >= 0 ? "+" : "";
+      ttHtml = dateStr + "<br>" + sign + fmtMoney(nearest.v) + " pts";
+    } else if (relativeMode === 2) {
+      const sign = nearest.v >= 0 ? "+" : "";
+      const gov = govPeriods.find(p => nearest.t >= p.from && nearest.t < p.to) || govPeriods[govPeriods.length-1];
+      ttHtml = dateStr + "<br>" + sign + fmtMoney(nearest.v) + " pts desde " + gov.name;
+    } else {
+      ttHtml = dateStr + "<br>" + fmtMoney(nearest.v);
+    }
+    if (paroMode){
+      const pv = valueAtGeneric(paroData, nearest.t);
+      if (pv !== null) {
+        if (relativeMode === 2){
+          const base2 = govBaseForDataset(paroData, nearest.t);
+          const gov = govPeriods.find(p => nearest.t >= p.from && nearest.t < p.to) || govPeriods[govPeriods.length-1];
+          ttHtml += "<br><span class='tt-paro'>Paro: " + (pv-base2>=0?"+":"") + (pv-base2).toFixed(1).replace(".",",") + " pts desde " + gov.name + "</span>";
+        } else {
+          ttHtml += "<br><span class='tt-paro'>Paro: " + pv.toFixed(1).replace(".",",") + " %</span>";
+        }
+      }
+    }
+    if (giniMode){
+      const gv = valueAtGeneric(giniData, nearest.t);
+      if (gv !== null) {
+        if (relativeMode === 2){
+          const base2 = govBaseForDataset(giniData, nearest.t);
+          const gov = govPeriods.find(p => nearest.t >= p.from && nearest.t < p.to) || govPeriods[govPeriods.length-1];
+          ttHtml += "<br><span class='tt-gini'>GINI: " + (gv-base2>=0?"+":"") + (gv-base2).toFixed(1).replace(".",",") + " pts desde " + gov.name + "</span>";
+        } else {
+          ttHtml += "<br><span class='tt-gini'>GINI: " + gv.toFixed(1).replace(".",",") + "</span>";
+        }
+      }
+    }
+    if (gdpMode){
+      const dv = valueAtGeneric(gdpData, nearest.t);
+      if (dv !== null) {
+        if (relativeMode === 1){
+          // variación respecto al dato anual anterior
+          const idx = gdpData.findIndex(p => p.t > nearest.t);
+          const prev = idx > 0 ? gdpData[idx-1] : gdpData[0];
+          const diff2 = dv - prev.v;
+          ttHtml += "<br><span class='tt-gdp'>PIB p.c.: " + (diff2>=0?"+":"") + Math.round(diff2).toLocaleString("es-ES") + " $/año</span>";
+        } else if (relativeMode === 2){
+          const base2 = govBaseForDataset(gdpData, nearest.t);
+          const diff2 = dv - base2;
+          const gov = govPeriods.find(p => nearest.t >= p.from && nearest.t < p.to) || govPeriods[govPeriods.length-1];
+          ttHtml += "<br><span class='tt-gdp'>PIB p.c.: " + (diff2>=0?"+":"") + Math.round(diff2).toLocaleString("es-ES") + " $ desde " + gov.name + "</span>";
+        } else {
+          ttHtml += "<br><span class='tt-gdp'>PIB p.c. PPA: " + Math.round(dv).toLocaleString("es-ES") + " $</span>";
+        }
+      }
+    }
+    tooltip.innerHTML = ttHtml;
+    tooltip.style.opacity = 1;
+  };
+  svg.onmouseleave = hideHover;
+  function hideHover(){
+    hoverLine.style.opacity = 0;
+    hoverDot.style.opacity = 0;
+    tooltip.style.opacity = 0;
+  }
+}
+
+/* ========== 7. (sin botones de rango: el panel de fechas siempre visible los sustituye) ========== */
+function paintButtons(activeKey){
+  document.querySelectorAll(".range-btn").forEach(b=>{
+    b.classList.toggle("active", b.dataset.key === activeKey);
+  });
+}
+
+/* ========== 8. TOGGLE "COLOREAR POR GOBIERNO" ========== */
+const govToggleBtn = document.getElementById("govToggleBtn");
+const govLegend = document.getElementById("govLegend");
+govToggleBtn.addEventListener("click", ()=>{
+  govMode = !govMode;
+  govToggleBtn.classList.toggle("active", govMode);
+  govLegend.style.visibility = govMode ? "visible" : "hidden";
+  render(currentRange);
+});
+
+const infoToggleBtn = document.getElementById("infoToggleBtn");
+infoToggleBtn.addEventListener("click", ()=>{
+  infoMode = !infoMode;
+  infoToggleBtn.classList.toggle("active", infoMode);
+  render(currentRange);
+});
+
+const trendToggleBtn = document.getElementById("trendToggleBtn");
+trendToggleBtn.addEventListener("click", ()=>{
+  trendMode = !trendMode;
+  trendToggleBtn.classList.toggle("active", trendMode);
+  render(currentRange);
+});
+
+const paroToggleBtn = document.getElementById("paroToggleBtn");
+const paroLegend = document.getElementById("paroLegend");
+paroToggleBtn.addEventListener("click", ()=>{
+  paroMode = !paroMode;
+  paroToggleBtn.classList.toggle("active", paroMode);
+  paroLegend.style.visibility = paroMode ? "visible" : "hidden";
+  render(currentRange);
+});
+
+const giniToggleBtn = document.getElementById("giniToggleBtn");
+const giniLegend = document.getElementById("giniLegend");
+giniToggleBtn.addEventListener("click", ()=>{
+  giniMode = !giniMode;
+  giniToggleBtn.classList.toggle("active", giniMode);
+  giniLegend.style.visibility = giniMode ? "visible" : "hidden";
+  render(currentRange);
+});
+
+const gdpToggleBtn = document.getElementById("gdpToggleBtn");
+const gdpLegend = document.getElementById("gdpLegend");
+if (!gdpData.length){
+  // red de seguridad por si en el futuro se vacía el array: el botón se desactiva solo, en vez de romperse
+  gdpToggleBtn.disabled = true;
+  gdpToggleBtn.title = "PIB per cápita PPA (pendiente de datos)";
+}
+gdpToggleBtn.addEventListener("click", ()=>{
+  if (!gdpData.length) return;
+  gdpMode = !gdpMode;
+  gdpToggleBtn.classList.toggle("active", gdpMode);
+  gdpLegend.style.visibility = gdpMode ? "visible" : "hidden";
+  render(currentRange);
+});
+
+/* ========== 9. PERIODO PERSONALIZADO (panel de fechas, siempre visible, + arrastre sobre el gráfico) ========== */
+const customRangePanel = document.getElementById("customRangePanel");
+const customFromInput = document.getElementById("customFrom");
+const customToInput = document.getElementById("customTo");
+const customApplyBtn = document.getElementById("customApplyBtn");
+const customResetBtn = document.getElementById("customResetBtn");
+const dragSelection = document.getElementById("dragSelection");
+let dragState = { active:false, startMx:0 };
+let editingDateFields = false; // evita que el auto-sync pise lo que el usuario está escribiendo
+
+function dateStrToTs(s){ return new Date(s+"T00:00:00").getTime(); }
+function tsToDateStr(t){
+  const d = new Date(t);
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+// mantiene los campos de fecha sincronizados con lo que se ve en cada momento (preset YTD o periodo personalizado)
+function syncDateFields(tMin, tMax){
+  if (editingDateFields) return;
+  customFromInput.value = tsToDateStr(tMin);
+  customToInput.value = tsToDateStr(tMax);
+}
+[customFromInput, customToInput].forEach(inp=>{
+  inp.addEventListener("focus", ()=> editingDateFields = true);
+  inp.addEventListener("blur", ()=> editingDateFields = false);
+});
+
+function applyCustomRange(fromTs, toTs){
+  if (toTs < fromTs){ const tmp=fromTs; fromTs=toTs; toTs=tmp; }
+  const minBound = anchors[0].t, maxBound = LAST_DATE.getTime();
+  fromTs = Math.max(minBound, Math.min(fromTs, maxBound));
+  toTs = Math.max(minBound, Math.min(toTs, maxBound));
+  customRange = { from: fromTs, to: toTs };
+  customFromInput.value = tsToDateStr(fromTs);
+  customToInput.value = tsToDateStr(toTs);
+  paintButtons(null);
+  render(currentRange);
+}
+
+customApplyBtn.addEventListener("click", ()=>{
+  if (!customFromInput.value || !customToInput.value) return;
+  applyCustomRange(dateStrToTs(customFromInput.value), dateStrToTs(customToInput.value));
+});
+customResetBtn.addEventListener("click", ()=>{
+  customRange = null;
+  paintButtons("MAX");
+  render("MAX");
+});
+
+// dropdown de acceso rápido a presidentes
+const presidenteSelect = document.getElementById("presidenteSelect");
+presidenteSelect.addEventListener("change", ()=>{
+  const val = presidenteSelect.value;
+  if (!val) return;
+  const [from, to] = val.split("|");
+  applyCustomRange(dateStrToTs(from), dateStrToTs(to));
+  presidenteSelect.value = ""; // reset a placeholder tras seleccionar
+});
+
+// botón V. Relativos / V. Absolutos
+const relativeToggleBtn = document.getElementById("relativeToggleBtn");
+// 0 = V. absolutos  |  1 = V. relativos (variación p.a.)  |  2 = Por gobierno (base 0 al inicio de cada mandato)
+const relativeModeLabels = ["V. relativos", "Por gobierno", "V. absolutos"];
+relativeToggleBtn.addEventListener("click", ()=>{
+  relativeMode = (relativeMode + 1) % 3;
+  relativeToggleBtn.textContent = relativeModeLabels[relativeMode];
+  relativeToggleBtn.classList.toggle("active", relativeMode > 0);
+  render(currentRange);
+});
+
+// arrastrar directamente sobre el gráfico para seleccionar un periodo visualmente
+function svgMx(evt){
+  const rect = svg.getBoundingClientRect();
+  return (evt.clientX - rect.left) * (W/rect.width);
+}
+svg.addEventListener("mousedown", (evt)=>{
+  const mx = svgMx(evt);
+  if (mx < padL || mx > W-padR) return;
+  dragState.active = true;
+  dragState.startMx = mx;
+  dragSelection.style.display = "";
+  dragSelection.setAttribute("x", mx); dragSelection.setAttribute("y", padT);
+  dragSelection.setAttribute("width", 0); dragSelection.setAttribute("height", plotH);
+});
+svg.addEventListener("mousemove", (evt)=>{
+  if (!dragState.active) return;
+  const mx = Math.min(Math.max(svgMx(evt), padL), W-padR);
+  const x1 = Math.min(dragState.startMx, mx), x2 = Math.max(dragState.startMx, mx);
+  dragSelection.setAttribute("x", x1); dragSelection.setAttribute("width", x2-x1);
+});
+function endDrag(evt){
+  if (!dragState.active) return;
+  dragState.active = false;
+  dragSelection.style.display = "none";
+  const mx = Math.min(Math.max(svgMx(evt), padL), W-padR);
+  const x1 = Math.min(dragState.startMx, mx), x2 = Math.max(dragState.startMx, mx);
+  if (x2 - x1 < 10) return; // arrastre demasiado pequeño: se ignora (probable click suelto)
+  const span = chartScale.tMax - chartScale.tMin;
+  const t1 = chartScale.tMin + ((x1-padL)/plotW) * span;
+  const t2 = chartScale.tMin + ((x2-padL)/plotW) * span;
+  applyCustomRange(t1, t2);
+}
+svg.addEventListener("mouseup", endDrag);
+svg.addEventListener("mouseleave", (evt)=>{
+  if (dragState.active){ dragState.active=false; dragSelection.style.display="none"; }
+});
+
+document.getElementById("footnoteDate").textContent = fmtDateMeta();
+
+render("MAX");
+resizeChartCanvas();
+
+// ResizeObserver: mantiene el SVG sincronizado con su contenedor ante CUALQUIER cambio de tamaño
+// (redimensionar la ventana, o que el resto del panel cambie de alto por wrap de texto, etc.)
+const chartResizeObserver = new ResizeObserver(()=> resizeChartCanvas());
+chartResizeObserver.observe(chartWrapEl);
+</script>
+
+</body>
+</html>
