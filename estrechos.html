@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Principales estrechos, canales y rutas marítimas del mundo</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  #app { position: relative; height: 100%; overflow: hidden; }
+
+  #toolbar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 40;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px;
+    padding: 10px 14px; background: rgba(31, 41, 55, 0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #fff;
+  }
+  #toolbar h1 {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    font-size: 15px; font-weight: 600; margin: 0; white-space: nowrap; pointer-events: none;
+  }
+  #toolbar button {
+    background: #374151; color: #fff; border: 1px solid #4b5563; border-radius: 8px;
+    padding: 7px 14px; font-size: 13px; cursor: pointer;
+  }
+  #toolbar button.active { background: #0f6e56; border-color: #0f6e56; }
+  #btn-change-key { background: transparent; border-color: #4b5563; }
+
+  #legend { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: #d1d5db; white-space: nowrap; }
+  #legend .legend-item { display: flex; align-items: center; gap: 6px; }
+  #legend .swatch { width: 18px; height: 0; border-top: 2px solid; display: inline-block; }
+  #legend .swatch.dashed { border-top-style: dashed; }
+  #legend .swatch.dotted { border-top-style: dotted; border-top-width: 3px; }
+
+  #map-container { position: absolute; inset: 0; }
+  #map { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #0f1c2e; color: #9ca3af; font-size: 14px; text-align: center; padding: 20px; }
+
+  #table-view { display: none; position: absolute; inset: 0; overflow: auto; padding: 76px 20px 20px; background: #f9fafb; }
+  table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 13px; background: #fff; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid #e5e7eb; vertical-align: top; word-wrap: break-word; }
+  th { background: #f3f4f6; font-weight: 600; color: #374151; position: sticky; top: 0; }
+  td:first-child { font-weight: 600; }
+  td:nth-child(2) { white-space: normal; }
+
+  .info-window { width: 270px; font-family: inherit; color: #e5e7eb; text-align: left; }
+  .info-window .info-body { padding: 12px 14px 14px; }
+  .info-window .info-box {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .info-window h3 { margin: 0 0 8px; font-size: 15px; color: #ffffff; text-align: left; }
+  .info-window p { margin: 0 0 5px; font-size: 12.5px; line-height: 1.4; color: #d1d5db; text-align: justify; }
+  .info-window p strong { color: #f3f4f6; }
+  .info-window a { color: #5eead4; font-weight: 600; text-decoration: none; }
+  .info-window a:hover { text-decoration: underline; }
+  .info-window .compare-label { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; color: #d1d5db; cursor: pointer; }
+
+  .card-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+  .card-nav-btn {
+    background: rgba(255,255,255,0.08); border: none; color: #fff; border-radius: 50%;
+    width: 26px; height: 26px; font-size: 15px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card-nav-btn:hover { background: rgba(255,255,255,0.18); }
+  .card-nav-counter { font-size: 12px; color: #9ca3af; }
+
+  .carousel { position: relative; margin: 0; border-radius: 0; overflow: hidden; background: #0b1622; }
+  .carousel-img { width: 100%; height: 150px; object-fit: cover; display: block; }
+  .carousel-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(17, 24, 39, 0.65); color: #fff; border: none; border-radius: 50%;
+    width: 26px; height: 26px; font-size: 15px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .carousel-nav:hover { background: rgba(17, 24, 39, 0.9); }
+  .carousel-nav.prev { left: 6px; }
+  .carousel-nav.next { right: 6px; }
+  .carousel-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
+  .carousel-dots .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; padding: 0; border: none; }
+  .carousel-dots .dot.active { background: #fff; width: 8px; height: 8px; }
+
+  .gm-style-iw-c { background-color: #1f2937 !important; border-radius: 12px !important; padding: 0 !important; overflow: hidden !important; }
+  .gm-style-iw-t::after, .gm-style-iw-tc::after { background: #1f2937 !important; }
+  .gm-style-iw-d { background-color: transparent !important; color: #e5e7eb !important; overflow: visible !important; max-height: none !important; padding: 0 !important; margin: 0 !important; }
+  div[role="dialog"] > div.gm-style-iw-chr:first-child { display: none !important; }
+
+  .carousel-close {
+    position: absolute; top: 8px; right: 8px; z-index: 10;
+    background: rgba(17,24,39,0.6); color: #fff; border: none; border-radius: 8px;
+    width: 26px; height: 26px; font-size: 16px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .carousel-close:hover { background: rgba(17,24,39,0.85); }
+
+  .gm-ui-hover-effect {
+    filter: invert(1) drop-shadow(0 1px 3px rgba(0,0,0,0.7)) !important;
+    opacity: 0.95 !important; top: 8px !important; right: 8px !important;
+  }
+  .gm-ui-hover-effect:hover { opacity: 1 !important; }
+
+  #api-key-popup {
+    display: none; position: fixed; top: 64px; right: 16px; z-index: 30;
+    width: 290px; background: #1f2937; color: #fff; border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35); padding: 16px;
+  }
+  #api-key-popup .popup-close {
+    position: absolute; top: 8px; right: 10px; background: none; border: none;
+    color: #9ca3af; font-size: 18px; cursor: pointer; line-height: 1; padding: 4px;
+  }
+  #api-key-popup p.title { font-weight: 600; margin: 0 0 8px; font-size: 14px; }
+  #api-key-popup p.desc { margin: 0 0 12px; font-size: 12.5px; color: #d1d5db; line-height: 1.4; }
+  #api-key-popup input {
+    width: 100%; padding: 8px 10px; border-radius: 7px; border: 1px solid #4b5563;
+    background: #111827; color: #fff; font-size: 13px;
+  }
+  #api-key-popup .popup-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  #api-key-popup button.action { background: #374151; border: 1px solid #4b5563; color: #fff; border-radius: 7px; padding: 8px 10px; font-size: 13px; cursor: pointer; }
+  #api-key-popup button.primary { background: #0f6e56; border-color: #0f6e56; }
+  #key-error { color: #f87171; font-size: 12px; margin-top: 6px; display: none; }
+
+  .carousel-img { cursor: zoom-in; }
+  #lightbox {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(10,12,16,0.9); align-items: center; justify-content: center; cursor: zoom-out;
+  }
+  #lightbox.active { display: flex; }
+  #lightbox img { max-width: 92vw; max-height: 88vh; object-fit: contain; border-radius: 8px; cursor: default; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+  #lightbox-close {
+    position: absolute; top: 18px; right: 22px; background: rgba(255,255,255,0.12); color: #fff;
+    border: none; border-radius: 8px; width: 34px; height: 34px; font-size: 20px; cursor: pointer;
+  }
+  #lightbox-close:hover { background: rgba(255,255,255,0.25); }
+
+  #marker-tooltip {
+    display: none; position: fixed; z-index: 45; width: 160px;
+    background: #1f2937; border-radius: 10px; overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+  }
+  #marker-tooltip.active { display: block; }
+  #marker-tooltip img { width: 100%; height: 90px; object-fit: cover; display: block; }
+  #marker-tooltip .tooltip-label { padding: 6px 9px; font-size: 12px; font-weight: 500; color: #fff; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="toolbar">
+    <button id="btn-map" class="active" onclick="showView('map')">Mapa</button>
+    <button id="btn-table" onclick="showView('table')">Tabla</button>
+    <h1>Estrechos, canales y rutas marítimas</h1>
+    <div id="legend">
+      <span class="legend-item"><span class="swatch" style="border-color:#2DD4BF;"></span>Suez / Ormuz</span>
+      <span class="legend-item"><span class="swatch dashed" style="border-color:#993C1D;"></span>Cabo de Buena Esperanza</span>
+      <span class="legend-item"><span class="swatch dotted" style="border-color:#C084FC;"></span>Panamá</span>
+      <button id="btn-toggle-routes" class="active" onclick="toggleRoutes()">Rutas</button>
+    </div>
+    <button id="btn-change-key">🔑 Cambiar clave de API</button>
+  </div>
+
+  <div id="map-container">
+    <div id="map">Introduce tu clave de API de Google Maps (arriba a la derecha) para cargar el mapa.</div>
+  </div>
+
+  <div id="table-view">
+    <table>
+      <colgroup>
+        <col style="width:11%"><col style="width:17%"><col style="width:8%"><col style="width:12%">
+        <col style="width:14%"><col style="width:10%"><col style="width:13%"><col style="width:15%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Punto</th><th>Países</th><th>Longitud</th><th>Anchura</th><th>% comercio mundial</th>
+          <th>Peaje</th><th>Dato histórico</th><th>Otras características</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="api-key-popup">
+  <button class="popup-close" id="popup-close" aria-label="Cerrar">×</button>
+  <p class="title">Clave de API de Google Maps</p>
+  <p class="desc">Pega aquí tu clave para cargar el mapa. Se guarda solo en tu navegador (localStorage), nunca se envía a ningún sitio.</p>
+  <input id="api-key-input" type="text" placeholder="AIza..." />
+  <p id="key-error">Pega una clave antes de continuar.</p>
+  <div class="popup-actions">
+    <button class="action" id="btn-get-key">Obtener una clave ↗</button>
+    <button class="action primary" id="btn-save-key">Guardar y cargar mapa</button>
+  </div>
+</div>
+
+<div id="lightbox" onclick="closeLightbox()">
+  <button id="lightbox-close" aria-label="Cerrar imagen" onclick="event.stopPropagation(); closeLightbox();">×</button>
+  <img id="lightbox-img" src="" alt="" />
+</div>
+
+<div id="marker-tooltip">
+  <img id="tooltip-img" src="" alt="" />
+  <div class="tooltip-label" id="tooltip-label"></div>
+</div>
+
+<script>
+const DATA = [
+  { key:'panama', name:'Canal de Panamá', lat:9.08, lng:-79.68, paisesArr:['🇵🇦 Panamá'], comercio:'~5% del comercio marítimo mundial', peaje:'Sí, desde 1914', hist:'EE.UU. lo controló hasta 1999', otros:'Disputa actual con la administración Trump', longitud:'~80 km', anchura:'Esclusas: 33,5 m (originales) / 55 m (ampliación 2016)', wiki:'https://es.wikipedia.org/wiki/Canal_de_Panam%C3%A1',
+    images:['https://upload.wikimedia.org/wikipedia/commons/5/59/Esquema_del_Canal_de_Panam%C3%A1.png',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjBmEJLNS4K1EdL18Gt0zbB4tqI3U742lsYomiNBkZRdlXsAeFOMm7QgPAlrvrR9zQF0WTDLp00EtY8nhokdwJK6nEmYxRxlW7oPF3OrrtmT8pfRA-li2a6papransJ1EQE8_Iki3nsr7ZfYvA=s4800-w800-h600',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjAr4VTV-QtL6WBaVAIdbp0igik50QfWYu60J-qbj3W9sW0wYiWk7rNJBPczgK6L-gCXodp_5W2eajU0N55i0twIyBuroLtGhyB768cm9tImk8Ix-Y6nemNtZnGhqmc2FP-g-sGUmRL1e1zUWVjrAg35tw=s4800-w800-h600'] },
+  { key:'gibraltar', name:'Estrecho de Gibraltar', lat:35.95, lng:-5.6, paisesArr:['🇪🇸 España','🇲🇦 Marruecos','🇬🇮 Gibraltar (RU)'], comercio:'~10% del comercio marítimo mundial', peaje:'Sin peaje', hist:'Musulmán 711-1462; británico desde 1713', otros:'Disputa de soberanía España-RU, activa', longitud:'~58 km', anchura:'~14,3 km (mínima)', wiki:'https://es.wikipedia.org/wiki/Estrecho_de_Gibraltar',
+    images:['https://upload.wikimedia.org/wikipedia/commons/8/8b/H%C3%A9rcules3D.jpg',
+      'https://upload.wikimedia.org/wikipedia/commons/4/45/Gibraltar_aerial_view_looking_northwest.jpg',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjCUU0pjsKoXCyaMzRahCRtDIj8aE3KXlbQEtyapvrkhtSl6C66dvSzr9UFkZ5cjJV_rMEaiezl-Ozb6NjPpmjjP0MYkvDCC8CgFkXMrFRVqIdNaG2J3ZVgFEdkZgVSCHH1UiDkJfnaG0t_UTA=s4800-w800-h600'] },
+  { key:'dover', name:'Estrecho de Dover (Canal de la Mancha)', lat:50.97, lng:1.4, paisesArr:['🇬🇧 Reino Unido','🇫🇷 Francia'], comercio:'Ruta más transitada del mundo (400-600 buques/día)', peaje:'Sin peaje marítimo (el Eurotúnel sí, desde 1994)', hist:'Clave en la II Guerra Mundial', otros:'Bajo él pasa el Eurotúnel', longitud:'—', anchura:'~33-34 km (mínima)', wiki:'https://es.wikipedia.org/wiki/Estrecho_de_Dover',
+    images:['https://www.economist.com/cdn-cgi/image/width=600,quality=80,format=auto/media-assets/image/20220813_BRM918.png',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjDmYlPeIVvhydyVGOYqBG9ETHOamTaksgbJWINIEzTEQLAqB9xLi-13Nm96j65l6sWffZGAh0STgc3hSyYr9UpF7CR_WJXZsp1Vx_P2QnMD-uDcC78Dti-eZuJLxMs_i3dcUFSJTuA_Thpn=s4800-w800-h600',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjAtdnLKJiPargm7nXptyyt_UaS1OyyfAAKzL_10weA0B0I4gUG4vXT_A6Y44N1B-U5XLsKeacwLZtf2fXUBBwTSD6sIdDGU6Io5yGCiI_E_xBc7tdknb-oQzrvkkikSgiRmQBBT1iZc504b0g=s4800-w800-h600'] },
+  { key:'cabo', name:'Cabo de Buena Esperanza', lat:-34.35, lng:18.47, paisesArr:['🇿🇦 Sudáfrica'], comercio:'Ruta alternativa, variable según el tráfico desviado', peaje:'Sin peaje', hist:'Bartolomeu Dias lo llamó "Cabo de las Tormentas" en 1488', otros:'Recupera relevancia por la crisis del Mar Rojo', longitud:'—', anchura:'— (ruta abierta, sin cuello de botella)', wiki:'https://es.wikipedia.org/wiki/Cabo_de_Buena_Esperanza',
+    images:['https://upload.wikimedia.org/wikipedia/commons/4/4e/CapeHopeDetail.png',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjBjvQ2ek0iA3IyfjPxU98dQlMFtXy4pks57HcWMlBGnaD964O1Igd_MNkfRHdmaxI5a439GtvFHjbOu4ke4KC21-kEcNxHCjCHn1On8ZJnauQK2ZG7tTfbsS6vtfC6q6QjXEj1zHe-_pE7ivg=s4800-w800-h600',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjD2AIO0Z15KpLlxw6oI7mBWi3UyuaNnr2GdtgI4RScDkUz1wvd6ZZEZl_idDQolJ9WyOpxH6zj5CRFYdQoXais1c4Xbz5VQhm_LqgQ_HEhroSpWWrnvHae2hTcnBluDQzVxKkDee5_xGSXQ=s4800-w612-h407',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjBmRWjFjsyJcamqHNnFjbZWqkznFv-nO1mPNhkHNS9qc901mxWl28KpVtJmOniIsekKvyPpJlkaBYCg6PycGo0Di9HMvZV7ZDJNtSBsz_DrfKho40G7pn3X0Jyp4o5wUKDgpqtz2EOBaTc=s4800-w612-h405'] },
+  { key:'bosforo', name:'Bósforo', lat:41.1, lng:29.06, paisesArr:['🇹🇷 Turquía'], comercio:'~48.000 buques al año; única salida del Mar Negro', peaje:'Otomanos cobraron aranceles 1453-1923; libre desde Montreux (1936)', hist:'Estambul se fundó para controlarlo', otros:'Divide Europa y Asia', longitud:'~31 km', anchura:'~700 m (mínima)', wiki:'https://es.wikipedia.org/wiki/B%C3%B3sforo',
+    images:['https://upload.wikimedia.org/wikipedia/commons/e/ea/Istanbul_and_Bosporus_big.jpg',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjATSi8OlF7S7K8buWrfEFYkiYJmAcJBMkDuB99MHrPc156iYRH5QH6i9jqqWNIwtyWIHMAyQuJLanwVXpAqkQMFtazvZGQCHsz1dUqaIBd8uTVmrM-qR4axxNXsWDnnM0I5S5_jD39_XlsTWoI=s4800-w800-h600',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjA1iSniKOUTAlesZCwILWB9aBLzfpC-SmssHGSmPWPUANLJLd1mGC65GocRiW-T5qkMTdPTkiu7N6ffYhlqxHSa2kz4g1i6L_bXQJ_TefgjssKFABRh0X8HQZeYBUd6SSeGK4EkasRtSwzNNEw=s4800-w800-h600',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjAYubktiGr3VuVKnEUPvL9bS9thfm-qFBhrkz6dpY9boA6l--gnmF4bwBKnU01L2HEPBQZXRa3nXYupdph5zaN8Yn49Ts17uQ4VVsbPoP9RPRA0bo8ap0FET3NL8ZFEE54on56Nt8oxXtae7g=s4800-w800-h600',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjCepDlpBQ8UtGzXJ9qGaZG5H_J2r-HUzVh82rz2AbowbZvjsT4y1P0jE35JVE-DVUW8utp18JXnDVBNnVzme8xi_ZpaFIP0tGTBMjpFopnKZmydXDRkr8zvLI_2BZ8g_hgzjZmcBeb1rzmd=s4800-w635-h483',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjCHIdwY_OY5CgCLtovOga4u0azyDWm_Wqj5SDUe7KtomeRtfpSjp6HCN6MqMB0wPai-ndhA-TL72d1KOO6g2gBiIGVjl1YZvM4WIeNCCXR13CNPxRBwTZz1owxrJQWQGWp-UJtQSnZNQ9frh4I=s4800-w800-h600'] },
+  { key:'suez', name:'Canal de Suez', lat:30.5, lng:32.3, paisesArr:['🇪🇬 Egipto'], comercio:'12-15% del comercio mundial (antes de 2023)', peaje:'Sí, desde 1869', hist:'Nacionalizado por Nasser en 1956 (Crisis de Suez)', otros:'Bloqueado 6 días en 2021 por el Ever Given', longitud:'~193 km', anchura:'~205-345 m (canal, según el tramo)', wiki:'https://es.wikipedia.org/wiki/Canal_de_Suez',
+    images:['https://upload.wikimedia.org/wikipedia/commons/1/10/Aerial_view_of_city_of_Suez_and_Suez_Canal.jpg',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjDslm94c_5RIAb20jJTf_xyBuu5Z18DxdugCbqHvPlPXWyMYnHwJG0NU-HAXdXR2kEcqvcMtAKiSAhKCPUCJL81yb823xg_nfkn5ETdnaVP4aldEEbM_iam_6GNrNYgJ0UPE4pU4KgG3ts0Xg=s4800-w521-h563',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjBQ8AMOI-DqpvD2mWub7Z_BZ8CEm-D6yCLGA0tAESWGG93d4ZBEjR1uVxTzl1yHa4wJZ1vNtf9GY9mrL2lSCZfi2Q53xaWqCeqf-dVULDe-1_2W2UD_eW3un187uCSdc8SxI1tOk7sRATN1Nw=s4800-w800-h600'] },
+  { key:'babelmandeb', name:'Bab el-Mandeb', lat:12.6, lng:43.4, paisesArr:['🇾🇪 Yemen','🇩🇯 Yibuti','🇪🇷 Eritrea'], comercio:'10-12% del comercio marítimo mundial', peaje:'Sin peaje oficial', hist:'Reino Unido controló Adén de 1839 a 1967', otros:'"Puerta de las Lágrimas"; ataques hutíes desde 2023', longitud:'—', anchura:'~26-32 km (mínima)', wiki:'https://es.wikipedia.org/wiki/Bab_el-Mandeb',
+    images:['https://upload.wikimedia.org/wikipedia/commons/b/be/Map_of_Bab-el-Mandeb.png',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjBempNdu2bPv6mudrKb9reJOtyIwNSZFE7LD-Te5fFtt51z8x-aNJSjlojgtrGVzLaJ3r6Y9zyJ6nP47t8-icnP2OT8uc5pOFyF4zV38E6RUXXpEzKWxQhs_G5pYHAoU15DqNOABgnDxtwUmQ=s4800-w720-h480',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjC7IxQF45j-Q6-XTCkioafPf1CBDbKeHKmX_g3WvvEf8rPG7rK4oIl_y8mVd0V-qi4qEy-g3JRB4KCizO9TskG1FAco3cLahHQeWp2ZLx0taDZ3gTvyY_sKvmcWQZWc0TPPNf8CuYLNFtwtUA=s4800-w739-h415',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjCmoF8pQTrbTpP6DD-jr0KDfiP9LaGM7G3GSLkMNaw_70wla11Iy45fJcAqDtmhKTUFpvd6x6lRTWSg0n3FmXnHl0WHMAlftRP95V4fFmLaa4RGADnX5vCmJXROCFrddmxMaVaXBHEKI4n59Q=s4800-w450-h300'] },
+  { key:'ormuz', name:'Estrecho de Ormuz', lat:26.5, lng:56.3, paisesArr:['🇮🇷 Irán','🇴🇲 Omán','🇦🇪 EAU'], comercio:'~25% del petróleo marítimo mundial; ~20% del GNL mundial', peaje:'Sin peaje oficial', hist:'Portugal controló su fortaleza de 1507 a 1622', otros:'Sin rutas alternativas; V Flota de EE.UU. en Bahréin', longitud:'~167 km', anchura:'~39 km (punto más estrecho)', wiki:'https://es.wikipedia.org/wiki/Estrecho_de_Ormuz',
+    images:['https://upload.wikimedia.org/wikipedia/commons/9/92/Strait_of_Hormuz.jpg',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjAUVyGBwbM5l2g9vCwF2kbnIeAXsouTTIIpFfeyELNnhMehnZxvUMAO8Sv3FQd_GccXLAWasSeogpl2rFJUU19DCkgHPFAoPQ0hkQVtizlFv1Poyv2FzbSKmbN9yL-jKEH4GH7dj7DtUXBMYA=s4800-w800-h600',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjBJIfi0mp2NzDJVA8_Gam7lzOddQnWmGL22jVC_Ul2S87graFKthXpyfkjMhbpqkjGZ6jIWS2R4DBr9YS5iqg7GMWSTISi7wsVK1Y6RvrukW28CRVcM0AsZ_J7dmQxTuVTWI3Q8qKkJy57rZqo=s4800-w800-h600',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjCD9T0XS5RPMeIyNh66OVA8HCTKDQ-lySf7SmVV6cZTPIREjjLh-OUzpRDwnae0y11iL9Uj9C5spEfw2YnvHOis6HhZwCYOwP1VKZgb9C92QffdXz1I4LojxKCrxvKehdFI--5m5W0xo1FClCE=s4800-w719-h532'] },
+  { key:'malaca', name:'Estrecho de Malaca', lat:1.2, lng:103.5, paisesArr:['🇮🇩 Indonesia','🇲🇾 Malasia','🇸🇬 Singapur','🇹🇭 Tailandia'], comercio:'25-30% del comercio mundial por valor', peaje:'Sin peaje directo (sí tasas portuarias)', hist:'Conquistado por Portugal en 1511', otros:'Riesgo de piratería; alternativas Sunda y Lombok', longitud:'~900 km', anchura:'~2,8 km (Canal Phillips)', wiki:'https://es.wikipedia.org/wiki/Estrecho_de_Malaca',
+    images:['https://upload.wikimedia.org/wikipedia/commons/9/95/Detroit_Malacca_OHI.png',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjDPVUCiTGtB5yxq0uGJUgK9ZsP3QPkNn7Ds6Y3dcoFQ48gxGuIRF6OICaUee-Wi-flTARHkgd3XkGO_QDqTtt-MCoQcpIKpScDRGh6kZ8THshz9AIMhJzWnj4rORcpUi1zsbZwCIzhaMBq6fA=s4800-w800-h600',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjAY020tvSljCoN4VuZ8YlLEdg54MhBlKsKwEJPK-8zh_Y-5c1fw-bZx28FPHlZvyxir07XOvrr9kOzPTD6AI_HQhbBpMgsKR-E9q1jF71Gxmrk21FZ4gb3fcMsUdotwzwixp9AV3v-Qp-Jauw=s4800-w800-h600',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjBwvMaMaaOxBvkjmIyaG_poATEybIh92hnr9JRVkUbN0ur1xer52EUSwndFLKnZr8EDc-SKYjjGCBNRgrauNmHeWK9lc4NZLOilHb2dTKuIk7uyuAOuK_RmM1Nv_ZmobaVoly989CW044G65CA=s4800-w800-h600'] },
+  { key:'taiwan', name:'Estrecho de Taiwán (Formosa)', lat:24.5, lng:119.5, paisesArr:['🇨🇳 China','🇹🇼 Taiwán'], comercio:'40-50% de la flota mundial de contenedores pasa cerca', peaje:'Sin peaje', hist:'Nombrado "Formosa" por marineros portugueses en el s. XVI', otros:'Clave para la industria de semiconductores', longitud:'hasta ~220 km (extremo más ancho)', anchura:'~130 km (mínima)', wiki:'https://es.wikipedia.org/wiki/Estrecho_de_Taiw%C3%A1n',
+    images:['https://upload.wikimedia.org/wikipedia/commons/b/b0/Taiwan_relief_location_map.jpg',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjD5hxNg2R2SNZr30lWmKUqZHIMkGJJsUrwAd1YDLdgTpt65dkJG7ob7iPeQnlptLRef4CLZ01c5ONJqqtojEMAtLETd7YS1MrnGrpJqSfBsG-LE8ktsyhe9rA2O4iGkV-bI2dQtQdo06FtTqQ=s4800-w800-h600',
+      'https://lh3.googleusercontent.com/place-photos/AG9NLjBG29NMGPyZrjC1I_W88FIuHfx6j9cvusSkdoKJDJoHJ2HIc3vq5udDyc5_ADVMlCVdCNMUfOJRmF4WqYrPxp5Ig7j5_7G6MXrT31PlLuOQ42foFEOaF6b3zuc0kIrvtkg6dAKiCPRibAbp1Q=s4800-w800-h600'] },
+];
+
+function ll(key) { const d = DATA.find(x => x.key === key); return { lat: d.lat, lng: d.lng }; }
+
+let lightboxKey = null;
+
+function updateLightboxImage() {
+  const d = DATA.find(function (x) { return x.key === lightboxKey; });
+  if (!d) return;
+  const img = document.getElementById('lightbox-img');
+  img.src = d.images[carouselIndex[d.key]];
+  img.alt = d.name;
+  const root = document.querySelector('.info-window[data-key="' + d.key + '"]');
+  if (root) {
+    const cardImg = root.querySelector('.carousel-img');
+    if (cardImg) cardImg.src = d.images[carouselIndex[d.key]];
+    root.querySelectorAll('.carousel-dots .dot').forEach(function (dot, i) {
+      dot.classList.toggle('active', i === carouselIndex[d.key]);
+    });
+  }
+}
+function openLightbox(key) {
+  lightboxKey = key;
+  updateLightboxImage();
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  lightboxKey = null;
+}
+function lightboxNav(direction) {
+  if (!lightboxKey) return;
+  const d = DATA.find(function (x) { return x.key === lightboxKey; });
+  carouselIndex[d.key] = (carouselIndex[d.key] + direction + d.images.length) % d.images.length;
+  updateLightboxImage();
+}
+document.addEventListener('keydown', function (e) {
+  if (!document.getElementById('lightbox').classList.contains('active')) return;
+  if (e.key === 'Escape') closeLightbox();
+  else if (e.key === 'ArrowLeft') lightboxNav(-1);
+  else if (e.key === 'ArrowRight') lightboxNav(1);
+});
+
+function smoothPanToCard(marker, cardHeight) {
+  const projection = map.getProjection();
+  if (!projection) { map.panTo(marker.position); return; }
+  const scale = Math.pow(2, map.getZoom());
+  const markerPoint = projection.fromLatLngToPoint(marker.position);
+  const pixelShift = (cardHeight / 2) + 36;
+  const targetPoint = new google.maps.Point(markerPoint.x, markerPoint.y - (pixelShift / scale));
+  const targetLatLng = projection.fromPointToLatLng(targetPoint);
+
+  const startLatLng = map.getCenter();
+  const startPoint = projection.fromLatLngToPoint(startLatLng);
+  const endPoint = projection.fromLatLngToPoint(targetLatLng);
+  const duration = 900;
+  const startTime = performance.now();
+
+  function step(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const x = startPoint.x + (endPoint.x - startPoint.x) * eased;
+    const y = startPoint.y + (endPoint.y - startPoint.y) * eased;
+    map.setCenter(projection.fromPointToLatLng(new google.maps.Point(x, y)));
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+const JAPAN = { lat: 35.4, lng: 139.7 };
+
+const GIB_TO_DOVER = [ {lat:36.5,lng:-9.5}, {lat:40,lng:-11}, {lat:44,lng:-10.5}, {lat:48,lng:-6} ];
+
+const ROUTE_SUEZ = [
+  JAPAN, ll('taiwan'), ll('malaca'),
+  {lat:3,lng:77},
+  ll('babelmandeb'),
+  ll('suez'),
+  {lat:32,lng:28}, {lat:33.5,lng:20}, {lat:34,lng:15}, {lat:36.3,lng:13.5}, {lat:38.5,lng:6}, {lat:37,lng:-2},
+  ll('gibraltar'),
+  ...GIB_TO_DOVER,
+  ll('dover')
+];
+const ROUTE_PANAMA = [
+  ll('dover'),
+  ...GIB_TO_DOVER.slice().reverse(),
+  {lat:35,lng:-30}, {lat:28,lng:-50}, {lat:22,lng:-65}, {lat:15,lng:-77},
+  ll('panama'),
+  {lat:15,lng:-100}, {lat:20,lng:-140}, {lat:30,lng:170}, {lat:33,lng:150},
+  JAPAN,
+  ll('taiwan')
+];
+const ROUTE_ORMUZ_SPUR = [
+  ll('ormuz'),
+  {lat:24,lng:58.5}, {lat:20,lng:60}, {lat:15,lng:53}, {lat:13,lng:45},
+  ll('babelmandeb')
+];
+const ROUTE_CAPE = [
+  JAPAN, ll('taiwan'), ll('malaca'),
+  {lat:-12,lng:90}, {lat:-28,lng:65}, {lat:-36,lng:40},
+  ll('cabo'),
+  {lat:-30,lng:5}, {lat:-10,lng:-10}, {lat:10,lng:-20}, {lat:25,lng:-22}, {lat:32,lng:-12}, {lat:35,lng:-8},
+  ll('gibraltar'),
+  ...GIB_TO_DOVER,
+  ll('dover')
+];
+
+let map;
+let routePolylines = [];
+let routesVisible = true;
+
+const pinnedKeys = new Set();
+const openWindows = {};
+const carouselIndex = {};
+
+function closeCard(d, infoWindow) {
+  infoWindow.close();
+  pinnedKeys.delete(d.key);
+  delete openWindows[d.key];
+  carouselIndex[d.key] = 0;
+  resolveCardOverlaps();
+}
+
+function resolveCardOverlaps() {
+  const keys = Object.keys(openWindows);
+  if (keys.length === 0) return;
+  if (keys.length === 1) {
+    openWindows[keys[0]].setOptions({ pixelOffset: new google.maps.Size(0, 0) });
+    return;
+  }
+  keys.forEach(function (k) {
+    openWindows[k].setOptions({ pixelOffset: new google.maps.Size(0, 0) });
+  });
+  requestAnimationFrame(function () {
+    const items = keys.map(function (k) {
+      const el = document.querySelector('.info-window[data-key="' + k + '"]');
+      return el ? { key: k, rect: el.getBoundingClientRect() } : null;
+    }).filter(Boolean);
+    items.sort(function (a, b) { return a.rect.left - b.rect.left; });
+
+    let claimedRight = -Infinity;
+    const gap = 12;
+    items.forEach(function (item) {
+      let shift = 0;
+      if (item.rect.left < claimedRight) {
+        shift = claimedRight - item.rect.left + gap;
+      }
+      const win = openWindows[item.key];
+      if (win) win.setOptions({ pixelOffset: new google.maps.Size(shift, 0) });
+      claimedRight = Math.max(claimedRight, item.rect.right + shift);
+    });
+  });
+}
+
+function buildCarouselHTML(d) {
+  const closeBtn = '<button class="carousel-close" aria-label="Cerrar">×</button>';
+  if (d.images.length <= 1) {
+    return '<div class="carousel"><img class="carousel-img" src="' + d.images[0] + '" alt="' + d.name + '" />' + closeBtn + '</div>';
+  }
+  const dots = d.images.map(function (_, i) {
+    return '<button class="dot' + (i === 0 ? ' active' : '') + '" data-index="' + i + '" aria-label="Imagen ' + (i + 1) + '"></button>';
+  }).join('');
+  return '<div class="carousel">' +
+    '<img class="carousel-img" src="' + d.images[0] + '" alt="' + d.name + '" />' +
+    closeBtn +
+    '<button class="carousel-nav prev" aria-label="Anterior">‹</button>' +
+    '<button class="carousel-nav next" aria-label="Siguiente">›</button>' +
+    '<div class="carousel-dots">' + dots + '</div>' +
+  '</div>';
+}
+
+function buildInfoHTML(d, index) {
+  return '<div class="info-window" data-key="' + d.key + '">' +
+    buildCarouselHTML(d) +
+    '<div class="info-body">' +
+    '<div class="info-box">' +
+    '<h3>' + d.name + '</h3>' +
+    '<p><strong>Países:</strong> ' + d.paisesArr.join(', ') + '</p>' +
+    '<p><strong>Longitud:</strong> ' + d.longitud + '</p>' +
+    '<p><strong>Anchura:</strong> ' + d.anchura + '</p>' +
+    '<p><strong>% comercio mundial:</strong> ' + d.comercio + '</p>' +
+    '<p><strong>Peaje:</strong> ' + d.peaje + '</p>' +
+    '<p><strong>Dato histórico:</strong> ' + d.hist + '</p>' +
+    '<p>' + d.otros + '</p>' +
+    '<a href="' + d.wiki + '" target="_blank" rel="noopener noreferrer">Ver artículo en Wikipedia ↗</a>' +
+    '<label class="compare-label"><input type="checkbox" class="compare-checkbox" /> Comparación (mantener abierta)</label>' +
+    '</div>' +
+    '<div class="card-nav">' +
+      '<button class="card-nav-btn prev" aria-label="Estrecho anterior">‹</button>' +
+      '<span class="card-nav-counter">' + (index + 1) + ' de ' + DATA.length + '</span>' +
+      '<button class="card-nav-btn next" aria-label="Estrecho siguiente">›</button>' +
+    '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+async function initMap() {
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+  await google.maps.importLibrary("maps");
+
+  document.getElementById('map').textContent = '';
+
+  const MARKER_ICON_PATHS = {
+    ormuz: '<path d="M22 9 Q30 21 22 30 Q14 21 22 9 Z" fill="#0C447C"/><path d="M22 12 Q27 21 22 27" fill="none" stroke="#4A93D6" stroke-width="1.2" opacity="0.6"/>',
+    malaca: '<path d="M22 30 L22 15" stroke="#8C6A4A" stroke-width="2" fill="none"/><path d="M22 15 Q14 12 10 16" stroke="#3E9B5C" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M22 15 Q16 9 12 10" stroke="#3E9B5C" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M22 15 Q30 12 34 16" stroke="#3E9B5C" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M22 15 Q28 9 32 10" stroke="#3E9B5C" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M22 15 Q22 8 22 7" stroke="#3E9B5C" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
+    gibraltar: '<path d="M22 9 L32 30 L22 26 Z" fill="#8C8577" stroke="#3d3d3a" stroke-width="0.6"/><path d="M22 9 L12 30 L22 26 Z" fill="#B7AF9D" stroke="#3d3d3a" stroke-width="0.6"/>',
+    bosforo: '<line x1="14" y1="16" x2="14" y2="28" stroke="#8C8577" stroke-width="2"/><line x1="30" y1="16" x2="30" y2="28" stroke="#8C8577" stroke-width="2"/><path d="M10 24 Q22 12 34 24" stroke="#0F6E56" stroke-width="2" fill="none"/><line x1="10" y1="27" x2="34" y2="27" stroke="#6B655A" stroke-width="2.5"/>',
+    babelmandeb: '<circle cx="22" cy="11" r="2.4" fill="none" stroke="#1f2937" stroke-width="1.6"/><line x1="22" y1="13.5" x2="22" y2="28" stroke="#1f2937" stroke-width="2"/><line x1="15" y1="17" x2="29" y2="17" stroke="#1f2937" stroke-width="2"/><path d="M15 22 Q15 29 22 29 Q29 29 29 22" stroke="#1f2937" stroke-width="2" fill="none"/>',
+    dover: '<rect x="10" y="20" width="8" height="10" fill="#EAE8DF" stroke="#3d3d3a" stroke-width="0.8"/><rect x="18" y="15" width="8" height="15" fill="#F7F6F1" stroke="#3d3d3a" stroke-width="0.8"/><rect x="26" y="21" width="8" height="9" fill="#EAE8DF" stroke="#3d3d3a" stroke-width="0.8"/><rect x="8" y="29" width="28" height="2" fill="#2DD4BF"/>',
+    taiwan: '<rect x="14" y="14" width="16" height="14" rx="1.5" fill="none" stroke="#0F6E56" stroke-width="1.8"/><line x1="18" y1="14" x2="18" y2="10" stroke="#0F6E56" stroke-width="1.5"/><line x1="22" y1="14" x2="22" y2="10" stroke="#0F6E56" stroke-width="1.5"/><line x1="26" y1="14" x2="26" y2="10" stroke="#0F6E56" stroke-width="1.5"/><line x1="18" y1="28" x2="18" y2="32" stroke="#0F6E56" stroke-width="1.5"/><line x1="22" y1="28" x2="22" y2="32" stroke="#0F6E56" stroke-width="1.5"/><line x1="26" y1="28" x2="26" y2="32" stroke="#0F6E56" stroke-width="1.5"/>',
+    suez: '<path d="M10 27 L34 27 L30 32 L14 32 Z" fill="#1f2937"/><rect x="13" y="19" width="5" height="6" fill="#E8763C"/><rect x="19" y="19" width="5" height="6" fill="#2DD4BF"/><rect x="25" y="19" width="5" height="6" fill="#C084FC"/><rect x="13" y="13" width="5" height="6" fill="#F5A623"/><rect x="19" y="13" width="5" height="6" fill="#5EEAD4"/>',
+    panama: '<rect x="20.5" y="9" width="2.5" height="21" fill="#8C8577"/><path d="M21.5 10 L33 15 L21.5 15 Z" fill="#8C8577"/><line x1="29" y1="15" x2="29" y2="23" stroke="#8C8577" stroke-width="1.4"/><rect x="14" y="27" width="16" height="3" fill="#6B655A"/>',
+    cabo: '<rect x="19" y="12" width="6" height="16" fill="#F7F6F1" stroke="#3d3d3a" stroke-width="1"/><rect x="19" y="12" width="6" height="4" fill="#E8763C"/><rect x="19" y="19" width="6" height="4" fill="#E8763C"/><rect x="17" y="28" width="10" height="3" fill="#6B655A"/><path d="M19 12 L22 8 L25 12 Z" fill="#6B655A"/><circle cx="22" cy="9" r="1.6" fill="#FBBF24"/>'
+  };
+
+  function createMarkerElement(d) {
+    const img = document.createElement('img');
+    const iconContent = MARKER_ICON_PATHS[d.key] || '';
+    img.src = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="44" height="54" viewBox="0 0 44 54">' +
+      '<path d="M17 36 L27 36 L22 50 Z" fill="#F7F6F1" stroke="#0F6E56" stroke-width="1.4"/>' +
+      '<rect x="3" y="2" width="38" height="36" rx="10" fill="#F7F6F1" stroke="#0F6E56" stroke-width="1.6"/>' +
+      iconContent +
+      '</svg>'
+    );
+    img.style.width = '44px';
+    img.style.height = '54px';
+    img.style.cursor = 'pointer';
+    img.style.filter = 'drop-shadow(0 3px 5px rgba(0,0,0,0.45))';
+    img.style.transition = 'transform 0.15s ease';
+    img.style.transformOrigin = 'bottom center';
+    return img;
+  }
+
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: { lat: 18, lng: 35 },
+    zoom: 3,
+    minZoom: 3,
+    maxZoom: 14,
+    mapId: 'DEMO_MAP_ID',
+    colorScheme: google.maps.ColorScheme.DARK,
+    streetViewControl: false,
+    mapTypeControl: false,
+    fullscreenControl: true,
+    restriction: {
+      latLngBounds: { north: 85, south: -85, west: -180, east: 180 },
+      strictBounds: true
+    }
+  });
+
+  const markersByKey = {};
+  const infoWindowsByKey = {};
+
+  function openCard(index) {
+    const target = DATA[index];
+    Object.keys(openWindows).forEach(function (k) {
+      if (!pinnedKeys.has(k)) { openWindows[k].close(); delete openWindows[k]; }
+    });
+    const targetWindow = infoWindowsByKey[target.key];
+    const targetMarker = markersByKey[target.key];
+    targetWindow.open({ anchor: targetMarker, map: map });
+    openWindows[target.key] = targetWindow;
+  }
+
+  let tooltipHideTimer = null;
+  const tooltipEl = document.getElementById('marker-tooltip');
+
+  function showMarkerTooltip(d, index, anchorEl) {
+    clearTimeout(tooltipHideTimer);
+    document.getElementById('tooltip-img').src = d.images[0];
+    document.getElementById('tooltip-label').textContent = d.name;
+    const rect = anchorEl.getBoundingClientRect();
+    const tooltipWidth = 160;
+    let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - tooltipWidth - 8));
+    tooltipEl.style.left = left + 'px';
+    tooltipEl.style.top = Math.max(8, rect.top - 128) + 'px';
+    tooltipEl.classList.add('active');
+    tooltipEl.onclick = function () {
+      hideMarkerTooltip();
+      openCard(index);
+    };
+  }
+  function scheduleHideTooltip() {
+    tooltipHideTimer = setTimeout(hideMarkerTooltip, 200);
+  }
+  function hideMarkerTooltip() {
+    tooltipEl.classList.remove('active');
+  }
+  tooltipEl.addEventListener('mouseenter', function () { clearTimeout(tooltipHideTimer); });
+  tooltipEl.addEventListener('mouseleave', scheduleHideTooltip);
+
+  DATA.forEach(function (d, index) {
+    carouselIndex[d.key] = 0;
+    const shipEl = createMarkerElement(d);
+    shipEl.addEventListener('mouseenter', function () { showMarkerTooltip(d, index, shipEl); shipEl.style.transform = 'scale(1.15)'; });
+    shipEl.addEventListener('mouseleave', function () { scheduleHideTooltip(); shipEl.style.transform = 'scale(1)'; });
+    const marker = new AdvancedMarkerElement({ position: { lat: d.lat, lng: d.lng }, map: map, title: d.name, content: shipEl, gmpClickable: true });
+    const infoWindow = new google.maps.InfoWindow({ content: buildInfoHTML(d, index), disableAutoPan: true });
+    markersByKey[d.key] = marker;
+    infoWindowsByKey[d.key] = infoWindow;
+
+    infoWindow.addListener('domready', function () {
+      const root = document.querySelector('.info-window[data-key="' + d.key + '"]');
+      if (!root) return;
+      if (root.dataset.bound === '1') return;
+      root.dataset.bound = '1';
+
+      resolveCardOverlaps();
+
+      setTimeout(function () {
+        if (openWindows[d.key] !== infoWindow) return;
+        smoothPanToCard(marker, root.offsetHeight);
+      }, 1500);
+
+      const checkbox = root.querySelector('.compare-checkbox');
+      if (checkbox) {
+        checkbox.checked = pinnedKeys.has(d.key);
+        checkbox.addEventListener('change', function () {
+          if (checkbox.checked) pinnedKeys.add(d.key); else pinnedKeys.delete(d.key);
+        });
+      }
+
+      const imgEl = root.querySelector('.carousel-img');
+      const dots = root.querySelectorAll('.carousel-dots .dot');
+      const prevBtn = root.querySelector('.carousel-nav.prev');
+      const nextBtn = root.querySelector('.carousel-nav.next');
+      function renderCarousel() {
+        imgEl.src = d.images[carouselIndex[d.key]];
+        dots.forEach(function (dot, i) { dot.classList.toggle('active', i === carouselIndex[d.key]); });
+      }
+      imgEl.addEventListener('click', function () { openLightbox(d.key); });
+      if (prevBtn) prevBtn.addEventListener('click', function () {
+        carouselIndex[d.key] = (carouselIndex[d.key] - 1 + d.images.length) % d.images.length;
+        renderCarousel();
+      });
+      if (nextBtn) nextBtn.addEventListener('click', function () {
+        carouselIndex[d.key] = (carouselIndex[d.key] + 1) % d.images.length;
+        renderCarousel();
+      });
+      dots.forEach(function (dot) {
+        dot.addEventListener('click', function () {
+          carouselIndex[d.key] = parseInt(dot.dataset.index, 10);
+          renderCarousel();
+        });
+      });
+      const closeBtn = root.querySelector('.carousel-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function () { closeCard(d, infoWindow); });
+      }
+
+      const prevCardBtn = root.querySelector('.card-nav-btn.prev');
+      const nextCardBtn = root.querySelector('.card-nav-btn.next');
+      if (prevCardBtn) prevCardBtn.addEventListener('click', function () {
+        openCard((index - 1 + DATA.length) % DATA.length);
+      });
+      if (nextCardBtn) nextCardBtn.addEventListener('click', function () {
+        openCard((index + 1) % DATA.length);
+      });
+    });
+
+    infoWindow.addListener('closeclick', function () { closeCard(d, infoWindow); });
+
+    marker.addListener('gmp-click', function () { hideMarkerTooltip(); openCard(index); });
+  });
+
+  map.addListener('click', function () {
+    Object.keys(openWindows).forEach(function (k) {
+      if (!pinnedKeys.has(k)) { openWindows[k].close(); delete openWindows[k]; }
+    });
+  });
+
+  routePolylines.push(new google.maps.Polyline({ path: ROUTE_SUEZ, geodesic: true, strokeColor: '#2DD4BF', strokeOpacity: 0.9, strokeWeight: 3, map: map }));
+  routePolylines.push(new google.maps.Polyline({ path: ROUTE_ORMUZ_SPUR, geodesic: true, strokeColor: '#2DD4BF', strokeOpacity: 0.9, strokeWeight: 3, map: map }));
+  routePolylines.push(new google.maps.Polyline({
+    path: ROUTE_PANAMA, geodesic: true, strokeColor: '#C084FC', strokeOpacity: 0, strokeWeight: 3, map: map,
+    icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 2 }, offset: '0', repeat: '10px' }]
+  }));
+  routePolylines.push(new google.maps.Polyline({
+    path: ROUTE_CAPE, geodesic: true, strokeColor: '#993C1D', strokeOpacity: 0, strokeWeight: 3, map: map,
+    icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 3 }, offset: '0', repeat: '14px' }]
+  }));
+}
+
+function toggleRoutes() {
+  routesVisible = !routesVisible;
+  routePolylines.forEach(function (p) { p.setMap(routesVisible ? map : null); });
+  document.getElementById('btn-toggle-routes').classList.toggle('active', routesVisible);
+  document.querySelectorAll('#legend .legend-item').forEach(function (item) {
+    item.style.display = routesVisible ? 'flex' : 'none';
+  });
+}
+
+function showView(v) {
+  document.getElementById('map-container').style.display = v === 'map' ? 'block' : 'none';
+  document.getElementById('table-view').style.display = v === 'table' ? 'flex' : 'none';
+  document.getElementById('btn-map').classList.toggle('active', v === 'map');
+  document.getElementById('btn-table').classList.toggle('active', v === 'table');
+}
+
+const tbody = document.getElementById('table-body');
+DATA.forEach(function (d) {
+  const tr = document.createElement('tr');
+
+  const tdPunto = document.createElement('td');
+  tdPunto.textContent = d.name;
+  tr.appendChild(tdPunto);
+
+  const tdPaises = document.createElement('td');
+  tdPaises.style.whiteSpace = 'nowrap';
+  tdPaises.innerHTML = d.paisesArr.join('<br>');
+  tr.appendChild(tdPaises);
+
+  [d.longitud, d.anchura, d.comercio, d.peaje, d.hist, d.otros].forEach(function (val) {
+    const td = document.createElement('td');
+    td.textContent = val;
+    tr.appendChild(td);
+  });
+
+  tbody.appendChild(tr);
+});
+
+const KEY_STORAGE = 'gmaps_api_key_estrechos';
+const CREDENTIALS_URL = 'https://console.cloud.google.com/apis/credentials?project=infinite-glow-230';
+
+function showKeyPopup() { document.getElementById('api-key-popup').style.display = 'block'; }
+function hideKeyPopup() { document.getElementById('api-key-popup').style.display = 'none'; }
+
+function loadMapsScript(key) {
+  const loaderCode =
+    '(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;' +
+    'b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,' +
+    'u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));' +
+    'e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);' +
+    'e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;' +
+    'd[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));' +
+    'a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));' +
+    'd[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})' +
+    '(' + JSON.stringify({ key: key, v: 'weekly' }) + ');';
+  const s = document.createElement('script');
+  s.textContent = loaderCode;
+  document.head.appendChild(s);
+  initMap();
+}
+
+document.getElementById('popup-close').addEventListener('click', hideKeyPopup);
+document.getElementById('btn-change-key').addEventListener('click', showKeyPopup);
+document.getElementById('btn-get-key').addEventListener('click', function () {
+  window.open(CREDENTIALS_URL, '_blank', 'noopener');
+});
+document.getElementById('btn-save-key').addEventListener('click', function () {
+  const input = document.getElementById('api-key-input');
+  const key = input.value.trim();
+  const errorEl = document.getElementById('key-error');
+  if (!key) { errorEl.style.display = 'block'; return; }
+  errorEl.style.display = 'none';
+  localStorage.setItem(KEY_STORAGE, key);
+  hideKeyPopup();
+  loadMapsScript(key);
+});
+
+const savedKey = localStorage.getItem(KEY_STORAGE);
+if (savedKey) {
+  document.getElementById('api-key-input').value = savedKey;
+  loadMapsScript(savedKey);
+} else {
+  showKeyPopup();
+}
+</script>
+</body>
+</html>
