@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real Madrid — Libro Mayor de Fichajes (1953-2026)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF9F5;
+    --panel:#FFFFFF;
+    --ink:#14213D;
+    --ink-soft:#4B5670;
+    --line:#E4E1D8;
+    --gold:#B8892B;
+    --gold-bg:#F6EDD4;
+    --navy:#14213D;
+    --navy-bg:#E7EAF2;
+    --teal:#1F6F63;
+    --teal-bg:#DEEFEA;
+    --blue:#2E5C8A;
+    --blue-bg:#E2EAF3;
+    --red:#9B2C3A;
+    --red-bg:#F6E2E3;
+    --amber:#B15C1E;
+    --amber-bg:#F3E1CE;
+    --grey:#7A7F8A;
+    --grey-bg:#EEEEEC;
+    --shadow: 0 18px 40px -18px rgba(20,33,61,0.35);
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-font-smoothing:antialiased;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Inter',sans-serif; font-size:14.5px; line-height:1.5;
+    padding-bottom:80px;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background: linear-gradient(160deg, #14213D 0%, #1B2E52 55%, #24365E 100%);
+    color:#F4F1E6; padding:52px 6vw 40px; position:relative; overflow:hidden;
+  }
+  .hero::after{
+    content:""; position:absolute; right:-6%; top:-30%; width:520px; height:520px;
+    border-radius:50%; border:1px solid rgba(244,241,230,0.14); pointer-events:none;
+  }
+  .hero::before{
+    content:""; position:absolute; right:4%; top:-10%; width:340px; height:340px;
+    border-radius:50%; border:1px solid rgba(244,241,230,0.10); pointer-events:none;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace; letter-spacing:.14em; text-transform:uppercase;
+    font-size:11.5px; color:var(--gold); margin:0 0 14px; font-weight:600;
+  }
+  .hero h1{
+    font-family:'Fraunces',serif; font-weight:600; font-size:clamp(28px,4vw,44px);
+    margin:0 0 10px; max-width:820px; letter-spacing:-0.01em;
+  }
+  .hero p{ max-width:640px; color:#C9CFDE; margin:0 0 26px; font-size:14.5px;}
+  .hero-stats{ display:flex; gap:28px; flex-wrap:wrap; margin-top:8px;}
+  .hstat{ min-width:140px; }
+  .hstat .n{ font-family:'Fraunces',serif; font-size:26px; font-weight:600; color:#fff;}
+  .hstat .l{ font-size:11.5px; color:#9AA4BC; text-transform:uppercase; letter-spacing:.06em;}
+
+  /* ---------- TOOLBAR ---------- */
+  .toolbar{
+    padding:10px 6vw; display:flex; flex-wrap:wrap; gap:18px; align-items:flex-start;
+  }
+  .tgroup{ display:flex; flex-direction:column; gap:6px;}
+  .tgroup-actions{ margin-left:auto; }
+  .tgroup .tlabel{
+    font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-transform:uppercase;
+    letter-spacing:.1em; color:var(--grey); font-weight:600;
+  }
+  .chips{ display:flex; flex-wrap:wrap; gap:5px; align-items:stretch; }
+  .chip{
+    border:1px solid var(--line); background:#fff; color:var(--ink-soft);
+    padding:3px 9px; border-radius:10px; font-size:10px; cursor:pointer;
+    user-select:none; transition:.15s; display:flex; align-items:center; gap:5px;
+    font-weight:600; line-height:1.15; text-align:left; max-width:92px;
+  }
+  .chip:hover{ border-color:var(--ink); }
+  .chip .dot{ width:6px; height:6px; border-radius:50%; background:var(--grey); flex:none;}
+  .chip.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .chip.on .dot{ background:var(--gold); }
+  .chip[data-cat="principal"].on{ background:var(--navy); border-color:var(--navy);}
+  .chip[data-cat="cantera"].on{ background:var(--teal); border-color:var(--teal);}
+  .chip[data-cat="formacion"].on{ background:var(--blue); border-color:var(--blue);}
+  .chip[data-cat="leyenda"].on{ background:var(--gold); border-color:var(--gold); color:#3a2c05;}
+  .chip[data-cat="fiasco"].on{ background:var(--red); border-color:var(--red);}
+  .chip[data-cat="resto"].on{ background:var(--grey); border-color:var(--grey);}
+
+  /* ---------- SEARCH ---------- */
+  .searchbox{ position:relative; }
+  .searchbox input{
+    font-family:'Inter',sans-serif; font-size:12.5px; border:1px solid var(--line); border-radius:10px;
+    padding:7px 26px 7px 30px; width:190px; background:#fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%237A7F8A" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>') no-repeat 9px center;
+    background-size:13px; color:var(--ink);
+  }
+  .searchbox input:focus{ outline:none; border-color:var(--ink); }
+  .searchClear{
+    position:absolute; right:5px; top:50%; transform:translateY(-50%); width:18px; height:18px;
+    border:none; background:var(--grey-bg); color:var(--ink-soft); border-radius:50%; font-size:13px;
+    line-height:1; cursor:pointer; padding:0; display:flex; align-items:center; justify-content:center;
+  }
+  .searchClear:hover{ background:var(--ink); color:#fff; }
+
+  /* ---------- MAIN TABLE ---------- */
+  .wrap{ padding:30px 6vw 0; }
+
+  /* ---------- cabecera pegajosa: pestañas de vista + toolbar juntos ---------- */
+  .stickyhead{
+    position:sticky; top:0; z-index:40; background:rgba(250,249,245,0.92);
+    backdrop-filter: blur(10px); border-bottom:1px solid var(--line);
+  }
+  .viewtabs{
+    display:flex; gap:6px; flex-wrap:wrap; padding:14px 6vw 0;
+  }
+  .viewtab{
+    font-family:'Inter',sans-serif; font-size:12.5px; font-weight:700; color:var(--ink-soft);
+    background:#fff; border:1px solid var(--line); border-bottom:none; border-radius:10px 10px 0 0;
+    padding:9px 16px; cursor:pointer; transition:.15s;
+  }
+  .viewtab:hover{ color:var(--ink); }
+  .viewtab.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  /* ---------- tarjetas de vista (gráficos, timeline, mapa, once) ---------- */
+  .viewcard{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    box-shadow: var(--shadow); padding:22px 24px;
+  }
+  .viewcard-head h2{ font-family:'Fraunces',serif; font-size:19px; font-weight:600; margin:0 0 6px; }
+  .viewcard-head p{ font-size:12.5px; color:var(--ink-soft); margin:0 0 16px; max-width:640px; line-height:1.5; }
+  .chart-frame{ display:flex; align-items:flex-start; }
+  .chart-axis{ flex:none; overflow:hidden; }
+  .chart-axis svg{ display:block; }
+  .chart-scroll{ flex:1 1 auto; overflow-x:auto; overflow-y:hidden; padding-bottom:6px; min-width:0; }
+  .chart-scroll svg{ display:block; }
+  .chart-scroll .avatar{ width:26px; height:26px; font-size:9px; }
+  .tablecard{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    overflow-x:auto; box-shadow: var(--shadow);
+  }
+  table.main{ width:100%; border-collapse:collapse; min-width:966px; table-layout:fixed; }
+  table.main > thead > tr > th{
+    text-align:right; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    text-transform:uppercase; letter-spacing:.08em; color:var(--grey);
+    padding:14px 16px; border-bottom:1px solid var(--line); white-space:nowrap;
+    background:#FCFBF8;
+  }
+  table.main > thead > tr > th:first-child, table.main > thead > tr > th.txt{ text-align:left; }
+  .yrow{ cursor:pointer; border-bottom:1px solid var(--line); transition:.12s background;}
+  .yrow:hover{ background:#F7F5EE; }
+  .yrow.open{ background:#F5F2E9; }
+  .yrow td{ padding:13px 16px; vertical-align:middle; text-align:right; }
+  .yrow td:first-child{ text-align:left; }
+  .col-temporada{ width:250px; min-width:250px; }
+  .col-gasto{ width:132px; min-width:132px; }
+  .col-ventas{ width:132px; min-width:132px; }
+  .col-neto{ width:120px; min-width:120px; }
+  .season-cell{ display:flex; align-items:center; gap:6px; }
+  .chev{
+    display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
+    border-radius:6px; background:var(--navy-bg); color:var(--navy); font-size:11px;
+    transition:transform .18s ease; flex:none;
+  }
+  .yrow.open .chev{ transform:rotate(90deg); }
+  .season-t{ font-family:'Fraunces',serif; font-weight:600; font-size:15px; display:inline-block; min-width:76px; }
+  .season-note-flag{
+    font-size:10px; color:var(--gold); border:1px solid var(--gold); border-radius:5px; padding:1px 5px;
+    cursor:help; flex:none; width:14px; text-align:center; box-sizing:content-box;
+  }
+  .season-note-flag.empty{ visibility:hidden; pointer-events:none; }
+  .tourney-flag{
+    font-size:10px; font-weight:700; color:#fff; background:var(--teal); border-radius:5px;
+    padding:1px 6px; letter-spacing:.02em; cursor:help; flex:none;
+  }
+  .g{ color:var(--red); font-weight:600; white-space:nowrap; }
+  .v{ color:var(--teal); font-weight:600; white-space:nowrap; }
+  .n-pos{ color:var(--teal); font-weight:700; white-space:nowrap;}
+  .n-neg{ color:var(--red); font-weight:700; white-space:nowrap;}
+  .nd{ color:#C7C2B4; }
+  .avatars{ display:flex; align-items:center; min-height:28px; }
+  .avatars-cell{ width:190px; min-width:190px; }
+  th.avatars-th{ width:190px; min-width:190px; }
+  .avatar{
+    width:28px; height:28px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:700; font-size:10.5px; color:#fff; border:2px solid #fff;
+    margin-left:-8px; cursor:default; position:relative; flex:none;
+  }
+  .avatar:first-child{ margin-left:0; }
+  img.avatar, img.op-avatar, img.hc-avatar{
+    object-fit:cover; object-position:center 22%; background:var(--grey-bg);
+  }
+  .avatars .more{
+    width:28px; height:28px; border-radius:50%; background:var(--grey-bg); color:var(--ink-soft);
+    display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:700;
+    margin-left:-8px; border:2px solid #fff;
+  }
+  .cat-principal{ background:var(--navy); }
+  .cat-cantera{ background:var(--teal); }
+  .cat-formacion{ background:var(--blue); }
+  .cat-leyenda{ background:var(--gold); color:#3a2c05 !important; }
+  .cat-fiasco{ background:var(--red); }
+  .cat-resto{ background:var(--grey); }
+
+  /* ---------- títulos de la temporada (columna opcional) ---------- */
+  .titles-cell{ text-align:left !important; }
+  .title-icon{ font-size:15px; margin-right:3px; cursor:help; }
+  th.titles-th{ text-align:left; width:120px; min-width:120px; }
+  .col-titles{ display:none; }
+  .show-titles .col-titles{ display:table-cell; }
+
+  /* optional column visibility */
+  .col-balance{ width:112px; min-width:112px; }
+  .hide-balance .col-balance{ display:none; }
+  /* columna de relleno sin ancho fijo: absorbe el espacio sobrante para que el resto de
+     columnas (con ancho explícito) nunca se estiren de forma proporcional. Ver nota en JS. */
+  .col-filler{ padding:0 !important; border:none !important; }
+
+  /* ---------- expand/collapse-all buttons (dentro del toolbar fijo) ---------- */
+  .tbtn{
+    font-family:'Inter',sans-serif; font-size:10px; font-weight:700; color:var(--ink-soft);
+    background:#fff; border:1px solid var(--line); border-radius:9px; padding:3px 6px;
+    cursor:pointer; transition:.15s; line-height:1.15; width:78px; text-align:center;
+    white-space:normal;
+  }
+  .tbtn:hover{ border-color:var(--ink); color:var(--ink); }
+
+  /* ---------- DETAIL (expanded) ---------- */
+  tr.detail-row td{ padding:0; border-bottom:1px solid var(--line); }
+  .detail-wrap{ background:#FBFAF6; padding:6px 16px 18px 16px; border-left:3px solid var(--gold-bg); }
+  table.ops{ width:100%; border-collapse:collapse; table-layout:fixed; }
+  table.ops th{
+    text-align:left; font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-transform:uppercase;
+    letter-spacing:.07em; color:var(--grey); padding:6px 10px; border-bottom:1px solid var(--line);
+  }
+  table.ops td{ padding:8px 10px; border-bottom:1px dashed #E8E5DA; font-size:13px; vertical-align:middle; }
+  table.ops tr:last-child td{ border-bottom:none; }
+  .op-player{ display:flex; align-items:center; gap:9px; }
+  .op-avatar{
+    width:30px; height:30px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:700; font-size:11px; color:#fff; flex:none; cursor:pointer;
+  }
+  .op-name{ font-weight:600; cursor:pointer; border-bottom:1px dotted transparent; color:var(--ink); text-decoration:none; }
+  .op-name:hover{ border-bottom-color:var(--ink); }
+  .op-name.search-hit, .op-club.search-hit, .op-comment.search-hit{ background:var(--gold-bg); border-radius:4px; padding:1px 4px; }
+  .op-club{ color:var(--ink-soft); }
+  .op-gasto, .op-ventas{ font-family:'IBM Plex Mono',monospace; font-weight:600; text-align:right; white-space:nowrap; }
+  .op-gasto{ color:var(--red); }
+  .op-ventas{ color:var(--teal); }
+  .op-fee-est{ display:block; color:var(--grey); font-weight:400; font-size:9px; letter-spacing:.02em; margin-top:1px; }
+  .op-venta-flag{
+    font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; font-weight:700; color:var(--teal);
+  }
+  .op-comment{ color:var(--ink-soft); font-size:12px; max-width:260px; display:none; }
+  .show-comments .op-comment{ display:table-cell; }
+  th.comment-th{ display:none; }
+  .show-comments th.comment-th{ display:table-cell; }
+  .verdict-tag{ font-size:11px; font-weight:700; white-space:nowrap; }
+  .verdict-tag.exito{ color:var(--teal); }
+  .verdict-tag.fiasco{ color:var(--red); }
+  .verdict-tag.mixto{ color:var(--amber); }
+  .verdict-tag.leyenda{ color:var(--gold); }
+
+  tr.op-row.filtered-out{ display:none; }
+  tr.op-row.kind-hidden{ display:none; }
+
+  /* ---------- NOTE TOOLTIP (floating, on hover of the "i" icon) ---------- */
+  #notetip{
+    position:fixed; z-index:210; max-width:320px; background:var(--gold-bg); border:1px solid #E9D9AA;
+    color:var(--ink-soft); border-radius:10px; padding:11px 13px; font-size:12.5px; line-height:1.55;
+    box-shadow: var(--shadow); opacity:0; transform:translateY(4px); pointer-events:none;
+    transition:opacity .12s, transform .12s;
+  }
+  #notetip.show{ opacity:1; transform:translateY(0); }
+  #notetip b{ color:var(--ink); }
+
+  /* ---------- tooltip instantáneo de temporada (gráfico de barras) ---------- */
+  #seasonTip{
+    position:fixed; z-index:210; width:220px; background:var(--ink); color:#F4F1E6;
+    border-radius:12px; padding:14px 16px; box-shadow:0 24px 50px -12px rgba(0,0,0,0.5);
+    opacity:0; transform:translateY(4px); pointer-events:none; transition:opacity .05s linear;
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  #seasonTip.show{ opacity:1; }
+  .stip-title{ font-family:'Fraunces',serif; font-weight:600; font-size:15px; margin-bottom:8px; }
+  .stip-row{ display:flex; justify-content:space-between; font-size:12.5px; padding:4px 0; border-top:1px solid rgba(255,255,255,0.08); }
+  .stip-row span{ color:#9AA4BC; }
+  .stip-row b.g{ color:#F3C6CB; } .stip-row b.v{ color:#BFE9DF; }
+  .stip-avatars{ display:flex; gap:4px; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08); flex-wrap:wrap; }
+  .stip-avatars .avatar{ width:24px; height:24px; font-size:9px; }
+
+  /* ---------- HOVER CARD ---------- */
+  #hovercard{
+    position:fixed; z-index:200; width:280px; background:var(--ink); color:#F4F1E6;
+    border-radius:14px; box-shadow:0 24px 50px -12px rgba(0,0,0,0.5); padding:0; overflow:hidden;
+    opacity:0; transform:translateY(6px) scale(.98); pointer-events:none; transition:opacity .12s, transform .12s;
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  #hovercard.show{ opacity:1; transform:translateY(0) scale(1); }
+  .hc-top{ padding:18px 18px 12px; display:flex; gap:14px; align-items:center; }
+  .hc-avatar{
+    width:72px; height:72px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:700; font-size:24px; color:#fff; flex:none;
+    box-shadow: inset 0 0 0 3px rgba(255,255,255,0.18);
+  }
+  .hc-name{ font-family:'Fraunces',serif; font-weight:600; font-size:16px; line-height:1.2; }
+  .hc-sub{ font-size:11px; color:#9AA4BC; margin-top:3px; }
+  .hc-body{ padding:0 16px 16px; }
+  .hc-row{ display:flex; justify-content:space-between; font-size:12px; padding:6px 0; border-top:1px solid rgba(255,255,255,0.08); }
+  .hc-row .k{ color:#9AA4BC; }
+  .hc-row .val{ font-family:'IBM Plex Mono',monospace; font-weight:600; text-align:right; max-width:150px; }
+  .hc-titles{ font-size:12px; color:#D8DCE8; padding:8px 0 2px; border-top:1px solid rgba(255,255,255,0.08); line-height:1.45; }
+  .hc-titles b{ color:#fff; display:block; font-size:10px; text-transform:uppercase; letter-spacing:.06em; margin-bottom:3px; color:var(--gold); }
+  .hc-verdict{ margin-top:10px; padding:9px 10px; border-radius:8px; font-size:12px; line-height:1.4; }
+  .hc-verdict.exito{ background:rgba(31,111,99,0.28); color:#BFE9DF; }
+  .hc-verdict.fiasco{ background:rgba(155,44,58,0.30); color:#F3C6CB; }
+  .hc-verdict.mixto{ background:rgba(177,92,30,0.30); color:#F2CFA9; }
+  .hc-verdict.leyenda{ background:rgba(184,137,43,0.28); color:#F2DFB0; }
+
+  .empty-season{ padding:14px 0 6px; color:var(--grey); font-size:12.5px; font-style:italic; }
+  .foot{ padding:34px 6vw 0; color:var(--grey); font-size:11.5px; max-width:900px; line-height:1.6; }
+  .foot b{ color:var(--ink-soft); }
+
+  @media (max-width: 760px){
+    table.main thead th:nth-child(5), table.main td:nth-child(5){ display:none; }
+    .avatars{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p class="eyebrow">Fichas &amp; balances · 1953 — 2026</p>
+  <h1>El libro mayor de fichajes del Real Madrid</h1>
+  <p>Compras, ventas y balance de cada verano, temporada a temporada — desde Di Stéfano hasta Yan Diomandé. Datos simplificados a partir del Excel completo, con filtros por columna y por tipo de jugador.</p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="n" id="statSeasons">–</div><div class="l">Temporadas</div></div>
+    <div class="hstat"><div class="n" id="statOps">–</div><div class="l">Operaciones registradas</div></div>
+    <div class="hstat"><div class="n" id="statSpend">–</div><div class="l">Gasto acumulado</div></div>
+    <div class="hstat"><div class="n" id="statSales">–</div><div class="l">Ingresos acumulados</div></div>
+  </div>
+</div>
+
+<div class="stickyhead">
+<div class="viewtabs">
+  <button class="viewtab on" data-view="tabla">📋 Tabla</button>
+  <button class="viewtab" data-view="chart-season">📊 Gasto por temporada</button>
+  <button class="viewtab" data-view="chart-player">💰 Gasto por jugador</button>
+  <button class="viewtab" data-view="timeline">📈 Timeline</button>
+  <button class="viewtab" data-view="mapa">🗺️ Mapa</button>
+  <button class="viewtab" data-view="once">⚽ Once</button>
+</div>
+
+<div class="toolbar">
+  <div class="tgroup">
+    <div class="tlabel">Categorías de jugador</div>
+    <div class="chips" id="catToggles">
+      <div class="chip on" id="allCatsChip" style="max-width:60px;"><span class="dot"></span>Todos</div>
+      <div class="chip on" data-cat="principal"><span class="dot"></span>Fichajes principales</div>
+      <div class="chip on" data-cat="cantera"><span class="dot"></span>Canteranos</div>
+      <div class="chip on" data-cat="formacion" style="max-width:112px;"><span class="dot"></span>Formación / Cat. inferiores</div>
+      <div class="chip on" data-cat="leyenda"><span class="dot"></span>Leyendas</div>
+      <div class="chip on" data-cat="fiasco"><span class="dot"></span>Fiascos</div>
+      <div class="chip on" data-cat="resto"><span class="dot"></span>Resto</div>
+      <div class="chip" id="hideVentasChip" style="max-width:66px;"><span class="dot"></span>Ocultar ventas</div>
+    </div>
+  </div>
+  <div class="tgroup">
+    <div class="tlabel">Buscar jugador</div>
+    <div class="searchbox">
+      <input type="text" id="searchInput" placeholder="Nombre (5+ letras)…" autocomplete="off">
+      <button class="searchClear" id="searchClear" style="display:none" aria-label="Limpiar búsqueda">×</button>
+    </div>
+  </div>
+  <div class="tgroup" id="colGroupTabla">
+    <div class="tlabel">Columnas</div>
+    <div class="chips" id="colToggles">
+      <div class="chip" data-col="balance" style="max-width:70px;"><span class="dot"></span>Balance completo</div>
+      <div class="chip" data-col="comments"><span class="dot"></span>Comentarios</div>
+      <div class="chip" data-col="titles"><span class="dot"></span>Títulos</div>
+    </div>
+  </div>
+  <div class="tgroup" id="colGroupPlayerChart" style="display:none">
+    <div class="tlabel">Gráfico por jugador</div>
+    <div class="chips">
+      <div class="chip on" id="chartSortChip">Orden: año</div>
+      <div class="chip" id="chartNetChip">Descontar venta</div>
+    </div>
+  </div>
+  <div class="tgroup tgroup-actions" id="tableOnlyActions">
+    <div class="tlabel">Temporadas</div>
+    <div class="chips">
+      <button class="tbtn" id="btnExpandAll">▾ Desplegar todas</button>
+      <button class="tbtn" id="btnCollapseAll">▸ Contraer todas</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="wrap">
+  <div class="viewpanel" id="view-tabla">
+  <div class="tablecard">
+    <table class="main" id="mainTable">
+      <thead>
+        <tr>
+          <th class="txt col-temporada">Temporada</th>
+          <th class="col-gasto">Gasto (M€)</th>
+          <th class="col-ventas">Ventas (M€)</th>
+          <th class="col-neto">Neto</th>
+          <th class="col-balance">Salarios</th>
+          <th class="col-balance">Otros gastos</th>
+          <th class="col-balance">Otros ingresos</th>
+          <th class="col-balance">Balance total</th>
+          <th class="txt avatars-th">Protagonistas</th>
+          <th class="txt titles-th col-titles">Títulos</th>
+          <th class="col-filler"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  </div>
+
+  <div class="viewpanel" id="view-chart-season" style="display:none">
+    <div class="viewcard">
+      <div class="viewcard-head">
+        <h2>Gasto y ventas por temporada</h2>
+        <p>Barras hacia arriba: gasto. Barras hacia abajo: ingresos por ventas. Línea dorada: balance neto. Pasa el ratón sobre una temporada para ver el detalle. Respeta los filtros activos arriba.</p>
+      </div>
+      <div class="chart-frame">
+        <div class="chart-axis" id="seasonChartAxis"></div>
+        <div class="chart-scroll" id="seasonChartWrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="viewpanel" id="view-chart-player" style="display:none">
+    <div class="viewcard">
+      <div class="viewcard-head">
+        <h2>Gasto por jugador</h2>
+        <p>Una barra por fichaje con importe conocido. Pasa el ratón sobre cualquier barra o avatar para ver la ficha del jugador. Controles de orden y "descontar venta" en la barra superior.</p>
+      </div>
+      <div class="chart-frame">
+        <div class="chart-axis" id="playerChartAxis"></div>
+        <div class="chart-scroll" id="playerChartWrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="viewpanel" id="view-timeline" style="display:none">
+    <div class="viewcard"><div class="viewcard-head"><h2>Timeline</h2><p>🚧 Próximamente.</p></div></div>
+  </div>
+  <div class="viewpanel" id="view-mapa" style="display:none">
+    <div class="viewcard"><div class="viewcard-head"><h2>Mapa</h2><p>🚧 Próximamente.</p></div></div>
+  </div>
+  <div class="viewpanel" id="view-once" style="display:none">
+    <div class="viewcard"><div class="viewcard-head"><h2>Once histórico / aleatorio</h2><p>🚧 Próximamente.</p></div></div>
+  </div>
+
+  <div class="foot">
+    <p><b>Sobre los avatares:</b> no se muestran fotografías reales (son material con derechos de autor); cada jugador tiene un avatar con sus iniciales, coloreado según su categoría.</p>
+    <p><b>Sobre las cifras:</b> vista simplificada derivada del Excel "real_madrid_compras_ventas.xlsx". Para el detalle completo, fuentes y metodología (incluyendo por qué la mayoría de Salarios/Otros gastos/Otros ingresos están en blanco), consulta ese archivo.</p>
+  </div>
+</div>
+
+<div id="hovercard"></div>
+<div id="notetip"></div>
+<div id="seasonTip"></div>
+
+<script>
+/* =====================================================================
+   DATOS — un objeto por temporada. ops: cada operación de esa temporada.
+   k: 'c' compra / 'v' venta.  cat: principal | cantera | formacion | leyenda | fiasco | resto
+   f: importe en M€ (null = desconocido).  fe: true si el importe es una estimación.
+   ve: 'exito' | 'fiasco' | 'mixto' | 'leyenda' | null (veredicto)
+   ===================================================================== */
+const SEASONS = [
+{t:"1953/54", g:0.03, v:0, note:"Arranque de la primera gran era europea del club (5 Copas de Europa seguidas, 1956-1960). Cifras convertidas de pesetas/dólares de 1953 con el tipo fijo de 1999, sin ajustar por inflación.", titles:[{icon:"🥇", name:"Liga 1953/54"}], ops:[
+  {n:"Alfredo Di Stéfano", k:"c", cat:"leyenda", f:0.03, club:"Millonarios de Bogotá", det:"Disputa histórica con el F.C. Barcelona por sus derechos", ti:"5 Copas de Europa consecutivas (1956-60) · 2 Balones de Oro (1957 y 1959) siendo jugador del Real Madrid · considerado por muchos el mejor jugador de la historia del club", ve:"leyenda", vt:"2 Balones de Oro (1957 y 1959) siendo jugador del Real Madrid. Pieza fundadora del mito del Real Madrid europeo."},
+  {n:"Francisco Gento", k:"c", cat:"formacion", f:0.01, club:"Racing de Santander", det:"+ cesión de los jugadores Espina y Urcelay", ti:"6 Copas de Europa — récord absoluto del club", ve:"leyenda", vt:"El futbolista con más Copas de Europa/Champions de la historia."}
+]},
+{t:"1956/57", g:0.08, v:0, note:"Kopa ganó el Balón de Oro 1958 jugando en el Real Madrid.", titles:[{icon:"🥇", name:"Liga 1956/57"}, {icon:"🏆", name:"Copa de Europa 1956/57"}], ops:[
+  {n:"Raymond Kopa", k:"c", cat:"leyenda", f:0.08, club:"Stade de Reims", det:"52 millones de francos franceses de la época", ti:"Balón de Oro 1958", ve:"leyenda", vt:"Balón de Oro 1958 siendo jugador del Real Madrid."}
+]},
+{t:"1958/59", g:null, v:0, note:"Puskás llevaba dos años sin equipo tras su exilio de la revolución húngara de 1956; probablemente no hubo traspaso formal a un club.", tourney:{short:"Mundial", full:"Mundial de fútbol 1958 (Suecia)"}, titles:[{icon:"🏆", name:"Copa de Europa 1958/59"}], ops:[
+  {n:"Ferenc Puskás", k:"c", cat:"leyenda", f:null, club:"Honvéd (en el exilio)", det:"Llegó sin vínculo contractual activo con ningún club", ti:"Ídolo total junto a Di Stéfano; delantera histórica", ve:"leyenda"}
+]},
+{t:"1971/72", g:0.02, v:0, note:"Estimación sin confirmar por prensa oficial de la época.", titles:[{icon:"🥇", name:"Liga 1971/72"}], ops:[
+  {n:"Carlos Santillana", k:"c", cat:"formacion", f:0.02, fe:true, club:"Llegó joven desde Cantabria", ti:"Uno de los máximos goleadores históricos del club", ve:"leyenda"}
+]},
+{t:"1973/74", g:0.02, v:0, note:"Estimación sin confirmar por prensa oficial de la época.", ops:[
+  {n:"José Antonio Camacho", k:"c", cat:"formacion", f:0.02, fe:true, club:"Albacete, vía Castilla", ti:"Capitán histórico; después entrenador del Madrid y de España", ve:"exito"}
+]},
+{t:"1977/78", g:0.3, v:0, note:"Cifra estimada por comparación con otros fichajes internacionales de la época; sin confirmar.", titles:[{icon:"🥇", name:"Liga 1977/78"}], ops:[
+  {n:"Uli Stielike", k:"c", cat:"resto", f:0.3, fe:true, club:"Borussia Mönchengladbach", ti:"Internacional con Alemania Occidental"}
+]},
+{t:"1984/85", g:0.75, v:0, note:"Cifra estimada; se aprovecha esta temporada para ubicar también el debut de Butragueño en la cantera.", tourney:{short:"Eurocopa", full:"Eurocopa 1984 (Francia)"}, titles:[{icon:"🎗️", name:"Copa de la UEFA 1984/85"}], ops:[
+  {n:"Jorge Valdano", k:"c", cat:"resto", f:0.75, fe:true, club:"Real Zaragoza", ti:"Campeón del Mundo 1986 con Argentina", ve:"exito"},
+  {n:"Emilio Butragueño", k:"c", cat:"cantera", f:0, club:"Cantera", ti:"Icono de 'la Quinta del Buitre'; hoy directivo del club", ve:"leyenda"}
+]},
+{t:"1985/86", g:1.5, v:0, note:"Fichaje muy sonado por venir del eterno rival: operación triangular a través de los Pumas de México (el Atlético cobró 200 M ptas de los Pumas, que revendieron a Hugo Sánchez al Madrid por 250 M ptas).", titles:[{icon:"🎗️", name:"Copa de la UEFA 1985/86"}], ops:[
+  {n:"Hugo Sánchez", k:"c", cat:"principal", f:1.5, club:"Atlético de Madrid (vía Pumas UNAM)", ti:"5 Trofeos Pichichi con el Real Madrid", ve:"exito", vt:"Uno de los mejores '9' de la historia de LaLiga."}
+]},
+{t:"1982/83", g:null, v:0, note:"Temporada añadida solo para ubicar el debut de Míchel en la cantera (no forma parte del Excel original).", tourney:{short:"Mundial", full:"Mundial de fútbol 1982 (España)"}, ops:[
+  {n:"Míchel", k:"c", cat:"cantera", f:0, club:"Cantera (desde 1976, con 13 años)", ti:"Líder técnico de 'la Quinta del Buitre'; récord de asistencias de su época", ve:"leyenda"}
+]},
+{t:"1980/81", g:null, v:0, note:"Temporada añadida solo para ubicar el debut de Chendo en la cantera (no forma parte del Excel original).", tourney:{short:"Eurocopa", full:"Eurocopa 1980 (Italia)"}, ops:[
+  {n:"Chendo", k:"c", cat:"cantera", f:0, club:"Cantera (desde 1977, con 15 años)", ti:"Junto a Sanchís, único 'Quinta del Buitre' con toda su carrera en el club", ve:"exito"}
+]},
+{t:"1983/84", g:null, v:0, note:"Temporada añadida solo para ubicar el debut de Manuel Sanchís en la cantera (no forma parte del Excel original).", ops:[
+  {n:"Manuel Sanchís", k:"c", cat:"cantera", f:0, club:"Cantera (hijo de Manuel Sanchís Martínez)", ti:"Capitán de 'la Quinta del Buitre'; nunca jugó en otro club", ve:"leyenda"}
+]},
+{t:"1989/90", g:1.2, v:0, note:"Cifra confirmada por Wikipedia y biografiasyvidas.com (200 M ptas ≈1,2 M€), más la cesión de José Luis Caminero en sentido contrario.", titles:[{icon:"🥇", name:"Liga 1989/90"}], ops:[
+  {n:"Fernando Hierro", k:"c", cat:"formacion", f:1.2, club:"Real Valladolid", ti:"Capitán histórico; hoy director deportivo de la RFEF", ve:"leyenda"}
+]},
+{t:"1994/95", g:null, v:0, note:"Temporada añadida solo para ubicar el debut de Raúl en la cantera (no forma parte del Excel original).", tourney:{short:"Mundial", full:"Mundial de fútbol 1994 (Estados Unidos)"}, titles:[{icon:"🥇", name:"Liga 1994/95"}], ops:[
+  {n:"Raúl González", k:"c", cat:"cantera", f:0, club:"Cantera (de niño, en la cantera del Atlético)", ti:"Máximo goleador histórico del club hasta Cristiano Ronaldo", ve:"leyenda"}
+]},
+{t:"1995/96", g:null, v:0, note:"Temporada añadida solo para ubicar el debut de Guti en la cantera (no forma parte del Excel original).", ops:[
+  {n:"Guti", k:"c", cat:"cantera", f:0, club:"Cantera (desde los 9 años)", ti:"Segundo capitán en la era de Raúl; récord de asistencias del club", ve:"exito"}
+]},
+{t:"1996/97", g:45.7, v:0, note:"Primer gran mercado de Lorenzo Sanz, la etapa 'pre-Galáctica'.", tourney:{short:"Eurocopa", full:"Eurocopa 1996 (Inglaterra)"}, titles:[{icon:"🥇", name:"Liga 1996/97"}], ops:[
+  {n:"Roberto Carlos", k:"c", cat:"principal", f:6, club:"Inter de Milán", ti:"3 Champions; referencia mundial del lateral izquierdo ofensivo", ve:"leyenda"},
+  {n:"Predrag Mijatović", k:"c", cat:"principal", f:14, club:"Valencia CF", ti:"Autor del gol de 'la Séptima' (1998)", ve:"exito"},
+  {n:"Davor Šuker", k:"c", cat:"principal", f:11, club:"Sevilla FC", ti:"Bota de Oro del Mundial 1998 con Croacia", ve:"exito", vt:"Bota de Oro del Mundial 1998 con Croacia, la misma temporada de su fichaje."},
+  {n:"Clarence Seedorf", k:"c", cat:"resto", f:8.6, club:"Sampdoria", ti:"4 Champions en toda su carrera (récord con 3 clubes distintos)"},
+  {n:"Christian Panucci", k:"c", cat:"resto", f:4.1, club:"AC Milan"},
+  {n:"Bodo Illgner", k:"c", cat:"resto", f:2, club:"1. FC Colonia"}
+]},
+{t:"1997/98", g:0, v:0, note:"Temporada de 'La Séptima' (7ª Copa de Europa, mayo 1998), ganada en gran parte con el bloque del año anterior.", titles:[{icon:"🏆", name:"Copa de Europa / Champions League 1997/98 (‘La Séptima’)"}], ops:[
+  {n:"Fernando Morientes", k:"c", cat:"resto", f:0, club:"Real Zaragoza (libre)", ti:"Máximo goleador español histórico en Champions durante años", ve:"exito"}
+]},
+{t:"1998/99", g:0, v:0, note:"Temporada floja en Liga y Champions tras el título continental; pocos movimientos relevantes en el mercado.", tourney:{short:"Mundial", full:"Mundial de fútbol 1998 (Francia)"}, ops:[]},
+{t:"1999/2000", g:40, v:0, note:"Temporada de 'La Octava' (8ª Copa de Europa, mayo 2000).", titles:[{icon:"🏆", name:"Champions League 1999/2000 (‘La Octava’)"}], ops:[
+  {n:"Nicolas Anelka", k:"c", cat:"principal", f:35, club:"Arsenal FC", ve:"mixto", vt:"Un año irregular; salió tras ganar la Octava."},
+  {n:"Steve McManaman", k:"c", cat:"resto", f:0, club:"Liverpool FC (libre)", ti:"2 Copas de Europa con el Real Madrid"},
+  {n:"Míchel Salgado", k:"c", cat:"resto", f:5, club:"Celta de Vigo", ti:"4 Copas de Europa/Champions"},
+  {n:"Iker Casillas", k:"c", cat:"cantera", f:0, club:"Cantera pura (desde los 9 años)", ti:"Mundial 2010 con España; capitán histórico del club", ve:"leyenda"}
+]},
+{t:"2000/01", g:121.95, v:58.5, note:"Inicio de la 'era Galáctica' de Florentino Pérez.", tourney:{short:"Eurocopa", full:"Eurocopa 2000 (Bélgica/Países Bajos)"}, titles:[{icon:"🥇", name:"Liga 2000/01"}], ops:[
+  {n:"Luis Figo", k:"c", cat:"principal", f:60, club:"F.C. Barcelona", det:"Traspaso más polémico de la historia del club", ti:"Balón de Oro 2000", ve:"exito", vt:"Balón de Oro 2000, el mismo año de su fichaje por el Real Madrid."},
+  {n:"Santiago Solari", k:"c", cat:"resto", f:0, fe:true, club:"Atlético de Madrid"},
+  {n:"Clarence Seedorf", k:"v", cat:"resto", f:24, club:"Inter de Milán"},
+  {n:"Nicolas Anelka", k:"v", cat:"principal", f:34.5, fe:true, club:"Paris Saint-Germain"}
+]},
+{t:"2001/02", g:77.5, v:0, note:"El fichaje más caro de la historia del fútbol en ese momento.", titles:[{icon:"🏆", name:"Champions League 2001/02 (‘La Novena’)"}], ops:[
+  {n:"Zinedine Zidane", k:"c", cat:"principal", f:77.5, club:"Juventus FC", ti:"Balón de Oro 1998; gol de la final de París 2002", ve:"leyenda", vt:"Balón de Oro 1998, antes de fichar. El importe de su fichaje fue el récord mundial en su momento (superó los 60 M€ de Figo del año anterior)."}
+]},
+{t:"2002/03", g:45, v:0, note:"Completaba el póker inicial de Galácticos junto a Figo y Zidane.", tourney:{short:"Mundial", full:"Mundial de fútbol 2002 (Japón/Corea del Sur)"}, titles:[{icon:"🥇", name:"Liga 2002/03"}], ops:[
+  {n:"Ronaldo Nazário", k:"c", cat:"principal", f:45, club:"Inter de Milán", ti:"Balón de Oro 2002 (recién llegado al Real Madrid, por su Mundial con Brasil); ídolo mundial, 'El Fenómeno'", ve:"exito", vt:"Balón de Oro 2002, recién llegado al Real Madrid tras ganar el Mundial con Brasil."}
+]},
+{t:"2003/04", g:37.5, v:16.8, note:"La salida de Makelele fue muy criticada por la afición y el vestuario ('el efecto Makelele').", ops:[
+  {n:"David Beckham", k:"c", cat:"principal", f:37.5, club:"Manchester United", ve:"mixto", vt:"Enorme repercusión mediática; rendimiento irregular en Champions."},
+  {n:"Claude Makelele", k:"v", cat:"principal", f:16.8, club:"Chelsea FC", vt:"Su marcha destapó la importancia de su posición: nació el término 'hacer de Makelele'."}
+]},
+{t:"2004/05", g:58.7, v:0, note:"Walter Samuel apenas jugó con el primer equipo antes de salir.", tourney:{short:"Eurocopa", full:"Eurocopa 2004 (Portugal)"}, ops:[
+  {n:"Walter Samuel", k:"c", cat:"resto", f:25, club:"AS Roma", vt:"Vendido al Inter apenas un año después."},
+  {n:"Jonathan Woodgate", k:"c", cat:"fiasco", f:13.4, fe:true, club:"Newcastle United", ve:"fiasco", vt:"Se lesionó antes de debutar oficialmente; pasó su primera pretemporada entera de baja."},
+  {n:"Michael Owen", k:"c", cat:"resto", f:12, fe:true, club:"Liverpool FC", ti:"Balón de Oro 2001 (antes de fichar)", vt:"Balón de Oro 2001, antes de fichar por el Real Madrid."}
+]},
+{t:"2005/06", g:89.5, v:0, note:"", ops:[
+  {n:"Sergio Ramos", k:"c", cat:"principal", f:27, club:"Sevilla FC", ti:"5 Champions; capitán histórico del club", ve:"exito"},
+  {n:"Robinho", k:"c", cat:"resto", f:24, club:"Santos FC", ve:"mixto", vt:"Destellos de gran calidad, nunca acabó de consolidarse."},
+  {n:"Julio Baptista", k:"c", cat:"resto", f:null, club:"Sevilla FC"}
+]},
+{t:"2006/07", g:103, v:7.5, note:"Zinedine Zidane se retiró tras el Mundial 2006 (sin traspaso).", tourney:{short:"Mundial", full:"Mundial de fútbol 2006 (Alemania)"}, titles:[{icon:"🥇", name:"Liga 2006/07"}], ops:[
+  {n:"Ruud van Nistelrooy", k:"c", cat:"principal", f:13, fe:true, club:"Manchester United", ti:"Máximo goleador de la Champions 2006/07", ve:"exito"},
+  {n:"Mahamadou Diarra", k:"c", cat:"resto", f:26, club:"Olympique de Lyon"},
+  {n:"Fabio Cannavaro", k:"c", cat:"principal", f:0, fe:true, club:"Juventus FC", ti:"Balón de Oro 2006", ve:"exito", vt:"Balón de Oro 2006 siendo jugador del Real Madrid."},
+  {n:"Emerson", k:"c", cat:"resto", f:null, club:"Juventus FC"},
+  {n:"Marcelo Vieira", k:"c", cat:"principal", f:0, fe:true, club:"Fluminense", ti:"6 Champions; lateral con más títulos de la historia del club", ve:"exito"},
+  {n:"Ronaldo Nazário", k:"v", cat:"principal", f:7.5, club:"AC Milan"}
+]},
+{t:"2007/08", g:118, v:0, note:"Una de las últimas grandes incorporaciones gestionadas por Santiago Bernabéu.", titles:[{icon:"🥇", name:"Liga 2007/08"}], ops:[
+  {n:"Arjen Robben", k:"c", cat:"principal", f:35, club:"Chelsea FC", ti:"Referencia mundial en banda; luego estrella del Bayern", ve:"exito"},
+  {n:"Wesley Sneijder", k:"c", cat:"principal", f:27, fe:true, club:"Ajax", ve:"mixto", vt:"Buen nivel, pero ganó el Triplete tras salir del Madrid (Inter, 2010)."},
+  {n:"Royston Drenthe", k:"c", cat:"fiasco", f:14, fe:true, club:"Feyenoord", ve:"fiasco", vt:"No cuajó; cedido repetidamente hasta su salida definitiva."},
+  {n:"Gabriel Heinze", k:"c", cat:"resto", f:8, fe:true, club:"Paris Saint-Germain"},
+  {n:"David Beckham", k:"v", cat:"principal", f:0, club:"LA Galaxy"}
+]},
+{t:"2008/09", g:82.2, v:42, note:"", tourney:{short:"Eurocopa", full:"Eurocopa 2008 (Austria/Suiza)"}, ops:[
+  {n:"Klaas-Jan Huntelaar", k:"c", cat:"fiasco", f:27, club:"Ajax", ve:"fiasco", vt:"Jugó muy poco; vendido al Schalke apenas 6 meses después de fichar."},
+  {n:"Rafael van der Vaart", k:"c", cat:"resto", f:13, fe:true, club:"Hamburgo SV"},
+  {n:"Lassana Diarra", k:"c", cat:"resto", f:20, fe:true, club:"Portsmouth FC"},
+  {n:"Robinho", k:"v", cat:"resto", f:42, club:"Manchester City"}
+]},
+{t:"2009/10", g:258.5, v:40, note:"Verano histórico ('segunda generación Galáctica'); las ventas de Robben y Sneijder ayudaron a financiarlo.", ops:[
+  {n:"Cristiano Ronaldo", k:"c", cat:"principal", f:94, club:"Manchester United", det:"El importe de su fichaje fue el récord mundial en su momento", ti:"5 Champions, 4 Balones de Oro con el Madrid, máximo goleador histórico del club", ve:"leyenda", vt:"4 Balones de Oro siendo jugador del Real Madrid (2013, 2014, 2016 y 2017). El importe de su fichaje fue el récord mundial en su momento."},
+  {n:"Kaká", k:"c", cat:"principal", f:67, club:"AC Milan", ti:"Balón de Oro 2007 (antes de fichar)", ve:"mixto", vt:"Balón de Oro 2007, antes de fichar. Las lesiones limitaron mucho su rendimiento con el Madrid."},
+  {n:"Karim Benzema", k:"c", cat:"principal", f:35, club:"Olympique de Lyon", ti:"Balón de Oro 2022; 4 Champions", ve:"exito", vt:"Balón de Oro 2022 siendo jugador del Real Madrid."},
+  {n:"Xabi Alonso", k:"c", cat:"principal", f:30, club:"Liverpool FC", ti:"Campeón del Mundo 2010 y Eurocopa 2012 con España", ve:"exito"},
+  {n:"Arjen Robben", k:"v", cat:"principal", f:25, club:"Bayern de Múnich"},
+  {n:"Wesley Sneijder", k:"v", cat:"principal", f:15, club:"Inter de Milán"}
+]},
+{t:"2010/11", g:93, v:0, note:"Fin de la era de Raúl González, símbolo histórico del madridismo (salida libre, sin traspaso).", tourney:{short:"Mundial", full:"Mundial de fútbol 2010 (Sudáfrica)"}, titles:[{icon:"🎖️", name:"Copa del Rey 2010/11"}], ops:[
+  {n:"Ángel Di María", k:"c", cat:"principal", f:33, club:"Benfica", ti:"Campeón del Mundo 2022 con Argentina (ya fuera del Madrid)", ve:"exito"},
+  {n:"Mesut Özil", k:"c", cat:"principal", f:15, club:"Werder Bremen", ti:"Campeón del Mundo 2014 con Alemania", ve:"exito"},
+  {n:"Sami Khedira", k:"c", cat:"resto", f:12, club:"VfB Stuttgart"},
+  {n:"Ricardo Carvalho", k:"c", cat:"resto", f:0, fe:true, club:"Chelsea FC"}
+]},
+{t:"2011/12", g:56, v:0, note:"", titles:[{icon:"🥇", name:"Liga 2011/12"}], ops:[
+  {n:"Fábio Coentrão", k:"c", cat:"resto", f:30, club:"Benfica"},
+  {n:"Nuri Şahin", k:"c", cat:"fiasco", f:10, fe:true, club:"Borussia Dortmund", ve:"fiasco", vt:"Grave lesión de rodilla nada más llegar; apenas tuvo continuidad."},
+  {n:"José Callejón", k:"c", cat:"resto", f:6, fe:true, club:"RCD Espanyol"},
+  {n:"Hamit Altıntop", k:"c", cat:"resto", f:0, club:"Bayern de Múnich (libre)"},
+  {n:"Nacho Fernández", k:"c", cat:"cantera", f:0, club:"Cantera pura (desde los 12 años)", ti:"Uno de los capitanes más veteranos de la plantilla en su última etapa", ve:"exito"}
+]},
+{t:"2012/13", g:44.5, v:0, note:"Casemiro llegó de forma discreta y acabaría siendo uno de los mejores negocios de la historia del club.", tourney:{short:"Eurocopa", full:"Eurocopa 2012 (Polonia/Ucrania)"}, ops:[
+  {n:"Luka Modrić", k:"c", cat:"principal", f:35, club:"Tottenham Hotspur", ti:"Balón de Oro 2018; 5 Champions", ve:"leyenda", vt:"Balón de Oro 2018 siendo jugador del Real Madrid."},
+  {n:"Michael Essien", k:"c", cat:"resto", f:0, club:"Chelsea FC (cedido)"},
+  {n:"Casemiro", k:"c", cat:"formacion", f:6, club:"São Paulo (cedido y comprado en 2013)", ti:"5 Champions; Balón de Bronce del Mundial 2018", ve:"exito", vt:"Balón de Bronce del Mundial 2018 siendo jugador del Real Madrid."}
+]},
+{t:"2013/14", g:175.5, v:90, note:"Las ventas de Higuaín y Özil ayudaron a financiar el fichaje récord de Bale.", titles:[{icon:"🏆", name:"Champions League 2013/14 (‘La Décima’)"}, {icon:"🎖️", name:"Copa del Rey 2013/14"}], ops:[
+  {n:"Gareth Bale", k:"c", cat:"principal", f:101, club:"Tottenham Hotspur", det:"El importe de su fichaje fue el récord mundial en su momento", ti:"5 Champions; autor de goles decisivos en 3 finales", ve:"mixto", vt:"El importe de su fichaje fue el récord mundial en su momento (superó los 94 M€ de Cristiano Ronaldo de 2009). Palmarés indiscutible, pero su relación con la afición se deterioró en sus últimos años."},
+  {n:"Isco", k:"c", cat:"principal", f:30, club:"Málaga CF", ti:"5 Champions; pieza clave 2016-2018", ve:"exito"},
+  {n:"Asier Illarramendi", k:"c", cat:"resto", f:32, fe:true, club:"Real Sociedad"},
+  {n:"Dani Carvajal", k:"c", cat:"cantera", f:6.5, club:"Cantera; recomprado al Bayer Leverkusen", ti:"5 Champions", ve:"exito"},
+  {n:"Gonzalo Higuaín", k:"v", cat:"resto", f:40, club:"SSC Nápoles"},
+  {n:"Mesut Özil", k:"v", cat:"principal", f:50, club:"Arsenal FC"}
+]},
+{t:"2014/15", g:126, v:95, note:"La venta de Di María financió en gran parte la llegada de James y Kroos.", tourney:{short:"Mundial", full:"Mundial de fútbol 2014 (Brasil)"}, ops:[
+  {n:"James Rodríguez", k:"c", cat:"principal", f:75, club:"AS Mónaco", ti:"Bota de Oro del Mundial 2014", ve:"mixto", vt:"Bota de Oro del Mundial 2014, antes de fichar. Gran arranque; perdió protagonismo con la llegada de Zidane."},
+  {n:"Toni Kroos", k:"c", cat:"principal", f:25, club:"Bayern de Múnich", ti:"Campeón del Mundo 2014; 4 Champions", ve:"leyenda"},
+  {n:"Keylor Navas", k:"c", cat:"principal", f:10, club:"Levante UD", ti:"3 Champions consecutivas como titular", ve:"exito"},
+  {n:"Lucas Vázquez", k:"c", cat:"cantera", f:0, club:"Cantera (desde los 16 años, vía Deportivo)", ti:"23 títulos con el primer equipo; tercer capitán", ve:"exito"},
+  {n:"Ángel Di María", k:"v", cat:"principal", f:75, club:"Manchester United"},
+  {n:"Álvaro Morata", k:"v", cat:"resto", f:20, club:"Juventus FC"}
+]},
+{t:"2015/16", g:92.9, v:0, note:"", titles:[{icon:"🏆", name:"Champions League 2015/16 (‘La Undécima’)"}], ops:[
+  {n:"Mateo Kovačić", k:"c", cat:"resto", f:38, club:"Inter de Milán"},
+  {n:"Danilo", k:"c", cat:"fiasco", f:31, fe:true, club:"FC Porto", ve:"fiasco", vt:"No convenció; vendido dos años después con pérdidas."}
+]},
+{t:"2016/17", g:35, v:0, note:"Mercado muy austero en el primer equipo: campeones de Liga y Champions con la plantilla ya formada.", tourney:{short:"Eurocopa", full:"Eurocopa 2016 (Francia)"}, titles:[{icon:"🏆", name:"Champions League 2016/17 (‘La Duodécima’)"}, {icon:"🥇", name:"Liga 2016/17"}], ops:[
+  {n:"Álvaro Morata", k:"c", cat:"resto", f:30, club:"Juventus FC (regreso)"},
+  {n:"Federico Valverde", k:"c", cat:"formacion", f:5, club:"Peñarol", ti:"Referencia mundial del centro del campo", ve:"exito"}
+]},
+{t:"2017/18", g:40.5, v:66, note:"", titles:[{icon:"🏆", name:"Champions League 2017/18 (‘La Decimotercera’)"}], ops:[
+  {n:"Theo Hernández", k:"c", cat:"resto", f:24, club:"Atlético de Madrid"},
+  {n:"Dani Ceballos", k:"c", cat:"resto", f:19, fe:true, club:"Real Betis"},
+  {n:"Álvaro Morata", k:"v", cat:"resto", f:66, club:"Chelsea FC"}
+]},
+{t:"2018/19", g:164.75, v:117, note:"La marcha de Cristiano Ronaldo cerró una década histórica; se vendió más caro de lo que costó fichar 9 años antes.", tourney:{short:"Mundial", full:"Mundial de fútbol 2018 (Rusia)"}, ops:[
+  {n:"Vinícius Júnior", k:"c", cat:"principal", f:45, club:"Flamengo", ti:"2 Champions (2022, 2024); finalista al Balón de Oro", ve:"exito"},
+  {n:"Thibaut Courtois", k:"c", cat:"principal", f:35, club:"Chelsea FC", ti:"Guante de Oro del Mundial 2018 (antes de fichar, con Bélgica); The Best/Yashin al mejor portero del mundo en 2022; 2 Champions con paradas decisivas", ve:"exito", vt:"Guante de Oro del Mundial 2018, antes de fichar. Elegido mejor portero del mundo (The Best/Yashin) en 2022 siendo jugador del Real Madrid."},
+  {n:"Álvaro Odriozola", k:"c", cat:"resto", f:30, fe:true, club:"Real Sociedad"},
+  {n:"Mariano Díaz", k:"c", cat:"fiasco", f:8, fe:true, club:"Olympique de Lyon (regreso)", ve:"fiasco", vt:"Su segunda etapa estuvo marcada por lesiones y escasa continuidad."},
+  {n:"Cristiano Ronaldo", k:"v", cat:"principal", f:117, club:"Juventus FC", ve:"leyenda", vt:"Cerró una década histórica del club a nivel de palmarés europeo. Se vendió por más dinero (117 M€) del que costó fichar 9 años antes (94 M€): una rareza en el fútbol."}
+]},
+{t:"2019/20", g:355.5, v:110, note:"Las cifras de Hazard varían mucho según la fuente (100-160 M€ con variables); se usa la de Goal.com.", titles:[{icon:"🥇", name:"Liga 2019/20"}], ops:[
+  {n:"Eden Hazard", k:"c", cat:"fiasco", f:115, fe:true, club:"Chelsea FC", ve:"fiasco", vt:"Ampliamente considerado uno de los mayores fiascos de la historia del club: lesiones constantes y un rendimiento muy por debajo de lo esperado para su coste."},
+  {n:"Luka Jović", k:"c", cat:"fiasco", f:63, club:"Eintracht Fráncfort", ve:"fiasco", vt:"Apenas marcó goles con el primer equipo; cedido y vendido poco después."},
+  {n:"Éder Militão", k:"c", cat:"principal", f:50, club:"FC Oporto", ti:"2 Champions (2022, 2024)", ve:"exito"},
+  {n:"Ferland Mendy", k:"c", cat:"principal", f:48, club:"Olympique de Lyon", ti:"4 Champions", ve:"exito"},
+  {n:"Rodrygo", k:"c", cat:"principal", f:45, club:"Santos FC", ti:"2 Champions; gol clave en la remontada al Manchester City (2022)", ve:"exito"},
+  {n:"Mateo Kovačić", k:"v", cat:"resto", f:45, club:"Chelsea FC"},
+  {n:"Theo Hernández", k:"v", cat:"resto", f:20, club:"AC Milan", vt:"Se convirtió en uno de los mejores laterales de Europa tras salir del Madrid."},
+  {n:"Marcos Llorente", k:"v", cat:"resto", f:30, club:"Atlético de Madrid"},
+  {n:"Keylor Navas", k:"v", cat:"resto", f:15, fe:true, club:"Paris Saint-Germain"}
+]},
+{t:"2020/21", g:0, v:108.2, note:"Sin fichajes (mercado marcado por la pandemia). Fuente: Transfermarkt, mayo 2024.", ops:[
+  {n:"Achraf Hakimi", k:"v", cat:"resto", f:43, club:"Inter de Milán", vt:"Salió siendo cantera y explotó como uno de los mejores laterales del mundo."},
+  {n:"Sergio Reguilón", k:"v", cat:"resto", f:30, club:"Tottenham Hotspur"}
+]},
+{t:"2021/22", g:31, v:70, note:"", tourney:{short:"Eurocopa", full:"Eurocopa 2020, disputada en verano de 2021 por el aplazamiento debido a la pandemia"}, titles:[{icon:"🏆", name:"Champions League 2021/22 (‘La Decimocuarta’)"}, {icon:"🥇", name:"Liga 2021/22"}], ops:[
+  {n:"David Alaba", k:"c", cat:"principal", f:0, club:"Bayern de Múnich (libre)", ti:"Champions 2022", ve:"exito"},
+  {n:"Eduardo Camavinga", k:"c", cat:"principal", f:31, club:"Stade Rennes", ti:"Champions 2022 y 2024", ve:"exito"},
+  {n:"Raphaël Varane", k:"v", cat:"principal", f:40, club:"Manchester United"},
+  {n:"Martin Ødegaard", k:"v", cat:"resto", f:30, club:"Arsenal FC", vt:"No cuajó en el Madrid; luego triunfó como capitán del Arsenal."}
+]},
+{t:"2022/23", g:80, v:70.6, note:"", tourney:{short:"Mundial", full:"Mundial de fútbol 2022 (Catar) — excepción: se disputó en noviembre-diciembre, a mitad de temporada, por el calor del verano catarí"}, ops:[
+  {n:"Aurélien Tchouaméni", k:"c", cat:"principal", f:80, club:"AS Mónaco", ti:"Champions 2024", ve:"exito"},
+  {n:"Antonio Rüdiger", k:"c", cat:"principal", f:0, club:"Chelsea FC (libre)", ti:"Champions 2024", ve:"exito"},
+  {n:"Casemiro", k:"v", cat:"formacion", f:70.6, club:"Manchester United"}
+]},
+{t:"2023/24", g:107, v:0, note:"", titles:[{icon:"🏆", name:"Champions League 2023/24 (‘La Decimoquinta’)"}, {icon:"🥇", name:"Liga 2023/24"}], ops:[
+  {n:"Jude Bellingham", k:"c", cat:"principal", f:103, club:"Borussia Dortmund", ti:"Champions y LaLiga 2024", ve:"exito"},
+  {n:"Arda Güler", k:"c", cat:"resto", f:0, fe:true, club:"Fenerbahçe"}
+]},
+{t:"2024/25", g:189.5, v:2, note:"Fuente Endrick: Bernabéu Digital (ago-2024): 35 fijos + 25 variables + 12 impuestos. Fuente prima Mbappé: cuentas anuales del Real Madrid (dic-2024) — caso EXCEPCIONAL de prima hecha pública.", tourney:{short:"Eurocopa", full:"Eurocopa 2024 (Alemania)"}, titles:[{icon:"🌍", name:"Copa Intercontinental / Mundial de Clubes FIFA (diciembre de 2024)"}], ops:[
+  {n:"Kylian Mbappé", k:"c", cat:"principal", f:117.5, club:"Paris Saint-Germain (traspaso libre; el importe es la prima de fichaje)", det:"Fichaje sin traspaso al PSG; los 117,5 M€ son la prima de fichaje, pública en las cuentas auditadas del club", ti:"Bota de Oro del Mundial 2022 (antes de fichar, con Francia); aún por evaluar en el Madrid; máximo goleador histórico de Francia", ve:"mixto", vt:"Bota de Oro del Mundial 2022, antes de fichar. Gran nivel individual, primera temporada de transición colectiva para el equipo."},
+  {n:"Endrick", k:"c", cat:"resto", f:72, club:"Palmeiras"}
+]},
+{t:"2025/26", g:217, v:2, note:"Fuente: El Desmarque (jun-2026).", ops:[
+  {n:"Dean Huijsen", k:"c", cat:"principal", f:62, club:"AFC Bournemouth"},
+  {n:"Álvaro Carreras", k:"c", cat:"resto", f:50, club:"Benfica"},
+  {n:"Franco Mastantuono", k:"c", cat:"principal", f:63, club:"River Plate"},
+  {n:"Trent Alexander-Arnold", k:"c", cat:"principal", f:0, club:"Liverpool FC (libre)"},
+  {n:"Álvaro Rodríguez", k:"v", cat:"resto", f:2, club:"Elche CF"}
+]},
+{t:"2026/27", g:265, v:193.5, note:"Fecha de corte: 7 de agosto de 2026. El mercado permanece abierto (posible llegada de un central si sale Asencio). Gasto incluye 20 M€ de prima conocida de Bernardo Silva + 15 M€ de indemnización a Mourinho.", tourney:{short:"Mundial", full:"Mundial de fútbol 2026 (Estados Unidos/México/Canadá)"}, ops:[
+  {n:"Marc Cucurella", k:"c", cat:"principal", f:55, club:"Chelsea FC"},
+  {n:"Ibrahima Konaté", k:"c", cat:"principal", f:0, club:"Liverpool FC (libre)"},
+  {n:"Denzel Dumfries", k:"c", cat:"resto", f:25, club:"Inter de Milán"},
+  {n:"Bernardo Silva", k:"c", cat:"principal", f:20, fe:false, club:"Manchester City (traspaso libre; importe = prima de fichaje)", det:"Prima de fichaje de 20 M€: 10 M€ para el jugador + 10 M€ para su entorno (Jorge Mendes y su padre)"},
+  {n:"Carlos Espí", k:"c", cat:"resto", f:25, club:"Levante UD"},
+  {n:"Yan Diomandé", k:"c", cat:"principal", f:125, club:"RB Leipzig", det:"Fichaje más caro de la historia del club", vt:"Fichaje récord, el más caro de la historia del club: supera los 101 M€ que costó Bale en 2013. Contrato hasta 2033, señal de una apuesta a muy largo plazo por su proyección. Aún no ha debutado con el primer equipo."},
+  {n:"José Mourinho (entrenador)", k:"c", cat:"resto", f:15, club:"SL Benfica", det:"Indemnización por rescisión de contrato como entrenador, no es un fichaje de jugador"},
+  {n:"Nico Paz", k:"v", cat:"resto", f:60, club:"Como 1907", vt:"Venta del 50% restante; el Madrid mantiene cláusula de recompra 2027."},
+  {n:"Gonzalo García", k:"v", cat:"resto", f:40, club:"Fulham FC", vt:"Venta del 70%; conserva el 30% restante."},
+  {n:"César Palacios", k:"v", cat:"resto", f:10, club:"Fulham FC"},
+  {n:"Víctor Muñoz", k:"v", cat:"resto", f:20, club:"Liverpool FC (vía Osasuna)"},
+  {n:"Mario Gila", k:"v", cat:"resto", f:15, club:"AC Milan"},
+  {n:"Álvaro Rodríguez", k:"v", cat:"resto", f:12.5, club:"AFC Bournemouth"},
+  {n:"Jacobo Ortega", k:"v", cat:"resto", f:8, club:"RC Estrasburgo"},
+  {n:"Víctor Valdepeñas", k:"v", cat:"resto", f:8, club:"ACF Fiorentina"},
+  {n:"Fran García", k:"v", cat:"resto", f:4, club:"Real Betis"},
+  {n:"Mario Martín", k:"v", cat:"resto", f:3.5, club:"Getafe CF"},
+  {n:"Álex Jiménez", k:"v", cat:"resto", f:12.5, club:"—"}
+]}
+];
+
+/* balance / financiero extra, solo donde hay dato oficial */
+const FIN = {
+  "2018/19": {sal:451, og:null, oi:null, bt:null},
+  "2022/23": {sal:null, og:null, oi:843, bt:null},
+  "2023/24": {sal:null, og:null, oi:1073, bt:null},
+  "2024/25": {sal:null, og:null, oi:1185, bt:null},
+  "2025/26": {sal:618, og:360.1, oi:1221, bt:27.9}
+};
+
+const CAT_LABEL = {principal:"Fichaje principal", cantera:"Canterano", formacion:"Formación/Cat. inferiores", leyenda:"Leyenda histórica", fiasco:"Fiasco", resto:"Resto"};
+// mismos colores que las clases .cat-X del CSS, en hexadecimal, para usarlos en fill="" de SVG
+const CAT_COLOR = {principal:"#14213D", cantera:"#1F6F63", formacion:"#2E5C8A", leyenda:"#B8892B", fiasco:"#9B2C3A", resto:"#7A7F8A"};
+const VERDICT_LABEL = {exito:"✓ Éxito", fiasco:"✕ Fiasco", mixto:"◐ Mixto", leyenda:"★ Leyenda"};
+
+// URLs de fotos (Wikimedia Commons, contenido de libre uso), aportadas por el usuario.
+// Si un jugador no tiene entrada aqui, o la imagen falla al cargar, se usa el avatar de iniciales.
+const PHOTOS = {
+  "Alfredo Di Stéfano": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Di_stefano_argentina_%28cropped%29.jpg/500px-Di_stefano_argentina_%28cropped%29.jpg",
+  "Francisco Gento": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Francisco%20Gento%201962.jpg/500px-Francisco%20Gento%201962.jpg",
+  "Raymond Kopa": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Raymond_Kopa_1963b.jpg/500px-Raymond_Kopa_1963b.jpg",
+  "Ferenc Puskás": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Ferenc_Puskas_en_1965.jpg/500px-Ferenc_Puskas_en_1965.jpg",
+  "Carlos Santillana": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Santillana.jpg/500px-Santillana.jpg",
+  "José Antonio Camacho": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Jose_Antonio_Camacho.jpg/500px-Jose_Antonio_Camacho.jpg",
+  "Uli Stielike": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Uli_Stielike_in_press_conference_before_Iran_match_1.jpg/500px-Uli_Stielike_in_press_conference_before_Iran_match_1.jpg",
+  "Jorge Valdano": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Jorge_Valdano_Cropped.jpg/500px-Jorge_Valdano_Cropped.jpg",
+  "Emilio Butragueño": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/25th_Laureus_World_Sports_Awards_-_Red_Carpet_-_Emilio_Butrague%C3%B1o_-_240422_191751-2_%28cropped%29.jpg/500px-25th_Laureus_World_Sports_Awards_-_Red_Carpet_-_Emilio_Butrague%C3%B1o_-_240422_191751-2_%28cropped%29.jpg",
+  "Hugo Sánchez": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Huguito.jpg/500px-Huguito.jpg",
+  "Míchel": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Michel09.jpg/500px-Michel09.jpg",
+  "Chendo": "https://assets.realmadrid.com/is/image/realmadrid/1330192171601?$Mobile$&fit=wrap&wid=312",
+  "Manuel Sanchís": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Manuel_Sanch%C3%ADs_Mart%C3%ADnez_1966.jpg/500px-Manuel_Sanch%C3%ADs_Mart%C3%ADnez_1966.jpg",
+  "Fernando Hierro": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Fernando_Hierro_in_Spain-Iran_press_conference_2018-06-19.jpg/500px-Fernando_Hierro_in_Spain-Iran_press_conference_2018-06-19.jpg",
+  "Raúl González": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/25th_Laureus_World_Sports_Awards_-_Ra%C3%BAl_-_240422_132916-2_%28cropped%29.jpg/500px-25th_Laureus_World_Sports_Awards_-_Ra%C3%BAl_-_240422_132916-2_%28cropped%29.jpg",
+  "Guti": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Gutti.jpg/500px-Gutti.jpg",
+  "Roberto Carlos": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/LS3_1288_%2853332367864%29_%28cropped%29.jpg/500px-LS3_1288_%2853332367864%29_%28cropped%29.jpg",
+  "Predrag Mijatović": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Predrag_Mijatovi%C4%87_2007_b.jpg/500px-Predrag_Mijatovi%C4%87_2007_b.jpg",
+  "Davor Šuker": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Football_against_poverty_2014_-_Davor_%C5%A0uker_%28cropped%29.jpg/500px-Football_against_poverty_2014_-_Davor_%C5%A0uker_%28cropped%29.jpg",
+  "Clarence Seedorf": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Clarence_Seedorf_Introductory_Press_Conferences%2C_2_June_2025_-_40_%28cropped%29.jpg/500px-Clarence_Seedorf_Introductory_Press_Conferences%2C_2_June_2025_-_40_%28cropped%29.jpg",
+  "Christian Panucci": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Panuccochristian.jpg/500px-Panuccochristian.jpg",
+  "Bodo Illgner": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/6640Bodo_Illgner.JPG/500px-6640Bodo_Illgner.JPG",
+  "Fernando Morientes": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Fernando_Morientes_-_53822470816.jpg/500px-Fernando_Morientes_-_53822470816.jpg",
+  "Nicolas Anelka": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Nicolas_Anelka_4720.jpg/500px-Nicolas_Anelka_4720.jpg",
+  "Steve McManaman": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/1_steve_mcmanaman_2017_%28cropped%29.jpg/500px-1_steve_mcmanaman_2017_%28cropped%29.jpg",
+  "Míchel Salgado": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/M%C3%ADchel_Salgado_2018.jpg/500px-M%C3%ADchel_Salgado_2018.jpg",
+  "Iker Casillas": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Iker-Casillas-SportsTrade-2021-cropped.jpg/500px-Iker-Casillas-SportsTrade-2021-cropped.jpg",
+  "Luis Figo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Luis_Figo_2023.jpg/500px-Luis_Figo_2023.jpg",
+  "Santiago Solari": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Santiago_Solari_%28cropped%29.jpg/500px-Santiago_Solari_%28cropped%29.jpg",
+  "Zinedine Zidane": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Zinedine_Zidane_by_Tasnim_03.jpg/500px-Zinedine_Zidane_by_Tasnim_03.jpg",
+  "Ronaldo Nazário": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Ronaldo.jpeg/500px-Ronaldo.jpeg",
+  "David Beckham": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/David_Beckham_UNICEF_%28cropped2%29.jpg/500px-David_Beckham_UNICEF_%28cropped2%29.jpg",
+  "Claude Makelele": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Claude_Mak%C3%A9l%C3%A9l%C3%A9_%2853557564951%29_%28cropped%29.jpg/500px-Claude_Mak%C3%A9l%C3%A9l%C3%A9_%2853557564951%29_%28cropped%29.jpg",
+  "Walter Samuel": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Walter_Samuel_FC_Internazionale.jpg/500px-Walter_Samuel_FC_Internazionale.jpg",
+  "Jonathan Woodgate": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Jonathan_Woodgate_12042025_%284%29.jpg/500px-Jonathan_Woodgate_12042025_%284%29.jpg",
+  "Michael Owen": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Michael_Owen.jpg/500px-Michael_Owen.jpg",
+  "Sergio Ramos": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Sergio_Ramos_Interview_2021_%28cropped%29.jpg/500px-Sergio_Ramos_Interview_2021_%28cropped%29.jpg",
+  "Robinho": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Robinho061115-2.jpg/500px-Robinho061115-2.jpg",
+  "Julio Baptista": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Julio%20Baptista.jpg/500px-Julio%20Baptista.jpg",
+  "Ruud van Nistelrooy": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Ruud_van_Nistelrooy_2017.jpg/500px-Ruud_van_Nistelrooy_2017.jpg",
+  "Mahamadou Diarra": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Mahamadou_Diarra.JPG/500px-Mahamadou_Diarra.JPG",
+  "Fabio Cannavaro": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Fabio_Cannavaro_2011.jpg/500px-Fabio_Cannavaro_2011.jpg",
+  "Emerson": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Emerson_2005.jpg/500px-Emerson_2005.jpg",
+  "Marcelo Vieira": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Bra-Cos_%28Marcelo%29_%28cropped%29.jpg/500px-Bra-Cos_%28Marcelo%29_%28cropped%29.jpg",
+  "Arjen Robben": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/2019147183036_2019-05-27_Fussball_1.FC_Kaiserslautern_vs_FC_Bayern_M%C3%BCnchen_-_Sven_-_1D_X_MK_II_-_0196_-_B70I8495_%28cropped%29.jpg/500px-2019147183036_2019-05-27_Fussball_1.FC_Kaiserslautern_vs_FC_Bayern_M%C3%BCnchen_-_Sven_-_1D_X_MK_II_-_0196_-_B70I8495_%28cropped%29.jpg",
+  "Wesley Sneijder": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Wesley_Sneijder_at_Sports_Festival_2025.jpg/500px-Wesley_Sneijder_at_Sports_Festival_2025.jpg",
+  "Royston Drenthe": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Royston_Drenthe_-_H%C3%A8rcules.jpg/500px-Royston_Drenthe_-_H%C3%A8rcules.jpg",
+  "Gabriel Heinze": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Gabriel_Heinze_en_Newell%27s_Old_Boys_%282022%29.jpg/500px-Gabriel_Heinze_en_Newell%27s_Old_Boys_%282022%29.jpg",
+  "Klaas-Jan Huntelaar": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Klaas-Jan_Huntelaar_in_2015_%28crop%29.png/500px-Klaas-Jan_Huntelaar_in_2015_%28crop%29.png",
+  "Rafael van der Vaart": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Rafael_van_der_Vaart_2014.jpg/500px-Rafael_van_der_Vaart_2014.jpg",
+  "Lassana Diarra": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Lassana_Diarra_2014.jpg/500px-Lassana_Diarra_2014.jpg",
+  "Cristiano Ronaldo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_%28cropped%29.jpg/500px-Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_%28cropped%29.jpg",
+  "Kaká": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Kak%C3%A1_visited_Stadium_St._Petersburg.jpg/500px-Kak%C3%A1_visited_Stadium_St._Petersburg.jpg",
+  "Karim Benzema": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Karim_Benzema_Pick.jpg/500px-Karim_Benzema_Pick.jpg",
+  "Xabi Alonso": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Los_Caminos_del_f%C3%BAtbol._Xabi_Alonso_%2839666778464%29_%28cropped%29.jpg/500px-Los_Caminos_del_f%C3%BAtbol._Xabi_Alonso_%2839666778464%29_%28cropped%29.jpg",
+  "Ángel Di María": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/NIG-ARG_%285%29.jpg/500px-NIG-ARG_%285%29.jpg",
+  "Mesut Özil": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Mesut_%C3%96zil_at_Baku_before_2019_UEFA_Europe_League_Final.jpg/500px-Mesut_%C3%96zil_at_Baku_before_2019_UEFA_Europe_League_Final.jpg",
+  "Sami Khedira": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Sami_Khedira_-_Juventus_%28cropped%29.jpg/500px-Sami_Khedira_-_Juventus_%28cropped%29.jpg",
+  "Ricardo Carvalho": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Ricardo_Carvalho.jpg/500px-Ricardo_Carvalho.jpg",
+  "Fábio Coentrão": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/4F%C3%A1bio_Coentr%C3%A3o.jpg/500px-4F%C3%A1bio_Coentr%C3%A3o.jpg",
+  "Nuri Şahin": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Nuri_%C5%9Eahin_at_Antalyaspor_vs_Trabzonspor_20211211_%286%29_%28cropped%29.jpg/500px-Nuri_%C5%9Eahin_at_Antalyaspor_vs_Trabzonspor_20211211_%286%29_%28cropped%29.jpg",
+  "José Callejón": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Russia-Spain_2017_%284%29.jpg/500px-Russia-Spain_2017_%284%29.jpg",
+  "Hamit Altıntop": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Hamit_Alt%C4%B1ntop_Fiorentina_%28cropped%29.JPG/500px-Hamit_Alt%C4%B1ntop_Fiorentina_%28cropped%29.JPG",
+  "Nacho Fernández": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Nacho_Fern%C3%A1ndez_-_Ofrenda_de_la_Liga_y_la_Champions-56-L.Mill%C3%A1n_%2852109788795%29_%28cropped%29.jpg/500px-Nacho_Fern%C3%A1ndez_-_Ofrenda_de_la_Liga_y_la_Champions-56-L.Mill%C3%A1n_%2852109788795%29_%28cropped%29.jpg",
+  "Luka Modrić": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Luka_Modric_Croatia_v_Portugal_2_July_2026-055.jpg/500px-Luka_Modric_Croatia_v_Portugal_2_July_2026-055.jpg",
+  "Michael Essien": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Chelsea_Legends_1_Inter_Forever_4_%2828453496098%29_%28cropped%29.jpg/500px-Chelsea_Legends_1_Inter_Forever_4_%2828453496098%29_%28cropped%29.jpg",
+  "Casemiro": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Casemiro_Brazil_V_Morocco_13_June_2026-76_%28cropped%29.jpg/500px-Casemiro_Brazil_V_Morocco_13_June_2026-76_%28cropped%29.jpg",
+  "Gareth Bale": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/2022_FIFA_World_Cup_United_States_1%E2%80%931_Wales_-_%2832%29_%28cropped%29.jpg/500px-2022_FIFA_World_Cup_United_States_1%E2%80%931_Wales_-_%2832%29_%28cropped%29.jpg",
+  "Isco": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Liver-RM_%285%29_%28cropped%29.jpg/500px-Liver-RM_%285%29_%28cropped%29.jpg",
+  "Asier Illarramendi": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Asier_Illaramendi_-_Real_Sociedad_2016-17_%28cropped%29.jpg/500px-Asier_Illaramendi_-_Real_Sociedad_2016-17_%28cropped%29.jpg",
+  "Dani Carvajal": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/UEFA_EURO_qualifiers_Sweden_vs_Spain_20191015_Dani_Carvajal_10_%28cropped%29.jpg/500px-UEFA_EURO_qualifiers_Sweden_vs_Spain_20191015_Dani_Carvajal_10_%28cropped%29.jpg",
+  "Gonzalo Higuaín": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Gonzalo_Higua%C3%ADn_2019.jpg/500px-Gonzalo_Higua%C3%ADn_2019.jpg",
+  "James Rodríguez": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Argentina_-_Colombia_2022_%2828%29_%28cropped_2%29.jpg/500px-Argentina_-_Colombia_2022_%2828%29_%28cropped_2%29.jpg",
+  "Toni Kroos": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Toni_Kroos_Real_Madrid_2021.jpg/500px-Toni_Kroos_Real_Madrid_2021.jpg",
+  "Keylor Navas": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Keylor_Navas_2018_%28cropped%29.jpg/500px-Keylor_Navas_2018_%28cropped%29.jpg",
+  "Lucas Vázquez": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Lucas-V%C3%A1zquez-2025-2.jpg/500px-Lucas-V%C3%A1zquez-2025-2.jpg",
+  "Álvaro Morata": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/%C3%81lvaro_Morata_in_2025.jpg/500px-%C3%81lvaro_Morata_in_2025.jpg",
+  "Mateo Kovačić": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Mateo_Kovacic_Croatia_v_Portugal_2_July_2026-132.jpg/500px-Mateo_Kovacic_Croatia_v_Portugal_2_July_2026-132.jpg",
+  "Danilo": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Danilo_Man_City_2017_%2836471169962%29_%28cropped%29.jpg/500px-Danilo_Man_City_2017_%2836471169962%29_%28cropped%29.jpg",
+  "Federico Valverde": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Federico_Valverde_2021_%28cropped%29.jpg/500px-Federico_Valverde_2021_%28cropped%29.jpg",
+  "Theo Hernández": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Theo%20Hern%C3%A1ndez.jpg/500px-Theo%20Hern%C3%A1ndez.jpg",
+  "Dani Ceballos": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Dani_Ceballos%2C_Real_Madrid%2C_2022.jpg/500px-Dani_Ceballos%2C_Real_Madrid%2C_2022.jpg",
+  "Vinícius Júnior": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Vin%C3%ADcius_J%C3%BAnior_Brazil_V_Morocco_13_June_2026-207_%28cropped%29.jpg/500px-Vin%C3%ADcius_J%C3%BAnior_Brazil_V_Morocco_13_June_2026-207_%28cropped%29.jpg",
+  "Thibaut Courtois": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Thibaut_Courtois_at_the_2018_World_Cup_%28cropped%29.jpg/500px-Thibaut_Courtois_at_the_2018_World_Cup_%28cropped%29.jpg",
+  "Álvaro Odriozola": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/2023_05_06_Final_de_la_Copa_del_Rey_-_52879024229_%28cropped%29.jpg/500px-2023_05_06_Final_de_la_Copa_del_Rey_-_52879024229_%28cropped%29.jpg",
+  "Mariano Díaz": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Mariano_D%C3%ADaz%2C_Real_Madrid%2C_2022.jpg/500px-Mariano_D%C3%ADaz%2C_Real_Madrid%2C_2022.jpg",
+  "Eden Hazard": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Eden_Hazard_at_Baku_before_2019_UEFA_Europe_League_Final.jpg/500px-Eden_Hazard_at_Baku_before_2019_UEFA_Europe_League_Final.jpg",
+  "Luka Jović": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/FWC_2018_-_Group_E_-_SRB_v_BRA_-_Photo_113_%28cropped%29.jpg/500px-FWC_2018_-_Group_E_-_SRB_v_BRA_-_Photo_113_%28cropped%29.jpg",
+  "Éder Militão": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Eder_Militao_2021.jpg/500px-Eder_Militao_2021.jpg",
+  "Ferland Mendy": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Ofrenda_de_la_Liga_y_la_Champions-49-L.Mill%C3%A1n_%2852109311048%29_%28Ferland_Mendy%29.jpg/500px-Ofrenda_de_la_Liga_y_la_Champions-49-L.Mill%C3%A1n_%2852109311048%29_%28Ferland_Mendy%29.jpg",
+  "Rodrygo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Rodrygo_2023_%28cropped%29.jpg/500px-Rodrygo_2023_%28cropped%29.jpg",
+  "Marcos Llorente": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Marcos_Llorente_France_v_Spain_7.24.26-020.jpg/500px-Marcos_Llorente_France_v_Spain_7.24.26-020.jpg",
+  "Achraf Hakimi": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Achraf_Hakimi_Morocco_v_Norway_7_June_2026-16.jpg/500px-Achraf_Hakimi_Morocco_v_Norway_7_June_2026-16.jpg",
+  "Sergio Reguilón": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Sergio_Reguil%C3%B3n_2018.jpg/500px-Sergio_Reguil%C3%B3n_2018.jpg",
+  "David Alaba": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/20180610_FIFA_Friendly_Match_Austria_vs._Brazil_David_Alaba_850_1632.jpg/500px-20180610_FIFA_Friendly_Match_Austria_vs._Brazil_David_Alaba_850_1632.jpg",
+  "Eduardo Camavinga": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Ofrenda_de_la_Liga_y_la_Champions-13-L.Mill%C3%A1n_%2852109790215%29_%28cropped%29.jpg/500px-Ofrenda_de_la_Liga_y_la_Champions-13-L.Mill%C3%A1n_%2852109790215%29_%28cropped%29.jpg",
+  "Raphaël Varane": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Liver-RM_%288%29_%28Varane%29.jpg/500px-Liver-RM_%288%29_%28Varane%29.jpg",
+  "Martin Ødegaard": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Martin_Odegaard_France_v_Norway_26_June_26-014.jpg/500px-Martin_Odegaard_France_v_Norway_26_June_26-014.jpg",
+  "Aurélien Tchouaméni": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Aurelien_Tchouameni_France_v_Senegal_16_June_2026-447_%28cropped%29.jpg/500px-Aurelien_Tchouameni_France_v_Senegal_16_June_2026-447_%28cropped%29.jpg",
+  "Antonio Rüdiger": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Antonio_Rudiger_Ecuador_v_Germany_25_June_2026-055_%28cropped%29.jpg/500px-Antonio_Rudiger_Ecuador_v_Germany_25_June_2026-055_%28cropped%29.jpg",
+  "Jude Bellingham": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Jude_Bellingham_England_v_Panama_27_June_26-160_%28cropped%29.jpg/500px-Jude_Bellingham_England_v_Panama_27_June_26-160_%28cropped%29.jpg",
+  "Arda Güler": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Arda_G%C3%BCler_2025.jpg/500px-Arda_G%C3%BCler_2025.jpg",
+  "Kylian Mbappé": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Kylian_Mbappe_France_v_Senegal_16_June_2026-391_%28cropped%29.jpg/500px-Kylian_Mbappe_France_v_Senegal_16_June_2026-391_%28cropped%29.jpg",
+  "Endrick": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Team_Brazil_at_2026_FIFA_World_Cup_by_YantsImages_%28Endrick%29.jpg/500px-Team_Brazil_at_2026_FIFA_World_Cup_by_YantsImages_%28Endrick%29.jpg",
+  "Dean Huijsen": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Dean_Huijsen_2024.jpg/500px-Dean_Huijsen_2024.jpg",
+  "Álvaro Carreras": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/%C3%81lvaroCarreras.jpg/500px-%C3%81lvaroCarreras.jpg",
+  "Franco Mastantuono": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Franco_Mastantuono_in_2025_%28cropped%29.jpg/500px-Franco_Mastantuono_in_2025_%28cropped%29.jpg",
+  "Trent Alexander-Arnold": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Trent_Alexander-Arnold_2018_%28cropped%29.jpg/500px-Trent_Alexander-Arnold_2018_%28cropped%29.jpg",
+  "Álvaro Rodríguez": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Alvaro_Rodriguez_2026.jpg/500px-Alvaro_Rodriguez_2026.jpg",
+  "Marc Cucurella": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Marc_Cucurella_Argentina_v_Spain_19_July_2026-064_%28cropped%29.jpg/500px-Marc_Cucurella_Argentina_v_Spain_19_July_2026-064_%28cropped%29.jpg",
+  "Ibrahima Konaté": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Ibrahima_Konate_France_v_Senegal_16_June_2026-516_%28cropped%29.jpg/500px-Ibrahima_Konate_France_v_Senegal_16_June_2026-516_%28cropped%29.jpg",
+  "Denzel Dumfries": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Edison_ndreca_inter_egnati_%28cropped_Denzel_Dumfries%29.jpg/500px-Edison_ndreca_inter_egnati_%28cropped_Denzel_Dumfries%29.jpg",
+  "Bernardo Silva": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Bernardo_Silva_Croatia_v_Portugal_2_July_2026-238.jpg/500px-Bernardo_Silva_Croatia_v_Portugal_2_July_2026-238.jpg",
+  "Yan Diomandé": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Yan_Diomande_Cote_D%27Ivoire_v_Ecuador_14_June_2026-17_%28cropped%29.jpg/500px-Yan_Diomande_Cote_D%27Ivoire_v_Ecuador_14_June_2026-17_%28cropped%29.jpg",
+  "Nico Paz": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Nico_Paz_Argentina_v_Spain_19_July_2026-057.jpg/500px-Nico_Paz_Argentina_v_Spain_19_July_2026-057.jpg",
+  "Gonzalo García": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/GonzaloGarciaGarcia1.jpg/500px-GonzaloGarciaGarcia1.jpg",
+  "Víctor Muñoz": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Victor_Munoz_Argentina_v_Spain_19_July_2026-020.jpg/500px-Victor_Munoz_Argentina_v_Spain_19_July_2026-020.jpg",
+  "Álex Jiménez": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Alex_Jimenez_00-02-07.99.png/500px-Alex_Jimenez_00-02-07.99.png",
+  "José Mourinho (entrenador)": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Jos%C3%A9_Mourinho_20250206_%281%29.jpg/500px-Jos%C3%A9_Mourinho_20250206_%281%29.jpg",
+};
+
+// Posición habitual de cada jugador (para el popup). Asignada a partir de conocimiento futbolístico general;
+// no verificada individualmente para los 126, así que puede haber algún matiz impreciso.
+const POSITION = {
+  "Alfredo Di Stéfano": "Delantero",
+  "Francisco Gento": "Extremo izquierdo",
+  "Raymond Kopa": "Delantero",
+  "Ferenc Puskás": "Delantero",
+  "Carlos Santillana": "Delantero",
+  "José Antonio Camacho": "Defensa (lateral izq.)",
+  "Uli Stielike": "Centrocampista",
+  "Jorge Valdano": "Delantero",
+  "Emilio Butragueño": "Delantero",
+  "Hugo Sánchez": "Delantero",
+  "Míchel": "Centrocampista",
+  "Chendo": "Defensa (lateral der.)",
+  "Manuel Sanchís": "Defensa central",
+  "Fernando Hierro": "Defensa central",
+  "Raúl González": "Delantero",
+  "Guti": "Centrocampista",
+  "Roberto Carlos": "Defensa (lateral izq.)",
+  "Predrag Mijatović": "Delantero",
+  "Davor Šuker": "Delantero",
+  "Clarence Seedorf": "Centrocampista",
+  "Christian Panucci": "Defensa",
+  "Bodo Illgner": "Portero",
+  "Fernando Morientes": "Delantero",
+  "Nicolas Anelka": "Delantero",
+  "Steve McManaman": "Centrocampista",
+  "Míchel Salgado": "Defensa (lateral der.)",
+  "Iker Casillas": "Portero",
+  "Luis Figo": "Centrocampista/Extremo",
+  "Santiago Solari": "Centrocampista",
+  "Zinedine Zidane": "Centrocampista",
+  "Ronaldo Nazário": "Delantero",
+  "David Beckham": "Centrocampista",
+  "Claude Makelele": "Centrocampista",
+  "Walter Samuel": "Defensa central",
+  "Jonathan Woodgate": "Defensa central",
+  "Michael Owen": "Delantero",
+  "Sergio Ramos": "Defensa central",
+  "Robinho": "Delantero",
+  "Julio Baptista": "Centrocampista",
+  "Ruud van Nistelrooy": "Delantero",
+  "Mahamadou Diarra": "Centrocampista",
+  "Fabio Cannavaro": "Defensa central",
+  "Emerson": "Centrocampista",
+  "Marcelo Vieira": "Defensa (lateral izq.)",
+  "Arjen Robben": "Extremo",
+  "Wesley Sneijder": "Centrocampista",
+  "Royston Drenthe": "Centrocampista",
+  "Gabriel Heinze": "Defensa central",
+  "Klaas-Jan Huntelaar": "Delantero",
+  "Rafael van der Vaart": "Centrocampista",
+  "Lassana Diarra": "Centrocampista",
+  "Cristiano Ronaldo": "Delantero",
+  "Kaká": "Centrocampista",
+  "Karim Benzema": "Delantero",
+  "Xabi Alonso": "Centrocampista",
+  "Ángel Di María": "Centrocampista/Extremo",
+  "Mesut Özil": "Centrocampista",
+  "Sami Khedira": "Centrocampista",
+  "Ricardo Carvalho": "Defensa central",
+  "Fábio Coentrão": "Defensa (lateral izq.)",
+  "Nuri Şahin": "Centrocampista",
+  "José Callejón": "Delantero/Extremo",
+  "Hamit Altıntop": "Centrocampista",
+  "Nacho Fernández": "Defensa central",
+  "Luka Modrić": "Centrocampista",
+  "Michael Essien": "Centrocampista",
+  "Casemiro": "Centrocampista",
+  "Gareth Bale": "Extremo",
+  "Isco": "Centrocampista",
+  "Asier Illarramendi": "Centrocampista",
+  "Dani Carvajal": "Defensa (lateral der.)",
+  "Gonzalo Higuaín": "Delantero",
+  "James Rodríguez": "Centrocampista",
+  "Toni Kroos": "Centrocampista",
+  "Keylor Navas": "Portero",
+  "Lucas Vázquez": "Defensa (lateral der.)/Extremo",
+  "Álvaro Morata": "Delantero",
+  "Mateo Kovačić": "Centrocampista",
+  "Danilo": "Defensa (lateral)",
+  "Federico Valverde": "Centrocampista",
+  "Theo Hernández": "Defensa (lateral izq.)",
+  "Dani Ceballos": "Centrocampista",
+  "Vinícius Júnior": "Extremo/Delantero",
+  "Thibaut Courtois": "Portero",
+  "Álvaro Odriozola": "Defensa (lateral der.)",
+  "Mariano Díaz": "Delantero",
+  "Eden Hazard": "Extremo/Delantero",
+  "Luka Jović": "Delantero",
+  "Éder Militão": "Defensa central",
+  "Ferland Mendy": "Defensa (lateral izq.)",
+  "Rodrygo": "Extremo/Delantero",
+  "Marcos Llorente": "Centrocampista",
+  "Achraf Hakimi": "Defensa (lateral der.)",
+  "Sergio Reguilón": "Defensa (lateral izq.)",
+  "David Alaba": "Defensa",
+  "Eduardo Camavinga": "Centrocampista",
+  "Raphaël Varane": "Defensa central",
+  "Martin Ødegaard": "Centrocampista",
+  "Aurélien Tchouaméni": "Centrocampista",
+  "Antonio Rüdiger": "Defensa central",
+  "Jude Bellingham": "Centrocampista",
+  "Arda Güler": "Centrocampista",
+  "Kylian Mbappé": "Delantero",
+  "Endrick": "Delantero",
+  "Dean Huijsen": "Defensa central",
+  "Álvaro Carreras": "Defensa (lateral izq.)",
+  "Franco Mastantuono": "Extremo/Delantero",
+  "Trent Alexander-Arnold": "Defensa (lateral der.)",
+  "Álvaro Rodríguez": "Delantero",
+  "Marc Cucurella": "Defensa (lateral izq.)",
+  "Ibrahima Konaté": "Defensa central",
+  "Denzel Dumfries": "Defensa (lateral der.)",
+  "Bernardo Silva": "Centrocampista",
+  "Carlos Espí": "Defensa central",
+  "Yan Diomandé": "Extremo/Delantero",
+  "José Mourinho (entrenador)": "Entrenador",
+  "Nico Paz": "Centrocampista",
+  "Gonzalo García": "Delantero",
+  "César Palacios": "Centrocampista",
+  "Víctor Muñoz": "Defensa central",
+  "Mario Gila": "Defensa central",
+  "Jacobo Ortega": "Portero",
+  "Víctor Valdepeñas": "Portero",
+  "Fran García": "Defensa (lateral izq.)",
+  "Mario Martín": "Defensa",
+  "Álex Jiménez": "Defensa (lateral der.)",
+};
+
+// Enlace al artículo de Wikipedia de cada jugador. Generado automáticamente a partir del nombre
+// (es.wikipedia.org/wiki/Nombre_Apellido); NO verificado uno a uno, así que algunos pueden aterrizar
+// en una página de desambiguación o no existir. Avisa si alguno falla y se corrige puntualmente.
+const WIKI = {
+  "Alfredo Di Stéfano": "https://es.wikipedia.org/wiki/Alfredo_Di_St%C3%A9fano",
+  "Francisco Gento": "https://es.wikipedia.org/wiki/Francisco_Gento",
+  "Raymond Kopa": "https://es.wikipedia.org/wiki/Raymond_Kopa",
+  "Ferenc Puskás": "https://es.wikipedia.org/wiki/Ferenc_Pusk%C3%A1s",
+  "Carlos Santillana": "https://es.wikipedia.org/wiki/Carlos_Santillana",
+  "José Antonio Camacho": "https://es.wikipedia.org/wiki/Jos%C3%A9_Antonio_Camacho",
+  "Uli Stielike": "https://es.wikipedia.org/wiki/Uli_Stielike",
+  "Jorge Valdano": "https://es.wikipedia.org/wiki/Jorge_Valdano",
+  "Emilio Butragueño": "https://es.wikipedia.org/wiki/Emilio_Butrague%C3%B1o",
+  "Hugo Sánchez": "https://es.wikipedia.org/wiki/Hugo_S%C3%A1nchez",
+  "Míchel": "https://es.wikipedia.org/wiki/M%C3%ADchel",
+  "Chendo": "https://es.wikipedia.org/wiki/Chendo",
+  "Manuel Sanchís": "https://es.wikipedia.org/wiki/Manuel_Sanch%C3%ADs",
+  "Fernando Hierro": "https://es.wikipedia.org/wiki/Fernando_Hierro",
+  "Raúl González": "https://es.wikipedia.org/wiki/Ra%C3%BAl_Gonz%C3%A1lez",
+  "Guti": "https://es.wikipedia.org/wiki/Guti_(futbolista)",
+  "Roberto Carlos": "https://es.wikipedia.org/wiki/Roberto_Carlos",
+  "Predrag Mijatović": "https://es.wikipedia.org/wiki/Predrag_Mijatovi%C4%87",
+  "Davor Šuker": "https://es.wikipedia.org/wiki/Davor_%C5%A0uker",
+  "Clarence Seedorf": "https://es.wikipedia.org/wiki/Clarence_Seedorf",
+  "Christian Panucci": "https://es.wikipedia.org/wiki/Christian_Panucci",
+  "Bodo Illgner": "https://es.wikipedia.org/wiki/Bodo_Illgner",
+  "Fernando Morientes": "https://es.wikipedia.org/wiki/Fernando_Morientes",
+  "Nicolas Anelka": "https://es.wikipedia.org/wiki/Nicolas_Anelka",
+  "Steve McManaman": "https://es.wikipedia.org/wiki/Steve_McManaman",
+  "Míchel Salgado": "https://es.wikipedia.org/wiki/M%C3%ADchel_Salgado",
+  "Iker Casillas": "https://es.wikipedia.org/wiki/Iker_Casillas",
+  "Luis Figo": "https://es.wikipedia.org/wiki/Luis_Figo",
+  "Santiago Solari": "https://es.wikipedia.org/wiki/Santiago_Solari",
+  "Zinedine Zidane": "https://es.wikipedia.org/wiki/Zinedine_Zidane",
+  "Ronaldo Nazário": "https://es.wikipedia.org/wiki/Ronaldo_Naz%C3%A1rio",
+  "David Beckham": "https://es.wikipedia.org/wiki/David_Beckham",
+  "Claude Makelele": "https://es.wikipedia.org/wiki/Claude_Makelele",
+  "Walter Samuel": "https://es.wikipedia.org/wiki/Walter_Samuel",
+  "Jonathan Woodgate": "https://es.wikipedia.org/wiki/Jonathan_Woodgate",
+  "Michael Owen": "https://es.wikipedia.org/wiki/Michael_Owen",
+  "Sergio Ramos": "https://es.wikipedia.org/wiki/Sergio_Ramos",
+  "Robinho": "https://es.wikipedia.org/wiki/Robinho",
+  "Julio Baptista": "https://es.wikipedia.org/wiki/Julio_Baptista",
+  "Ruud van Nistelrooy": "https://es.wikipedia.org/wiki/Ruud_van_Nistelrooy",
+  "Mahamadou Diarra": "https://es.wikipedia.org/wiki/Mahamadou_Diarra",
+  "Fabio Cannavaro": "https://es.wikipedia.org/wiki/Fabio_Cannavaro",
+  "Emerson": "https://es.wikipedia.org/wiki/Emerson",
+  "Marcelo Vieira": "https://es.wikipedia.org/wiki/Marcelo_Vieira",
+  "Arjen Robben": "https://es.wikipedia.org/wiki/Arjen_Robben",
+  "Wesley Sneijder": "https://es.wikipedia.org/wiki/Wesley_Sneijder",
+  "Royston Drenthe": "https://es.wikipedia.org/wiki/Royston_Drenthe",
+  "Gabriel Heinze": "https://es.wikipedia.org/wiki/Gabriel_Heinze",
+  "Klaas-Jan Huntelaar": "https://es.wikipedia.org/wiki/Klaas-Jan_Huntelaar",
+  "Rafael van der Vaart": "https://es.wikipedia.org/wiki/Rafael_van_der_Vaart",
+  "Lassana Diarra": "https://es.wikipedia.org/wiki/Lassana_Diarra",
+  "Cristiano Ronaldo": "https://es.wikipedia.org/wiki/Cristiano_Ronaldo",
+  "Kaká": "https://es.wikipedia.org/wiki/Kak%C3%A1",
+  "Karim Benzema": "https://es.wikipedia.org/wiki/Karim_Benzema",
+  "Xabi Alonso": "https://es.wikipedia.org/wiki/Xabi_Alonso",
+  "Ángel Di María": "https://es.wikipedia.org/wiki/%C3%81ngel_Di_Mar%C3%ADa",
+  "Mesut Özil": "https://es.wikipedia.org/wiki/Mesut_%C3%96zil",
+  "Sami Khedira": "https://es.wikipedia.org/wiki/Sami_Khedira",
+  "Ricardo Carvalho": "https://es.wikipedia.org/wiki/Ricardo_Carvalho",
+  "Fábio Coentrão": "https://es.wikipedia.org/wiki/F%C3%A1bio_Coentr%C3%A3o",
+  "Nuri Şahin": "https://es.wikipedia.org/wiki/Nuri_%C5%9Eahin",
+  "José Callejón": "https://es.wikipedia.org/wiki/Jos%C3%A9_Callej%C3%B3n",
+  "Hamit Altıntop": "https://es.wikipedia.org/wiki/Hamit_Alt%C4%B1ntop",
+  "Nacho Fernández": "https://es.wikipedia.org/wiki/Nacho_Fern%C3%A1ndez",
+  "Luka Modrić": "https://es.wikipedia.org/wiki/Luka_Modri%C4%87",
+  "Michael Essien": "https://es.wikipedia.org/wiki/Michael_Essien",
+  "Casemiro": "https://es.wikipedia.org/wiki/Casemiro",
+  "Gareth Bale": "https://es.wikipedia.org/wiki/Gareth_Bale",
+  "Isco": "https://es.wikipedia.org/wiki/Isco",
+  "Asier Illarramendi": "https://es.wikipedia.org/wiki/Asier_Illarramendi",
+  "Dani Carvajal": "https://es.wikipedia.org/wiki/Dani_Carvajal",
+  "Gonzalo Higuaín": "https://es.wikipedia.org/wiki/Gonzalo_Higua%C3%ADn",
+  "James Rodríguez": "https://es.wikipedia.org/wiki/James_Rodr%C3%ADguez",
+  "Toni Kroos": "https://es.wikipedia.org/wiki/Toni_Kroos",
+  "Keylor Navas": "https://es.wikipedia.org/wiki/Keylor_Navas",
+  "Lucas Vázquez": "https://es.wikipedia.org/wiki/Lucas_V%C3%A1zquez",
+  "Álvaro Morata": "https://es.wikipedia.org/wiki/%C3%81lvaro_Morata",
+  "Mateo Kovačić": "https://es.wikipedia.org/wiki/Mateo_Kova%C4%8Di%C4%87",
+  "Danilo": "https://es.wikipedia.org/wiki/Danilo",
+  "Federico Valverde": "https://es.wikipedia.org/wiki/Federico_Valverde",
+  "Theo Hernández": "https://es.wikipedia.org/wiki/Theo_Hern%C3%A1ndez",
+  "Dani Ceballos": "https://es.wikipedia.org/wiki/Dani_Ceballos",
+  "Vinícius Júnior": "https://es.wikipedia.org/wiki/Vin%C3%ADcius_J%C3%BAnior",
+  "Thibaut Courtois": "https://es.wikipedia.org/wiki/Thibaut_Courtois",
+  "Álvaro Odriozola": "https://es.wikipedia.org/wiki/%C3%81lvaro_Odriozola",
+  "Mariano Díaz": "https://es.wikipedia.org/wiki/Mariano_D%C3%ADaz",
+  "Eden Hazard": "https://es.wikipedia.org/wiki/Eden_Hazard",
+  "Luka Jović": "https://es.wikipedia.org/wiki/Luka_Jovi%C4%87",
+  "Éder Militão": "https://es.wikipedia.org/wiki/%C3%89der_Milit%C3%A3o",
+  "Ferland Mendy": "https://es.wikipedia.org/wiki/Ferland_Mendy",
+  "Rodrygo": "https://es.wikipedia.org/wiki/Rodrygo",
+  "Marcos Llorente": "https://es.wikipedia.org/wiki/Marcos_Llorente",
+  "Achraf Hakimi": "https://es.wikipedia.org/wiki/Achraf_Hakimi",
+  "Sergio Reguilón": "https://es.wikipedia.org/wiki/Sergio_Reguil%C3%B3n",
+  "David Alaba": "https://es.wikipedia.org/wiki/David_Alaba",
+  "Eduardo Camavinga": "https://es.wikipedia.org/wiki/Eduardo_Camavinga",
+  "Raphaël Varane": "https://es.wikipedia.org/wiki/Rapha%C3%ABl_Varane",
+  "Martin Ødegaard": "https://es.wikipedia.org/wiki/Martin_%C3%98degaard",
+  "Aurélien Tchouaméni": "https://es.wikipedia.org/wiki/Aur%C3%A9lien_Tchouam%C3%A9ni",
+  "Antonio Rüdiger": "https://es.wikipedia.org/wiki/Antonio_R%C3%BCdiger",
+  "Jude Bellingham": "https://es.wikipedia.org/wiki/Jude_Bellingham",
+  "Arda Güler": "https://es.wikipedia.org/wiki/Arda_G%C3%BCler",
+  "Kylian Mbappé": "https://es.wikipedia.org/wiki/Kylian_Mbapp%C3%A9",
+  "Endrick": "https://es.wikipedia.org/wiki/Endrick",
+  "Dean Huijsen": "https://es.wikipedia.org/wiki/Dean_Huijsen",
+  "Álvaro Carreras": "https://es.wikipedia.org/wiki/%C3%81lvaro_Carreras",
+  "Franco Mastantuono": "https://es.wikipedia.org/wiki/Franco_Mastantuono",
+  "Trent Alexander-Arnold": "https://es.wikipedia.org/wiki/Trent_Alexander-Arnold",
+  "Álvaro Rodríguez": "https://es.wikipedia.org/wiki/%C3%81lvaro_Rodr%C3%ADguez",
+  "Marc Cucurella": "https://es.wikipedia.org/wiki/Marc_Cucurella",
+  "Ibrahima Konaté": "https://es.wikipedia.org/wiki/Ibrahima_Konat%C3%A9",
+  "Denzel Dumfries": "https://es.wikipedia.org/wiki/Denzel_Dumfries",
+  "Bernardo Silva": "https://es.wikipedia.org/wiki/Bernardo_Silva",
+  "Carlos Espí": "https://es.wikipedia.org/wiki/Carlos_Esp%C3%AD",
+  "Yan Diomandé": "https://es.wikipedia.org/wiki/Yan_Diomande",
+  "José Mourinho (entrenador)": "https://es.wikipedia.org/wiki/Jos%C3%A9_Mourinho",
+  "Nico Paz": "https://es.wikipedia.org/wiki/Nico_Paz",
+  "Gonzalo García": "https://es.wikipedia.org/wiki/Gonzalo_Garc%C3%ADa",
+  "César Palacios": "https://es.wikipedia.org/wiki/C%C3%A9sar_Palacios",
+  "Víctor Muñoz": "https://es.wikipedia.org/wiki/V%C3%ADctor_Mu%C3%B1oz",
+  "Mario Gila": "https://es.wikipedia.org/wiki/Mario_Gila",
+  "Jacobo Ortega": "https://es.wikipedia.org/wiki/Jacobo_Ortega",
+  "Víctor Valdepeñas": "https://es.wikipedia.org/wiki/V%C3%ADctor_Valdepe%C3%B1as",
+  "Fran García": "https://es.wikipedia.org/wiki/Fran_Garc%C3%ADa",
+  "Mario Martín": "https://es.wikipedia.org/wiki/Mario_Mart%C3%ADn",
+  "Álex Jiménez": "https://es.wikipedia.org/wiki/%C3%81lex_Jim%C3%A9nez",
+};
+
+/* ---------------- helpers ---------------- */
+function fmtM(v){
+  if(v===null||v===undefined) return '<span class="nd">N/D</span>';
+  if(v===0) return '<span class="nd">—</span>';
+  return v.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})+' M€';
+}
+function initials(name){
+  const clean = name.replace(/\(.*?\)/g,'').trim();
+  const parts = clean.split(/\s+/).filter(Boolean);
+  if(parts.length===1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0]+parts[parts.length-1][0]).toUpperCase();
+}
+// quita acentos/diacríticos y pasa a minúsculas, para que "kovacic" encuentre "Kovačić"
+function norm(s){
+  return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+}
+// Devuelve el HTML de un avatar: foto real si hay URL en PHOTOS, si no, iniciales.
+// Si la imagen falla al cargar (enlace roto, etc.), avatarFallback() la sustituye por las iniciales.
+function avatarHTML(name, cat, baseClass, extraAttrs){
+  const url = PHOTOS[name];
+  const base = baseClass || 'avatar';
+  const cls = `${base} cat-${cat}`.trim();
+  const attrs = extraAttrs||'';
+  if(url){
+    return `<img class="${cls}" src="${url}" alt="${name}" loading="lazy" referrerpolicy="no-referrer" `
+         + `data-initials="${initials(name)}" data-cls="${cls}" title="${name}" ${attrs} onerror="avatarFallback(this)">`;
+  }
+  return `<span class="${cls}" title="${name}" ${attrs}>${initials(name)}</span>`;
+}
+function avatarFallback(img){
+  const span = document.createElement('span');
+  span.className = img.dataset.cls;
+  span.title = img.alt;
+  span.textContent = img.dataset.initials;
+  // preservar cualquier atributo data-* adicional (p.ej. data-hover-ref, usado por el hover)
+  for(const key in img.dataset){
+    if(key==='cls' || key==='initials') continue;
+    span.dataset[key] = img.dataset[key];
+  }
+  img.replaceWith(span);
+}
+
+/* ---------------- registro global de hover (compartido por TODAS las vistas) ----------------
+   Cualquier vista (tabla, gráficos, timeline, mapa, onces) registra aquí los objetos de jugador
+   que quiere que muestren el popup al pasar el ratón, y marca su elemento con data-hover-ref.
+   Esto evita reimplementar el popup o el cálculo de posición en cada vista nueva. */
+let HOVER_REGISTRY = [];
+function registerHover(o){
+  HOVER_REGISTRY.push(o);
+  return HOVER_REGISTRY.length - 1;
+}
+function hoverAttr(o){
+  return `data-hover-ref="${registerHover(o)}"`;
+}
+
+/* ---------------- state ---------------- */
+const state = {
+  cols: new Set(),               // active column toggles (balance, comments, titles)
+  hideVentas: false,             // "Ocultar ventas" toggle
+  cats: new Set(Object.keys(CAT_LABEL)), // active categories (all on by default)
+  open: new Set(),
+  search: '',                    // texto de búsqueda
+  view: 'tabla',                 // vista activa: tabla | chart-season | chart-player | timeline | mapa | once
+  chartSort: 'year',             // gráfico por jugador: 'year' | 'price'
+  chartNet: false,               // gráfico por jugador: descontar importe de venta
+  onceMode: 'historico'          // once: 'historico' | 'aleatorio'
+};
+
+// nombres/apellidos de 4 letras que existen en los datos (Kaká, Bale, Xabi, Raúl, Kopa...):
+// para estos, la búsqueda se activa ya con 4 caracteres en vez de 5.
+const SHORT_NAME_TOKENS = new Set();
+SEASONS.forEach(s => s.ops.forEach(o => {
+  o.n.replace(/\(.*?\)/g,'').split(/\s+/).forEach(tok=>{
+    const clean = tok.replace(/[^\p{L}]/gu,'');
+    if(clean.length===4) SHORT_NAME_TOKENS.add(norm(clean));
+  });
+}));
+
+/* ---------------- render ---------------- */
+const tbody = document.getElementById('tbody');
+
+// operaciones que pasan el filtro de CATEGORÍA (sin tener en cuenta "ocultar ventas")
+function catVisibleOps(season){
+  return season.ops.filter(o => state.cats.has(o.cat));
+}
+// operaciones que sobreviven a TODOS los filtros activos (categoría + ocultar ventas)
+function visibleOps(season){
+  return catVisibleOps(season).filter(o => !(state.hideVentas && o.k==='v'));
+}
+// mínimo 5 caracteres, salvo excepción de nombres/apellidos de 4 letras conocidos (Kaká, Bale...)
+function searchActive(){
+  const q = norm(state.search.trim());
+  if(q.length>=5) return true;
+  if(q.length===4 && SHORT_NAME_TOKENS.has(q)) return true;
+  return false;
+}
+// texto buscable de una operación: nombre, club y comentario/detalle (sin acentos)
+function opSearchText(o){
+  return norm(o.n + ' ' + (o.club||'') + ' ' + (o.vt||o.det||''));
+}
+function seasonMatchesSearch(season){
+  if(!searchActive()) return true;
+  const q = norm(state.search.trim());
+  return season.ops.some(o => opSearchText(o).includes(q));
+}
+// una temporada se oculta por completo si el filtro de CATEGORÍA la deja sin nada,
+// o si hay una búsqueda activa y ninguna operación de esa temporada coincide.
+// las temporadas que ya nacen vacías (p.ej. 1998/99) nunca se ocultan por el filtro de categoría,
+// pero sí se ocultan durante una búsqueda activa (no tienen jugadores que puedan coincidir).
+function seasonHidden(season){
+  if(searchActive() && !seasonMatchesSearch(season)) return true;
+  if(season.ops.length===0) return false;
+  return catVisibleOps(season).length===0;
+}
+// caso especial: tras el filtro de categoría quedan operaciones, pero son TODAS ventas
+// y "ocultar ventas" está activo -> no se oculta la temporada, se muestra un aviso.
+function seasonOnlySalesHidden(season){
+  const cv = catVisibleOps(season);
+  if(cv.length===0) return false;
+  return state.hideVentas && cv.every(o => o.k==='v');
+}
+
+// suma de importes conocidos de un conjunto de operaciones. null si hay operaciones
+// pero ninguna con importe conocido; 0 (via fmtM -> "—") si el conjunto está vacío.
+function sumFees(ops){
+  if(ops.length===0) return 0;
+  const withFee = ops.filter(o=>o.f!==null);
+  if(withFee.length===0) return null;
+  return withFee.reduce((a,o)=>a+o.f,0);
+}
+// totales de una temporada: el GASTO solo depende del filtro de CATEGORÍA (nunca de "ocultar
+// ventas", que no tiene nada que ver con las compras); los VENTAS dependen de categoría Y de
+// "ocultar ventas". Con los filtros en su estado por defecto se usan las cifras oficiales de
+// la temporada (más completas que la suma de operaciones con nombre, ya incluyen primas conocidas).
+function seasonTotals(season){
+  const catsDefault = state.cats.size===Object.keys(CAT_LABEL).length;
+
+  const g = catsDefault
+    ? season.g
+    : sumFees(catVisibleOps(season).filter(o=>o.k==='c'));
+
+  const v = (catsDefault && !state.hideVentas)
+    ? season.v
+    : sumFees(visibleOps(season).filter(o=>o.k==='v'));
+
+  return {g, v};
+}
+
+function seasonAvatars(season){
+  const picks = visibleOps(season).filter(o => ['principal','leyenda','fiasco'].includes(o.cat));
+  const shown = picks.slice(0,5);
+  let html = '<div class="avatars">';
+  shown.forEach(o=>{
+    html += avatarHTML(o.n, o.cat);
+  });
+  if(picks.length>shown.length){ html += `<span class="more">+${picks.length-shown.length}</span>`; }
+  html += '</div>';
+  return html;
+}
+
+function seasonTitlesHTML(season){
+  if(!season.titles || !season.titles.length) return '<span class="nd">—</span>';
+  return season.titles.map(t => `<span class="title-icon" title="${t.name}">${t.icon}</span>`).join('');
+}
+
+function buildRows(){
+  tbody.innerHTML = '';
+  SEASONS.forEach((s, idx)=>{
+    const fin = FIN[s.t] || {};
+    const tot = seasonTotals(s);
+    const neto = (tot.g===null||tot.v===null) ? null : (tot.v - tot.g);
+    const tr = document.createElement('tr');
+    tr.className = 'yrow';
+    tr.dataset.idx = idx;
+    tr.innerHTML = `
+      <td><div class="season-cell"><span class="chev">▸</span><span class="season-t">${s.t}</span><span class="season-note-flag${s.note?'':' empty'}" data-season="${idx}">i</span>${s.tourney?`<span class="tourney-flag" title="${s.tourney.full}">${s.tourney.short}</span>`:''}</div></td>
+      <td class="g gcell">${fmtM(tot.g)}</td>
+      <td class="v vcell">${fmtM(tot.v)}</td>
+      <td class="netocell ${neto===null?'':(neto>=0?'n-pos':'n-neg')}">${neto===null?'<span class="nd">N/D</span>':fmtM(neto)}</td>
+      <td class="col-balance">${fmtM(fin.sal)}</td>
+      <td class="col-balance">${fmtM(fin.og)}</td>
+      <td class="col-balance">${fmtM(fin.oi)}</td>
+      <td class="col-balance">${fmtM(fin.bt)}</td>
+      <td class="txt avatars-cell">${seasonAvatars(s)}</td>
+      <td class="txt titles-cell col-titles">${seasonTitlesHTML(s)}</td>
+      <td></td>
+    `;
+    tbody.appendChild(tr);
+
+    const dtr = document.createElement('tr');
+    dtr.className = 'detail-row';
+    dtr.style.display = 'none';
+    dtr.dataset.idx = idx;
+    const td = document.createElement('td');
+    td.colSpan = 11;
+    td.innerHTML = buildDetail(s, idx);
+    dtr.appendChild(td);
+    tbody.appendChild(dtr);
+
+    tr.addEventListener('click', ()=> toggleSeason(idx));
+  });
+}
+
+function buildDetail(s, idx){
+  let html = `<div class="detail-wrap">`;
+  if(!s.ops.length){
+    html += `<div class="empty-season">Sin operaciones destacadas registradas esta temporada.</div></div>`;
+    return html;
+  }
+  if(seasonOnlySalesHidden(s)){
+    html += `<div class="empty-season">Solo operaciones de venta en esta temporada.</div></div>`;
+    return html;
+  }
+  const q = searchActive() ? norm(state.search.trim()) : null;
+  html += `<table class="ops"><thead><tr>
+      <th style="width:231px; text-align:left;">Jugador</th>
+      <th class="col-gasto" style="text-align:right;">Gasto</th>
+      <th class="col-ventas" style="text-align:right;">Ventas</th>
+      <th style="width:190px; text-align:left;">Club</th>
+      <th style="width:100px; text-align:left;">Veredicto</th>
+      <th class="comment-th" style="text-align:left;">Comentario</th>
+      <th class="col-filler"></th>
+    </tr></thead><tbody>`;
+  s.ops.forEach((o,oi)=>{
+    const fmtFee = (val)=> val.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})+' M€'
+         + (o.fe?'<span class="op-fee-est">(estim.)</span>':'');
+    let gastoCell, ventasCell;
+    if(o.k==='c'){
+      gastoCell = o.f===null ? '<span class="nd">N/D</span>' : fmtFee(o.f);
+      ventasCell = '';
+    } else {
+      gastoCell = '<span class="op-venta-flag">Venta</span>';
+      ventasCell = o.f===null ? '<span class="nd">N/D</span>' : fmtFee(o.f);
+    }
+    const nameHit = q && norm(o.n).includes(q);
+    const clubHit = q && norm(o.club||'').includes(q);
+    const commentHit = q && norm(o.vt||o.det||'').includes(q);
+    html += `<tr class="op-row" data-cat="${o.cat}" data-kind="${o.k}">
+      <td><div class="op-player">
+        ${avatarHTML(o.n, o.cat, 'op-avatar', hoverAttr(o))}
+        <a class="op-name${nameHit?' search-hit':''}" href="${WIKI[o.n]||'#'}" target="_blank" rel="noopener noreferrer" ${hoverAttr(o)} onclick="event.stopPropagation(); window.open(this.href,'_blank','noopener,noreferrer'); return false;">${o.n}</a>
+      </div></td>
+      <td class="op-gasto">${gastoCell}</td>
+      <td class="op-ventas">${ventasCell}</td>
+      <td class="op-club${clubHit?' search-hit':''}">${o.club||''}</td>
+      <td>${o.ve?`<span class="verdict-tag ${o.ve}">${VERDICT_LABEL[o.ve]}</span>`:''}</td>
+      <td class="op-comment${commentHit?' search-hit':''}">${o.vt||o.det||''}</td>
+      <td></td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+  return html;
+}
+
+/* ---------------- expand / collapse ---------------- */
+function toggleSeason(idx){
+  if(state.open.has(idx)) state.open.delete(idx);
+  else state.open.add(idx);
+  render();
+}
+function expandAll(){
+  SEASONS.forEach((s, idx)=>{ if(!seasonHidden(s)) state.open.add(idx); });
+  render();
+}
+function collapseAll(){
+  state.open.clear();
+  render();
+}
+document.getElementById('btnExpandAll').addEventListener('click', expandAll);
+document.getElementById('btnCollapseAll').addEventListener('click', collapseAll);
+
+/* ---------------- búsqueda ---------------- */
+const searchInput = document.getElementById('searchInput');
+const searchClear = document.getElementById('searchClear');
+searchInput.addEventListener('input', (e)=>{
+  state.search = e.target.value;
+  searchClear.style.display = state.search ? 'flex' : 'none';
+  render();
+});
+searchClear.addEventListener('click', ()=>{
+  searchInput.value = '';
+  state.search = '';
+  searchClear.style.display = 'none';
+  searchInput.focus();
+  render();
+});
+
+/* ---------------- unified render: filtros + expand/collapse + avatares ---------------- */
+function renderTabla(){
+  // columnas
+  document.body.classList.toggle('hide-balance', !state.cols.has('balance'));
+  document.body.classList.toggle('show-comments', state.cols.has('comments'));
+  document.body.classList.toggle('show-titles', state.cols.has('titles'));
+
+  // sincronizar visualmente los chips de categoría individuales y el chip "Todos"
+  document.querySelectorAll('#catToggles .chip[data-cat]').forEach(chip=>{
+    chip.classList.toggle('on', state.cats.has(chip.dataset.cat));
+  });
+  document.getElementById('allCatsChip').classList.toggle('on', state.cats.size===Object.keys(CAT_LABEL).length);
+
+  // filas de temporada: totales dinámicos, visibilidad, apertura, avatares, mensaje "solo ventas"
+  SEASONS.forEach((s, idx)=>{
+    const yrow = tbody.querySelector(`.yrow[data-idx="${idx}"]`);
+    const drow = tbody.querySelector(`.detail-row[data-idx="${idx}"]`);
+    if(!yrow) return;
+
+    // totales recalculados según los toggles activos
+    const tot = seasonTotals(s);
+    const neto = (tot.g===null||tot.v===null) ? null : (tot.v - tot.g);
+    yrow.querySelector('.gcell').innerHTML = fmtM(tot.g);
+    yrow.querySelector('.vcell').innerHTML = fmtM(tot.v);
+    const netoCell = yrow.querySelector('.netocell');
+    netoCell.innerHTML = neto===null ? '<span class="nd">N/D</span>' : fmtM(neto);
+    netoCell.classList.remove('n-pos','n-neg');
+    if(neto!==null) netoCell.classList.add(neto>=0?'n-pos':'n-neg');
+
+    const hidden = seasonHidden(s);
+    yrow.style.display = hidden ? 'none' : '';
+    // durante una búsqueda activa, las temporadas que coinciden se despliegan solas
+    const forcedOpen = searchActive() && seasonMatchesSearch(s);
+    const isOpen = !hidden && (state.open.has(idx) || forcedOpen);
+    if(drow){
+      drow.style.display = isOpen ? 'table-row' : 'none';
+      // el contenido del detalle depende de "ocultar ventas" y de la búsqueda (resaltado)
+      const td = drow.querySelector('td');
+      if(td) td.innerHTML = buildDetail(s, idx);
+    }
+    yrow.classList.toggle('open', isOpen);
+    const avCell = yrow.querySelector('.avatars-cell');
+    if(avCell) avCell.innerHTML = isOpen ? '<div class="avatars"></div>' : seasonAvatars(s);
+  });
+
+  // filas de operaciones (categoría + ocultar ventas) — se aplica DESPUÉS de reconstruir
+  // el detalle de cada temporada, para que también afecte a las filas recién creadas.
+  document.querySelectorAll('tr.op-row').forEach(row=>{
+    const cat = row.dataset.cat;
+    const kind = row.dataset.kind;
+    const hide = !state.cats.has(cat) || (state.hideVentas && kind==='v');
+    row.style.display = hide ? 'none' : '';
+  });
+}
+
+/* =====================================================================
+   DATOS COMPARTIDOS ENTRE VISTAS
+   getFilteredPlayers(): única fuente de verdad para cualquier vista que no sea la tabla
+   (gráficos, timeline, mapa, onces). Aplica los mismos filtros que la tabla: categorías
+   activas, "ocultar ventas" y la búsqueda. Devuelve una lista plana de operaciones, cada
+   una con su temporada adjunta.
+   ===================================================================== */
+function getFilteredPlayers(){
+  const q = searchActive() ? norm(state.search.trim()) : null;
+  const out = [];
+  SEASONS.forEach(season=>{
+    season.ops.forEach(o=>{
+      if(!state.cats.has(o.cat)) return;
+      if(state.hideVentas && o.k==='v') return;
+      if(q && !opSearchText(o).includes(q)) return;
+      out.push(Object.assign({season: season.t}, o));
+    });
+  });
+  return out;
+}
+
+/* =====================================================================
+   SELECTOR DE VISTAS
+   ===================================================================== */
+const VIEWS = ['tabla','chart-season','chart-player','timeline','mapa','once'];
+function switchView(view){
+  state.view = view;
+  // al entrar por primera vez en un gráfico de importes, si todas las categorías están activas
+  // (estado por defecto), se desactivan cantera/formación/leyendas: sus fichajes suelen tener
+  // importe nulo o simbólico y solo añaden ruido visual a estos gráficos.
+  if((view==='chart-season' || view==='chart-player') && state.cats.size===Object.keys(CAT_LABEL).length){
+    state.cats.delete('cantera');
+    state.cats.delete('formacion');
+    state.cats.delete('leyenda');
+  }
+  document.querySelectorAll('.viewtab').forEach(b=> b.classList.toggle('on', b.dataset.view===view));
+  VIEWS.forEach(v=>{
+    const el = document.getElementById('view-'+v);
+    if(el) el.style.display = (v===view) ? '' : 'none';
+  });
+  document.getElementById('tableOnlyActions').style.display = (view==='tabla') ? '' : 'none';
+  document.getElementById('colGroupTabla').style.display = (view==='tabla') ? '' : 'none';
+  document.getElementById('colGroupPlayerChart').style.display = (view==='chart-player') ? '' : 'none';
+  render();
+}
+document.querySelectorAll('.viewtab').forEach(btn=>{
+  btn.addEventListener('click', ()=> switchView(btn.dataset.view));
+});
+
+/* dispatcher: además de la tabla (que ya se pinta sola), refresca la vista activa */
+/* =====================================================================
+   GRÁFICO 1: barras de gasto (arriba) / ventas (abajo) por temporada + línea de neto
+   Eje Y fijo a la izquierda (no se desplaza con el scroll horizontal) + tooltip instantáneo.
+   ===================================================================== */
+function seasonChartData(){
+  const players = getFilteredPlayers();
+  const map = {};
+  SEASONS.forEach(s=>{ map[s.t] = {g:0, v:0}; });
+  players.forEach(p=>{
+    if(p.f===null) return;
+    if(p.k==='c') map[p.season].g += p.f;
+    else map[p.season].v += p.f;
+  });
+  return SEASONS.map(s=>({t:s.t, g:map[s.t].g, v:map[s.t].v, neto: map[s.t].v - map[s.t].g}))
+                .filter(d=> d.g>0 || d.v>0); // ocultar temporadas sin ningún jugador visible con los filtros activos
+}
+const SEASON_CHART = {slot:34, barW:16, chartH:420, padTop:24, padBottom:80, axisW:52};
+// dominio del eje Y calculado UNA VEZ sobre TODOS los fichajes/ventas de la historia (sin filtrar):
+// así ni los toggles de categoría ni "ocultar ventas" desplazan la línea base ni reescalan el gráfico.
+let _seasonDomainCache = null;
+function getSeasonChartDomain(){
+  if(_seasonDomainCache) return _seasonDomainCache;
+  const map = {};
+  SEASONS.forEach(s=>{ map[s.t] = {g:0, v:0}; });
+  SEASONS.forEach(s=> s.ops.forEach(o=>{
+    if(o.f===null) return;
+    if(o.k==='c') map[s.t].g += o.f; else map[s.t].v += o.f;
+  }));
+  const all = SEASONS.map(s=>({g:map[s.t].g, v:map[s.t].v, neto: map[s.t].v - map[s.t].g}));
+  const upMax = Math.max(1, ...all.map(d=>Math.max(d.g, d.neto)));
+  const downMax = Math.max(1, ...all.map(d=>Math.max(d.v, -d.neto)));
+  _seasonDomainCache = {yMin:-downMax, yMax:upMax};
+  return _seasonDomainCache;
+}
+function seasonChartScale(){
+  const C = SEASON_CHART;
+  const plotH = C.chartH - C.padTop - C.padBottom;
+  const {yMin, yMax} = getSeasonChartDomain();
+  const yScale = v => C.padTop + plotH - ((v - yMin)/(yMax-yMin))*plotH;
+  return {yScale, yMin, yMax, baseline: yScale(0), plotH};
+}
+function renderSeasonAxis(yScale, yMin, yMax){
+  const C = SEASON_CHART;
+  const axisEl = document.getElementById('seasonChartAxis');
+  if(!axisEl) return;
+  let ticks = '';
+  for(let i=0;i<=5;i++){
+    const val = yMin + (yMax-yMin)*i/5;
+    const y = yScale(val);
+    ticks += `<text x="${C.axisW-8}" y="${y+3}" text-anchor="end" font-size="9" fill="#7A7F8A" font-family="IBM Plex Mono, monospace">${Math.round(val)}</text>`;
+  }
+  axisEl.innerHTML = `<svg width="${C.axisW}" height="${C.chartH}">${ticks}</svg>`;
+}
+function renderSeasonChart(){
+  const el = document.getElementById('seasonChartWrap');
+  if(!el) return;
+  const C = SEASON_CHART;
+  const data = seasonChartData();
+  const n = data.length;
+  const chartW = Math.max(300, n*C.slot + 20);
+  const {yScale, yMin, yMax, baseline} = seasonChartScale();
+  renderSeasonAxis(yScale, yMin, yMax);
+
+  if(n===0){
+    el.innerHTML = `<div class="empty-season" style="padding:40px 0;">Ningún jugador visible con los filtros activos.</div>`;
+    return;
+  }
+
+  let bars = '', line = [], labels = '', gridlines = '', hits = '';
+  for(let i=0;i<=5;i++){
+    const val = yMin + (yMax-yMin)*i/5;
+    const y = yScale(val);
+    gridlines += `<line x1="0" y1="${y}" x2="${chartW}" y2="${y}" stroke="#E4E1D8" stroke-width="1"/>`;
+  }
+  data.forEach((d, i)=>{
+    const x = 10 + i*C.slot;
+    const cx = x + C.barW/2;
+    const hg = d.g>0 ? Math.max(2, baseline - yScale(d.g)) : 0;
+    const hv = d.v>0 ? Math.max(2, yScale(-d.v) - baseline) : 0;
+    bars += `<rect x="${x}" y="${baseline-hg}" width="${C.barW}" height="${hg}" fill="var(--red)" rx="2"/>`;
+    bars += `<rect x="${x}" y="${baseline}" width="${C.barW}" height="${hv}" fill="var(--teal)" rx="2"/>`;
+    line.push(`${cx},${yScale(d.neto)}`);
+    labels += `<text x="${cx}" y="${C.chartH-C.padBottom+16}" text-anchor="end" font-size="8.5" fill="#4B5670" font-family="Inter, sans-serif" transform="rotate(-60 ${cx} ${C.chartH-C.padBottom+16})">${d.t}</text>`;
+    // zona invisible para el tooltip instantáneo (cubre toda la columna, arriba y abajo)
+    hits += `<rect x="${x-C.slot/2+C.barW/2}" y="0" width="${C.slot}" height="${C.chartH}" fill="transparent" class="season-hit" data-idx="${i}"/>`;
+  });
+  const linePath = `<polyline points="${line.join(' ')}" fill="none" stroke="var(--gold)" stroke-width="2.5"/>`;
+  const dots = data.map((d,i)=>{
+    const [x,y] = line[i].split(',');
+    return `<circle cx="${x}" cy="${y}" r="3" fill="var(--gold)" stroke="#fff" stroke-width="1"/>`;
+  }).join('');
+  const baselineLine = `<line x1="0" y1="${baseline}" x2="${chartW}" y2="${baseline}" stroke="#B0AB9C" stroke-width="1.2"/>`;
+
+  el.innerHTML = `<svg width="${chartW}" height="${C.chartH}" viewBox="0 0 ${chartW} ${C.chartH}">
+    ${gridlines}${baselineLine}${bars}${linePath}${dots}${labels}${hits}
+  </svg>`;
+
+  el.querySelectorAll('.season-hit').forEach(hit=>{
+    hit.addEventListener('mouseenter', (e)=> showSeasonTip(data[+hit.dataset.idx], e));
+    hit.addEventListener('mouseleave', hideSeasonTip);
+  });
+}
+
+/* tooltip instantáneo de temporada: total gasto/ventas/neto + caras de los protagonistas */
+const seasonTip = document.getElementById('seasonTip');
+function showSeasonTip(d, e){
+  const s = SEASONS.find(x=>x.t===d.t);
+  const protagonists = s ? s.ops.filter(o=>state.cats.has(o.cat) && !(state.hideVentas && o.k==='v'))
+                               .filter(o=>['principal','leyenda','fiasco'].includes(o.cat)).slice(0,6) : [];
+  const avatarsHtml = protagonists.map(o=>avatarHTML(o.n, o.cat, 'avatar', hoverAttr(o))).join('');
+  seasonTip.innerHTML = `
+    <div class="stip-title">${d.t}</div>
+    <div class="stip-row"><span>Gasto</span><b class="g">${d.g.toFixed(1)} M€</b></div>
+    <div class="stip-row"><span>Ventas</span><b class="v">${d.v.toFixed(1)} M€</b></div>
+    <div class="stip-row"><span>Neto</span><b>${d.neto.toFixed(1)} M€</b></div>
+    ${avatarsHtml ? `<div class="stip-avatars">${avatarsHtml}</div>` : ''}
+  `;
+  // posicionar cerca del cursor, sin salirse de la ventana
+  seasonTip.style.left = '-1000px'; seasonTip.style.top='-1000px'; seasonTip.classList.add('show');
+  const tipW = seasonTip.offsetWidth, tipH = seasonTip.offsetHeight;
+  let left = e.clientX - tipW/2;
+  let top = e.clientY - tipH - 16;
+  left = Math.max(10, Math.min(left, window.innerWidth - tipW - 10));
+  if(top < 10) top = e.clientY + 16;
+  seasonTip.style.left = left+'px';
+  seasonTip.style.top = top+'px';
+}
+function hideSeasonTip(){ seasonTip.classList.remove('show'); }
+
+/* =====================================================================
+   GRÁFICO 2: barras por jugador (fichajes), orden por año o precio, con toggle de neto.
+   Eje Y fijo (dominio calculado UNA VEZ sobre todos los datos, no cambia con filtros/orden/neto).
+   Caras siempre en una fila fija debajo del eje horizontal.
+   ===================================================================== */
+let _playerDomainCache = null;
+function getPlayerChartDomain(){
+  if(_playerDomainCache) return _playerDomainCache;
+  const byName = {};
+  SEASONS.forEach(season=> season.ops.forEach(o=>{
+    if(!byName[o.n]) byName[o.n] = {compra:null, venta:null};
+    if(o.k==='c') byName[o.n].compra = o.f;
+    else byName[o.n].venta = o.f;
+  }));
+  let maxRaw = 1, minNet = 0, maxNet = 1;
+  Object.values(byName).forEach(p=>{
+    if(p.compra===null || p.compra===undefined) return;
+    maxRaw = Math.max(maxRaw, p.compra);
+    const net = p.compra - (p.venta||0);
+    minNet = Math.min(minNet, net);
+    maxNet = Math.max(maxNet, net);
+  });
+  _playerDomainCache = { yMax: Math.max(maxRaw, maxNet), yMin: Math.min(0, minNet) };
+  return _playerDomainCache;
+}
+function playerChartData(){
+  const players = getFilteredPlayers();
+  const byName = {};
+  players.forEach(p=>{
+    if(!byName[p.n]) byName[p.n] = Object.assign({}, p, {compra:null, venta:null});
+    if(p.k==='c'){ Object.assign(byName[p.n], p); byName[p.n].compra = p.f; byName[p.n].compraSeason = p.season; }
+    else { byName[p.n].venta = p.f; }
+  });
+  let arr = Object.values(byName).filter(p=>p.compra!==null && p.compra!==undefined);
+  arr.forEach(p=>{
+    const venta = (state.chartNet && p.venta!==null && p.venta!==undefined) ? p.venta : 0;
+    p.value = p.compra - venta;
+  });
+  if(state.chartSort==='price') arr.sort((a,b)=> a.value - b.value);
+  else arr.sort((a,b)=> (a.compraSeason||a.season).localeCompare(b.compraSeason||b.season));
+  return arr;
+}
+const PLAYER_CHART = {slot:30, barW:20, chartH:460, padTop:24, padBottom:60, axisW:52};
+function renderPlayerAxis(){
+  const C = PLAYER_CHART;
+  const {yMin, yMax} = getPlayerChartDomain();
+  const plotH = C.chartH - C.padTop - C.padBottom;
+  const yScale = v => C.padTop + plotH - ((v - yMin)/(yMax-yMin))*plotH;
+  const axisEl = document.getElementById('playerChartAxis');
+  if(!axisEl) return;
+  let ticks = '';
+  for(let i=0;i<=5;i++){
+    const val = yMin + (yMax-yMin)*i/5;
+    const y = yScale(val);
+    ticks += `<text x="${C.axisW-8}" y="${y+3}" text-anchor="end" font-size="9" fill="#7A7F8A" font-family="IBM Plex Mono, monospace">${Math.round(val)}</text>`;
+  }
+  axisEl.innerHTML = `<svg width="${C.axisW}" height="${C.chartH}">${ticks}</svg>`;
+}
+function renderPlayerChart(){
+  const el = document.getElementById('playerChartWrap');
+  if(!el) return;
+  const C = PLAYER_CHART;
+  const data = playerChartData();
+  const n = data.length;
+  const chartW = Math.max(700, n*C.slot + 20);
+  const {yMin, yMax} = getPlayerChartDomain();
+  const plotH = C.chartH - C.padTop - C.padBottom;
+  const yScale = v => C.padTop + plotH - ((v - yMin)/(yMax-yMin))*plotH;
+  const baseline = yScale(0);
+  const avatarRowY = baseline + 8; // fila fija de caras justo debajo del eje horizontal (línea base),
+                                     // no debajo de todo el gráfico: puede tapar barras que van hacia abajo, es intencional.
+  renderPlayerAxis();
+
+  let bars = '', avatars = '', gridlines = '';
+  for(let i=0;i<=5;i++){
+    const val = yMin + (yMax-yMin)*i/5;
+    const y = yScale(val);
+    gridlines += `<line x1="0" y1="${y}" x2="${chartW}" y2="${y}" stroke="#E4E1D8" stroke-width="1"/>`;
+  }
+  data.forEach((d,i)=>{
+    const x = 10 + i*C.slot;
+    const rawH = baseline - yScale(d.value);
+    const dir = rawH < 0 ? -1 : 1;
+    const h = Math.max(Math.abs(rawH), 2.5) * dir;
+    const y = h>=0 ? baseline-h : baseline;
+    bars += `<rect x="${x}" y="${y}" width="${C.barW}" height="${Math.abs(h)}" fill="${CAT_COLOR[d.cat]||CAT_COLOR.resto}" rx="2" data-hover-ref="${registerHover(d)}"><title>${d.n} · ${d.value.toFixed(1)} M€</title></rect>`;
+    avatars += `<foreignObject x="${x+C.barW/2-14}" y="${avatarRowY}" width="28" height="28">${avatarHTML(d.n, d.cat, 'avatar', hoverAttr(d))}</foreignObject>`;
+  });
+  el.innerHTML = `<svg width="${chartW}" height="${C.chartH}" viewBox="0 0 ${chartW} ${C.chartH}" xmlns="http://www.w3.org/2000/svg">
+    ${gridlines}<line x1="0" y1="${baseline}" x2="${chartW}" y2="${baseline}" stroke="#B0AB9C" stroke-width="1.2"/>
+    ${bars}${avatars}
+  </svg>`;
+}
+
+/* ---------------- dispatcher: refresca la tabla (siempre) + la vista activa ---------------- */
+function render(){
+  renderTabla(); // los toggles son transversales: se mantiene sincronizada aunque esté oculta
+  if(state.view==='chart-season') renderSeasonChart();
+  if(state.view==='chart-player') renderPlayerChart();
+}
+
+document.querySelectorAll('#colToggles .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    const col = chip.dataset.col;
+    if(state.cols.has(col)){ state.cols.delete(col); chip.classList.remove('on'); }
+    else{ state.cols.add(col); chip.classList.add('on'); }
+    render();
+  });
+});
+document.getElementById('hideVentasChip').addEventListener('click', function(){
+  state.hideVentas = !state.hideVentas;
+  this.classList.toggle('on', state.hideVentas);
+  render();
+});
+document.querySelectorAll('#catToggles .chip[data-cat]').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    const cat = chip.dataset.cat;
+    if(state.cats.has(cat)){ state.cats.delete(cat); chip.classList.remove('on'); }
+    else{ state.cats.add(cat); chip.classList.add('on'); }
+    render();
+  });
+});
+document.getElementById('allCatsChip').addEventListener('click', function(){
+  const allOn = state.cats.size === Object.keys(CAT_LABEL).length;
+  if(allOn){ state.cats.clear(); } else { Object.keys(CAT_LABEL).forEach(c=>state.cats.add(c)); }
+  render();
+});
+
+/* ---------------- controles del gráfico por jugador ---------------- */
+document.getElementById('chartSortChip').addEventListener('click', function(){
+  state.chartSort = state.chartSort==='year' ? 'price' : 'year';
+  this.textContent = state.chartSort==='year' ? 'Orden: año' : 'Orden: precio';
+  renderPlayerChart();
+});
+document.getElementById('chartNetChip').addEventListener('click', function(){
+  state.chartNet = !state.chartNet;
+  this.classList.toggle('on', state.chartNet);
+  renderPlayerChart();
+});
+
+/* ---------------- note tooltip (hover on the "i" icon) ---------------- */
+const notetip = document.getElementById('notetip');
+function showNoteTip(target, season){
+  notetip.innerHTML = `<b>${season.t} — </b>${season.note}`;
+  const rect = target.getBoundingClientRect();
+  let left = rect.left;
+  let top = rect.bottom + 8;
+  if(left + 320 > window.innerWidth) left = window.innerWidth - 330;
+  notetip.style.left = left+'px';
+  notetip.style.top = top+'px';
+  notetip.classList.add('show');
+}
+function hideNoteTip(){ notetip.classList.remove('show'); }
+tbody.addEventListener('mouseover', (e)=>{
+  const flag = e.target.closest('.season-note-flag');
+  if(!flag) return;
+  showNoteTip(flag, SEASONS[+flag.dataset.season]);
+});
+tbody.addEventListener('mouseout', (e)=>{
+  if(e.target.closest('.season-note-flag')) hideNoteTip();
+});
+
+
+/* ---------------- hover card ---------------- */
+const hc = document.getElementById('hovercard');
+function showCard(target, o){
+  hc.innerHTML = `
+    <div class="hc-top">
+      ${avatarHTML(o.n, o.cat, 'hc-avatar')}
+      <div>
+        <div class="hc-name">${o.n}</div>
+        <div class="hc-sub">${POSITION[o.n]||CAT_LABEL[o.cat]}</div>
+      </div>
+    </div>
+    <div class="hc-body">
+      <div class="hc-row"><span class="k">${o.k==='c'?'Procedencia':'Destino'}</span><span class="val">${o.club||'—'}</span></div>
+      ${o.compraSeason?`<div class="hc-row"><span class="k">Fichaje</span><span class="val">${o.compraSeason}</span></div>`:''}
+      <div class="hc-row"><span class="k">Importe</span><span class="val">${o.f===null?'N/D':(o.f.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})+' M€'+(o.fe?' (estim.)':''))}</span></div>
+      ${o.ti?`<div class="hc-titles"><b>Palmarés / hitos</b>${o.ti}</div>`:''}
+      ${o.vt||o.ve?`<div class="hc-verdict ${o.ve||''}">${o.vt||VERDICT_LABEL[o.ve]||''}</div>`:''}
+    </div>
+  `;
+  const rect = target.getBoundingClientRect();
+  let left = rect.right + 14;
+  let top = rect.top - 10;
+  if(left + 270 > window.innerWidth) left = rect.left - 274;
+  if(top + 260 > window.innerHeight) top = window.innerHeight - 270;
+  if(top < 10) top = 10;
+  hc.style.left = left+'px';
+  hc.style.top = top+'px';
+  hc.classList.add('show');
+}
+function hideCard(){ hc.classList.remove('show'); }
+
+document.body.addEventListener('mouseover', (e)=>{
+  const el = e.target.closest('[data-hover-ref]');
+  if(!el) return;
+  const o = HOVER_REGISTRY[+el.dataset.hoverRef];
+  if(!o) return;
+  showCard(el, o);
+});
+document.body.addEventListener('mouseout', (e)=>{
+  const el = e.target.closest('[data-hover-ref]');
+  if(!el) return;
+  hideCard();
+});
+document.body.addEventListener('click', (e)=>{
+  // prevent player click from also toggling the season row (tabla) or other row-level clicks
+  if(e.target.closest('[data-hover-ref]')) e.stopPropagation();
+});
+
+/* ---------------- stats + init ---------------- */
+function initStats(){
+  let ops=0, spend=0, sales=0;
+  SEASONS.forEach(s=>{ ops += s.ops.length; if(s.g) spend+=s.g; if(s.v) sales+=s.v; });
+  document.getElementById('statSeasons').textContent = SEASONS.length;
+  document.getElementById('statOps').textContent = ops;
+  document.getElementById('statSpend').textContent = spend.toLocaleString('es-ES',{maximumFractionDigits:0})+' M€';
+  document.getElementById('statSales').textContent = sales.toLocaleString('es-ES',{maximumFractionDigits:0})+' M€';
+}
+
+buildRows();
+initStats();
+render();
+</script>
+</body>
+</html>
