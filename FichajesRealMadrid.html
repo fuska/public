@@ -6,6 +6,12 @@
 <title>Real Madrid — Libro Mayor de Fichajes (1953-2026)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<!-- Leaflet: mapa interactivo con teselas de OpenStreetMap, sin necesidad de clave de API -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- topojson-client: convierte a GeoJSON las fronteras reales de países (world-atlas / Natural Earth,
+     dataset público, se carga bajo demanda en la vista de Mapa) para colorear los países con fichajes -->
+<script src="https://unpkg.com/topojson-client@3"></script>
 <style>
   :root{
     --bg:#FAF9F5;
@@ -192,7 +198,7 @@
     margin-left:-8px; cursor:default; position:relative; flex:none;
   }
   .avatar:first-child{ margin-left:0; }
-  img.avatar, img.op-avatar, img.hc-avatar{
+  img.avatar, img.op-avatar, img.hc-avatar, img.tl-avatar, img.map-avatar, img.once-avatar{
     object-fit:cover; object-position:center 22%; background:var(--grey-bg);
   }
   .avatars .more{
@@ -206,6 +212,11 @@
   .cat-leyenda{ background:var(--gold); color:#3a2c05 !important; }
   .cat-fiasco{ background:var(--red); }
   .cat-resto{ background:var(--grey); }
+  /* pseudo-categorías propias de la vista "Mejores por país" (no forman parte del libro de fichajes,
+     solo codifican con color si el jugador juega/jugó en el Real Madrid) */
+  .cat-rmactual{ background:var(--gold); color:#3a2c05 !important; }
+  .cat-rmex{ background:var(--teal); }
+  .cat-rmnone{ background:var(--grey); }
 
   /* ---------- títulos de la temporada (columna opcional) ---------- */
   .titles-cell{ text-align:left !important; }
@@ -271,7 +282,7 @@
 
   /* ---------- NOTE TOOLTIP (floating, on hover of the "i" icon) ---------- */
   #notetip{
-    position:fixed; z-index:210; max-width:320px; background:var(--gold-bg); border:1px solid #E9D9AA;
+    position:fixed; z-index:1200; max-width:320px; background:var(--gold-bg); border:1px solid #E9D9AA;
     color:var(--ink-soft); border-radius:10px; padding:11px 13px; font-size:12.5px; line-height:1.55;
     box-shadow: var(--shadow); opacity:0; transform:translateY(4px); pointer-events:none;
     transition:opacity .12s, transform .12s;
@@ -281,7 +292,7 @@
 
   /* ---------- tooltip instantáneo de temporada (gráfico de barras) ---------- */
   #seasonTip{
-    position:fixed; z-index:210; width:220px; background:var(--ink); color:#F4F1E6;
+    position:fixed; z-index:1200; width:280px; background:var(--ink); color:#F4F1E6;
     border-radius:12px; padding:14px 16px; box-shadow:0 24px 50px -12px rgba(0,0,0,0.5);
     opacity:0; transform:translateY(4px); pointer-events:none; transition:opacity .05s linear;
     border:1px solid rgba(255,255,255,0.08);
@@ -291,12 +302,18 @@
   .stip-row{ display:flex; justify-content:space-between; font-size:12.5px; padding:4px 0; border-top:1px solid rgba(255,255,255,0.08); }
   .stip-row span{ color:#9AA4BC; }
   .stip-row b.g{ color:#F3C6CB; } .stip-row b.v{ color:#BFE9DF; }
-  .stip-avatars{ display:flex; gap:4px; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08); flex-wrap:wrap; }
-  .stip-avatars .avatar{ width:24px; height:24px; font-size:9px; }
+  .stip-group-label{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#9AA4BC; margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08); }
+  .stip-group-label.sell{ color:#BFE9DF; }
+  .stip-avatars{ display:grid; grid-template-columns:repeat(3, 1fr); gap:9px 6px; margin-top:6px; }
+  .stip-player{ display:flex; flex-direction:column; align-items:center; gap:3px; min-width:0; }
+  .stip-player .avatar{ width:26px; height:26px; font-size:9.5px; }
+  .stip-player .pname-mini{ font-size:9.5px; font-weight:600; color:#F4F1E6; line-height:1.2; text-align:center; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   /* ---------- HOVER CARD ---------- */
   #hovercard{
-    position:fixed; z-index:200; width:280px; background:var(--ink); color:#F4F1E6;
+    /* z-index muy por encima de los panes internos de Leaflet (máx. 700, el del popup) para que,
+       en la vista de Mapa, la ficha del jugador nunca quede tapada por las teselas o los marcadores. */
+    position:fixed; z-index:1200; width:280px; background:var(--ink); color:#F4F1E6;
     border-radius:14px; box-shadow:0 24px 50px -12px rgba(0,0,0,0.5); padding:0; overflow:hidden;
     opacity:0; transform:translateY(6px) scale(.98); pointer-events:none; transition:opacity .12s, transform .12s;
     border:1px solid rgba(255,255,255,0.08);
@@ -323,12 +340,109 @@
   .hc-verdict.leyenda{ background:rgba(184,137,43,0.28); color:#F2DFB0; }
 
   .empty-season{ padding:14px 0 6px; color:var(--grey); font-size:12.5px; font-style:italic; }
-  .foot{ padding:34px 6vw 0; color:var(--grey); font-size:11.5px; max-width:900px; line-height:1.6; }
-  .foot b{ color:var(--ink-soft); }
 
   @media (max-width: 760px){
     table.main thead th:nth-child(5), table.main td:nth-child(5){ display:none; }
     .avatars{ display:none; }
+  }
+
+  /* ---------- TIMELINE ---------- */
+  .timeline-wrap{ display:flex; align-items:flex-start; }
+  .timeline-names{ flex:none; width:186px; padding-top:34px; }
+  .tl-name-row{ display:flex; align-items:center; gap:7px; overflow:hidden; }
+  img.tl-avatar, span.tl-avatar{ width:20px; height:20px; font-size:8px; flex:none; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:700; color:#fff; }
+  .tl-name-txt{ font-size:11.5px; font-weight:600; color:var(--ink); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-bottom:1px dotted transparent; }
+  .tl-name-txt:hover{ border-bottom-color:var(--ink); }
+  .timeline-chart-scroll{ flex:1 1 auto; overflow-x:auto; min-width:0; padding-bottom:6px; }
+  .timeline-chart-scroll svg{ display:block; }
+  .tl-hit{ cursor:default; }
+
+  /* ---------- MAPA (Leaflet) ---------- */
+  .mapa-leaflet{ height:620px; border-radius:12px; overflow:hidden; border:1px solid var(--line); background:#DCE8F0; }
+  .leaflet-div-icon.map-avatar-wrap{ background:transparent; border:none; position:relative; }
+  img.map-avatar, span.map-avatar{
+    /* Leaflet aplica "width:auto" a cualquier <img> dentro de su marker-pane (pensado para sus
+       propios iconos), con más especificidad que esta regla; !important es la forma correcta de
+       ganarle esa pulseada sin tener que pelear con su hoja de estilos. */
+    width:30px !important; height:30px !important; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:700; font-size:10.5px; color:#fff; border:2px solid #fff;
+    box-shadow:0 2px 6px rgba(20,33,61,0.4); cursor:pointer;
+  }
+  .map-more-badge{
+    position:absolute; right:-3px; bottom:-3px; background:var(--ink); color:#fff; font-size:9px; font-weight:800;
+    border-radius:8px; padding:1px 4px; border:1.5px solid #fff; line-height:1.25; font-family:'Inter',sans-serif;
+    box-shadow:0 1px 3px rgba(0,0,0,.4); cursor:pointer; transition:transform .15s ease; transform-origin:bottom left;
+  }
+  /* al pasar el ratón, el "+N" se hace el doble de grande para que sea más fácil localizarlo y
+     acertar el clic. Crece hacia la derecha (transform-origin en el borde izquierdo) porque hacia la
+     izquierda es donde está el resto de caras apiladas (p.ej. España) y quedaba tapado por ellas. */
+  .map-more-badge:hover{ transform:scale(2); z-index:1000; }
+  /* excepción: en estos dos países el hueco libre está a la izquierda del clúster, así que su "+N"
+     crece hacia allí en vez de hacia la derecha (ver GROW_LEFT_COUNTRIES en el JS). */
+  .map-more-badge.grow-left{ transform-origin:bottom right; }
+  .map-popup .leaflet-popup-content{ margin:10px 12px; width:auto !important; }
+  .map-popup-title{ font-family:'Fraunces',serif; font-weight:600; font-size:13px; color:var(--ink); margin-bottom:7px; }
+  .map-popup-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(64px,1fr)); gap:8px; max-height:220px; overflow-y:auto; max-width:250px; }
+  .map-popup-item{ display:flex; flex-direction:column; align-items:center; gap:3px; text-align:center; }
+  .map-popup-item img.avatar, .map-popup-item span.avatar{ width:30px; height:30px; }
+  .map-popup-item span.pname-mini{ font-size:9px; font-weight:600; color:var(--ink); line-height:1.15; }
+  @media (max-width: 760px){ .mapa-leaflet{ height:440px; } }
+
+  /* ---------- ONCE (histórico / aleatorio) ---------- */
+  .pitch{
+    position:relative; width:100%; max-width:540px; margin:0 auto; aspect-ratio:68/100;
+    background: radial-gradient(circle at 50% 42%, #1F6F63 0%, #175a50 70%, #134a42 100%);
+    border-radius:12px; overflow:hidden; border:2px solid rgba(255,255,255,.18); box-shadow:var(--shadow);
+  }
+  .pitch-lines{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .pitch-slot{ position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; gap:4px; width:112px; }
+  img.once-avatar, span.once-avatar{
+    width:62px; height:62px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:#fff; border:3px solid #fff;
+    box-shadow:0 4px 12px rgba(0,0,0,.45);
+  }
+  .pname{ font-size:10.5px; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.75); text-align:center; line-height:1.2; }
+  .pitch-empty{
+    font-size:10px; color:rgba(255,255,255,.65); text-align:center; border:1.5px dashed rgba(255,255,255,.4);
+    border-radius:50%; width:62px; height:62px; display:flex; align-items:center; justify-content:center;
+  }
+  @media (max-width: 760px){ .pitch{ max-width:400px; } .pitch-slot{ width:78px; } img.once-avatar, span.once-avatar, .pitch-empty{ width:46px; height:46px; font-size:14px; } .pname{ font-size:8.5px; } }
+
+  /* ---------- MEJORES POR PAÍS ---------- */
+  select.year-select{
+    font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; color:var(--ink);
+    background:#fff; border:1px solid var(--line); border-radius:8px; padding:7px 10px; cursor:pointer;
+  }
+  .pais-list{ display:flex; flex-direction:column; }
+  .pais-row{ display:flex; align-items:center; gap:14px; padding:10px 4px; border-bottom:1px solid var(--line); }
+  .pais-row:last-child{ border-bottom:none; }
+  .pais-rank{ flex:none; width:26px; font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--grey); font-size:13px; text-align:right; }
+  .pais-flag{ flex:none; font-size:22px; line-height:1; }
+  .pais-country{ flex:none; width:150px; font-weight:600; font-size:13px; color:var(--ink-soft); }
+  img.pais-avatar, span.pais-avatar{
+    flex:none; width:38px; height:38px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:700; font-size:12.5px; color:#fff; border:2px solid #fff; box-shadow:0 2px 6px rgba(20,33,61,.25);
+  }
+  .pais-info{ min-width:0; width:230px; flex:0 0 auto; }
+  .pais-name{ font-weight:600; font-size:13.5px; color:var(--ink); text-decoration:none; border-bottom:1px dotted transparent; }
+  a.pais-name:hover{ border-bottom-color:var(--ink); }
+  span.pais-name{ cursor:default; }
+  .pais-meta{ font-size:11.5px; color:var(--grey); margin-top:1px; }
+  .pais-rmbadge{ display:inline-block; padding:1px 7px; border-radius:8px; font-size:10px; font-weight:700; }
+  .pais-rmbadge.actual{ background:var(--gold-bg); color:#8a6416; }
+  .pais-rmbadge.ex{ background:rgba(58,124,109,0.16); color:var(--teal); }
+  .pais-club{ flex:none; width:172px; display:flex; align-items:center; gap:8px; }
+  /* selector por clase (no por etiqueta) para que cubra tanto el <img> real como el <span> vacío que
+     se usa de "hueco reservado" cuando no hay escudo mapeado o la imagen no llega a cargar */
+  .club-crest{ flex:none; width:22px; height:22px; object-fit:contain; }
+  .pais-club-name{ font-size:12.5px; color:var(--ink-soft); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  @media (max-width: 760px){
+    .pais-country{ width:88px; font-size:12px; }
+    .pais-flag{ font-size:18px; }
+    .pais-rank{ width:20px; font-size:11.5px; }
+    .pais-row{ flex-wrap:wrap; }
+    .pais-info{ width:auto; flex:1 1 auto; }
+    .pais-club{ width:auto; flex:0 0 100%; margin-top:4px; padding-left:52px; }
   }
 </style>
 </head>
@@ -354,10 +468,11 @@
   <button class="viewtab" data-view="timeline">📈 Timeline</button>
   <button class="viewtab" data-view="mapa">🗺️ Mapa</button>
   <button class="viewtab" data-view="once">⚽ Once</button>
+  <button class="viewtab" data-view="paises">🌍 Mejores por país</button>
 </div>
 
 <div class="toolbar">
-  <div class="tgroup">
+  <div class="tgroup" id="colGroupCats">
     <div class="tlabel">Categorías de jugador</div>
     <div class="chips" id="catToggles">
       <div class="chip on" id="allCatsChip" style="max-width:60px;"><span class="dot"></span>Todos</div>
@@ -390,6 +505,20 @@
     <div class="chips">
       <div class="chip on" id="chartSortChip">Orden: año</div>
       <div class="chip" id="chartNetChip">Descontar venta</div>
+    </div>
+  </div>
+  <div class="tgroup" id="colGroupOnce" style="display:none">
+    <div class="tlabel">Once</div>
+    <div class="chips">
+      <div class="chip on" id="onceHistChip"><span class="dot"></span>Histórico</div>
+      <div class="chip" id="onceRandChip"><span class="dot"></span>Aleatorio</div>
+      <button class="tbtn" id="onceRerollBtn" style="display:none;">🎲 Repetir</button>
+    </div>
+  </div>
+  <div class="tgroup" id="colGroupPaises" style="display:none">
+    <div class="tlabel">Año</div>
+    <div class="chips">
+      <select id="paisesYearSelect" class="year-select"></select>
     </div>
   </div>
   <div class="tgroup tgroup-actions" id="tableOnlyActions">
@@ -453,18 +582,40 @@
   </div>
 
   <div class="viewpanel" id="view-timeline" style="display:none">
-    <div class="viewcard"><div class="viewcard-head"><h2>Timeline</h2><p>🚧 Próximamente.</p></div></div>
+    <div class="viewcard">
+      <div class="viewcard-head">
+        <h2>Timeline de fichajes</h2>
+        <p>Una línea por jugador: empieza el año de su llegada y termina el año en que salió del club (punto dorado = sigue en el Real Madrid en 2026/27). Respeta los filtros activos arriba. Algunos canteranos cuya llegada no quedó registrada como operación en el Excel original no aparecen aquí.</p>
+      </div>
+      <div class="timeline-wrap" id="timelineWrap"></div>
+    </div>
   </div>
   <div class="viewpanel" id="view-mapa" style="display:none">
-    <div class="viewcard"><div class="viewcard-head"><h2>Mapa</h2><p>🚧 Próximamente.</p></div></div>
+    <div class="viewcard">
+      <div class="viewcard-head">
+        <h2>Mapa de nacionalidades</h2>
+        <p>Cada cara está colocada en el país del jugador. Cuando no caben todas las caras se muestran las más relevantes y un "+N" que abre el resto al hacer clic; haz zoom sobre un país para que quepan más. Mapa real de OpenStreetMap, sin clave de API.</p>
+      </div>
+      <div id="mapaLeaflet" class="mapa-leaflet"></div>
+    </div>
   </div>
   <div class="viewpanel" id="view-once" style="display:none">
-    <div class="viewcard"><div class="viewcard-head"><h2>Once histórico / aleatorio</h2><p>🚧 Próximamente.</p></div></div>
+    <div class="viewcard">
+      <div class="viewcard-head">
+        <h2>Once histórico / aleatorio</h2>
+        <p id="onceDesc">El mejor once de la historia del club, a nuestro juicio, en un 4-3-3. Cambia a "Aleatorio" para sortear un once distinto entre todos los fichajes de la tabla (uno por posición), respetando los filtros activos.</p>
+      </div>
+      <div id="onceWrap"></div>
+    </div>
   </div>
-
-  <div class="foot">
-    <p><b>Sobre los avatares:</b> no se muestran fotografías reales (son material con derechos de autor); cada jugador tiene un avatar con sus iniciales, coloreado según su categoría.</p>
-    <p><b>Sobre las cifras:</b> vista simplificada derivada del Excel "real_madrid_compras_ventas.xlsx". Para el detalle completo, fuentes y metodología (incluyendo por qué la mayoría de Salarios/Otros gastos/Otros ingresos están en blanco), consulta ese archivo.</p>
+  <div class="viewpanel" id="view-paises" style="display:none">
+    <div class="viewcard">
+      <div class="viewcard-head">
+        <h2>Mejores jugadores por país</h2>
+        <p id="paisesDesc">Ránking editorial (ajeno al libro de fichajes) del mejor jugador de cada selección para el año elegido arriba. Los que llevan alguna vez la camiseta del Real Madrid se destacan en oro (jugador actual) o verde (ex del club).</p>
+      </div>
+      <div id="paisesWrap"></div>
+    </div>
   </div>
 </div>
 
@@ -732,7 +883,7 @@ const VERDICT_LABEL = {exito:"✓ Éxito", fiasco:"✕ Fiasco", mixto:"◐ Mixto
 // Si un jugador no tiene entrada aqui, o la imagen falla al cargar, se usa el avatar de iniciales.
 const PHOTOS = {
   "Alfredo Di Stéfano": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Di_stefano_argentina_%28cropped%29.jpg/500px-Di_stefano_argentina_%28cropped%29.jpg",
-  "Francisco Gento": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Francisco%20Gento%201962.jpg/500px-Francisco%20Gento%201962.jpg",
+  "Francisco Gento": "https://media.revistagq.com/photos/5ca5f7e04409cc449a90b0c9/master/w_1600%2Cc_limit/galerna_cantabrico_5372.jpg",
   "Raymond Kopa": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Raymond_Kopa_1963b.jpg/500px-Raymond_Kopa_1963b.jpg",
   "Ferenc Puskás": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Ferenc_Puskas_en_1965.jpg/500px-Ferenc_Puskas_en_1965.jpg",
   "Carlos Santillana": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Santillana.jpg/500px-Santillana.jpg",
@@ -850,6 +1001,23 @@ const PHOTOS = {
   "Víctor Muñoz": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Victor_Munoz_Argentina_v_Spain_19_July_2026-020.jpg/500px-Victor_Munoz_Argentina_v_Spain_19_July_2026-020.jpg",
   "Álex Jiménez": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Alex_Jimenez_00-02-07.99.png/500px-Alex_Jimenez_00-02-07.99.png",
   "José Mourinho (entrenador)": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Jos%C3%A9_Mourinho_20250206_%281%29.jpg/500px-Jos%C3%A9_Mourinho_20250206_%281%29.jpg",
+  // Jugadores sin relación con el Real Madrid que solo aparecen en "Mejores por país" (fotos
+  // proporcionadas directamente, mismo criterio de Wikimedia Commons que el resto del diccionario).
+  "Takefusa Kubo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Takefusa_Kubo_1053.jpg/500px-Takefusa_Kubo_1053.jpg",
+  "Lionel Messi": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Leo_Messi_Argentina_v_Egypt_7_July_2026-1.jpg/500px-Leo_Messi_Argentina_v_Egypt_7_July_2026-1.jpg",
+  "Lamine Yamal": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Lamine_Yamal_France_v_Spain_7.24.26-142.jpg/500px-Lamine_Yamal_France_v_Spain_7.24.26-142.jpg",
+  "Erling Haaland": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Erling_Haaland_Morocco_v_Norway_7_June_2026-51.jpg/500px-Erling_Haaland_Morocco_v_Norway_7_June_2026-51.jpg",
+  "Florian Wirtz": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Florian_Wirtz_Ecuador_v_Germany_25_June_2026-181_%28cropped%29.jpg/500px-Florian_Wirtz_Ecuador_v_Germany_25_June_2026-181_%28cropped%29.jpg",
+  "Virgil van Dijk": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/20160604_AUT_NED_8876_%28cropped%29.jpg/500px-20160604_AUT_NED_8876_%28cropped%29.jpg",
+  "Kevin De Bruyne": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Kevin_De_Bruyne_USMNT_v_Belgium_Mar_28_2026-64_%28cropped%29.jpg/500px-Kevin_De_Bruyne_USMNT_v_Belgium_Mar_28_2026-64_%28cropped%29.jpg",
+  "Luis Díaz": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/FC_RB_Salzburg_gegen_FC_Bayern_M%C3%BCnchen_%282026-01-06_Testspiel%29_40_%28Luiz_D%C3%ADaz%29.jpg/500px-FC_RB_Salzburg_gegen_FC_Bayern_M%C3%BCnchen_%282026-01-06_Testspiel%29_40_%28Luiz_D%C3%ADaz%29.jpg",
+  "Robert Lewandowski": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Robert_Lewandowski_2013_in_Wilhelmshaven.jpeg/500px-Robert_Lewandowski_2013_in_Wilhelmshaven.jpeg",
+  "Mohamed Salah": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Mohamed_Salah_Argentina_v_Egypt_7_July_2026-163_%28cropped%29.jpg/500px-Mohamed_Salah_Argentina_v_Egypt_7_July_2026-163_%28cropped%29.jpg",
+  "Alphonso Davies": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Alphonso_Davies_Canada_v_Qatar_18_June_2026-007_%28cropped%29.jpg/500px-Alphonso_Davies_Canada_v_Qatar_18_June_2026-007_%28cropped%29.jpg",
+  "Andriy Lunin": "https://en.wikipedia.org/wiki/Special:FilePath/Andriy%20Lunin%2C%20Real%20Madrid%2C%202022.jpg",
+  "Victor Osimhen": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Victor-osimhen-nigeria-2024-3-4.jpg/500px-Victor-osimhen-nigeria-2024-3-4.jpg",
+  "Khvicha Kvaratskhelia": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Kvaratskhelia_asse_psg_2425.png/500px-Kvaratskhelia_asse_psg_2425.png",
+  "Dominik Szoboszlai": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Dominik_Szoboszlai_04012026_%281%29.jpg/500px-Dominik_Szoboszlai_04012026_%281%29.jpg",
 };
 
 // Posición habitual de cada jugador (para el popup). Asignada a partir de conocimiento futbolístico general;
@@ -1115,6 +1283,380 @@ const WIKI = {
   "Álex Jiménez": "https://es.wikipedia.org/wiki/%C3%81lex_Jim%C3%A9nez",
 };
 
+// Nacionalidad de cada fichaje (para la vista de Mapa). Dato nuevo, no presente en el Excel original:
+// investigado a partir de conocimiento futbolístico general y verificado puntualmente para los fichajes
+// más recientes (2024-2026), dado que varios tienen doble nacionalidad o cambios de selección reciente
+// (p.ej. Dean Huijsen, nacido en Ámsterdam pero nacionalizado español desde 2024).
+const NATIONALITY = {
+  "Achraf Hakimi": "Marruecos",
+  "Alfredo Di Stéfano": "Argentina",
+  "Antonio Rüdiger": "Alemania",
+  "Arda Güler": "Turquía",
+  "Arjen Robben": "Países Bajos",
+  "Asier Illarramendi": "España",
+  "Aurélien Tchouaméni": "Francia",
+  "Bernardo Silva": "Portugal",
+  "Bodo Illgner": "Alemania",
+  "Carlos Espí": "España",
+  "Carlos Santillana": "España",
+  "Casemiro": "Brasil",
+  "Chendo": "España",
+  "Christian Panucci": "Italia",
+  "Clarence Seedorf": "Países Bajos",
+  "Claude Makelele": "Francia",
+  "Cristiano Ronaldo": "Portugal",
+  "César Palacios": "España",
+  "Dani Carvajal": "España",
+  "Dani Ceballos": "España",
+  "Danilo": "Brasil",
+  "David Alaba": "Austria",
+  "David Beckham": "Inglaterra",
+  "Davor Šuker": "Croacia",
+  "Dean Huijsen": "España",
+  "Denzel Dumfries": "Países Bajos",
+  "Eden Hazard": "Bélgica",
+  "Eduardo Camavinga": "Francia",
+  "Emerson": "Brasil",
+  "Emilio Butragueño": "España",
+  "Endrick": "Brasil",
+  "Fabio Cannavaro": "Italia",
+  "Federico Valverde": "Uruguay",
+  "Ferenc Puskás": "Hungría",
+  "Ferland Mendy": "Francia",
+  "Fernando Hierro": "España",
+  "Fernando Morientes": "España",
+  "Fran García": "España",
+  "Francisco Gento": "España",
+  "Franco Mastantuono": "Argentina",
+  "Fábio Coentrão": "Portugal",
+  "Gabriel Heinze": "Argentina",
+  "Gareth Bale": "Gales",
+  "Gonzalo García": "España",
+  "Gonzalo Higuaín": "Argentina",
+  "Guti": "España",
+  "Hamit Altıntop": "Turquía",
+  "Hugo Sánchez": "México",
+  "Ibrahima Konaté": "Francia",
+  "Iker Casillas": "España",
+  "Isco": "España",
+  "Jacobo Ortega": "España",
+  "James Rodríguez": "Colombia",
+  "Jonathan Woodgate": "Inglaterra",
+  "Jorge Valdano": "Argentina",
+  "José Antonio Camacho": "España",
+  "José Callejón": "España",
+  "Jude Bellingham": "Inglaterra",
+  "Julio Baptista": "Brasil",
+  "Kaká": "Brasil",
+  "Karim Benzema": "Francia",
+  "Keylor Navas": "Costa Rica",
+  "Klaas-Jan Huntelaar": "Países Bajos",
+  "Kylian Mbappé": "Francia",
+  "Lassana Diarra": "Francia",
+  "Lucas Vázquez": "España",
+  "Luis Figo": "Portugal",
+  "Luka Jović": "Serbia",
+  "Luka Modrić": "Croacia",
+  "Mahamadou Diarra": "Malí",
+  "Manuel Sanchís": "España",
+  "Marc Cucurella": "España",
+  "Marcelo Vieira": "Brasil",
+  "Marcos Llorente": "España",
+  "Mariano Díaz": "República Dominicana",
+  "Mario Gila": "España",
+  "Mario Martín": "España",
+  "Martin Ødegaard": "Noruega",
+  "Mateo Kovačić": "Croacia",
+  "Mesut Özil": "Alemania",
+  "Michael Essien": "Ghana",
+  "Michael Owen": "Inglaterra",
+  "Míchel": "España",
+  "Míchel Salgado": "España",
+  "Nacho Fernández": "España",
+  "Nico Paz": "Argentina",
+  "Nicolas Anelka": "Francia",
+  "Nuri Şahin": "Turquía",
+  "Predrag Mijatović": "Montenegro",
+  "Rafael van der Vaart": "Países Bajos",
+  "Raphaël Varane": "Francia",
+  "Raymond Kopa": "Francia",
+  "Raúl González": "España",
+  "Ricardo Carvalho": "Portugal",
+  "Roberto Carlos": "Brasil",
+  "Robinho": "Brasil",
+  "Rodrygo": "Brasil",
+  "Ronaldo Nazário": "Brasil",
+  "Royston Drenthe": "Países Bajos",
+  "Ruud van Nistelrooy": "Países Bajos",
+  "Sami Khedira": "Alemania",
+  "Santiago Solari": "Argentina",
+  "Sergio Ramos": "España",
+  "Sergio Reguilón": "España",
+  "Steve McManaman": "Inglaterra",
+  "Theo Hernández": "Francia",
+  "Thibaut Courtois": "Bélgica",
+  "Toni Kroos": "Alemania",
+  "Trent Alexander-Arnold": "Inglaterra",
+  "Uli Stielike": "Alemania",
+  "Vinícius Júnior": "Brasil",
+  "Víctor Muñoz": "España",
+  "Víctor Valdepeñas": "España",
+  "Walter Samuel": "Argentina",
+  "Wesley Sneijder": "Países Bajos",
+  "Xabi Alonso": "España",
+  "Yan Diomandé": "Costa de Marfil",
+  "Zinedine Zidane": "Francia",
+  "Álex Jiménez": "España",
+  "Álvaro Carreras": "España",
+  "Álvaro Morata": "España",
+  "Álvaro Odriozola": "España",
+  "Álvaro Rodríguez": "Uruguay",
+  "Ángel Di María": "Argentina",
+  "Éder Militão": "Brasil",
+};
+
+// Geografía de cada país con fichajes (para la vista de Mapa): punto central alejado de fronteras
+// y radio 'seguro' en km dentro del cual se pueden colocar caras sin que invadan visualmente un
+// país vecino (sí pueden asomar al mar). Curado a mano país a país, no es un cálculo geométrico exacto.
+const COUNTRY_INFO = {
+  "Alemania": {lat:51.2, lng:9.9, r:200, iso:"DE"},
+  "Argentina": {lat:-34.8, lng:-63.8, r:380, iso:"AR"},
+  "Austria": {lat:47.35, lng:13.9, r:55, iso:"AT"},
+  "Brasil": {lat:-15.6, lng:-49.5, r:480, iso:"BR"},
+  "Bélgica": {lat:50.6, lng:4.7, r:38, iso:"BE"},
+  "Colombia": {lat:4.6, lng:-74.6, r:110, iso:"CO"},
+  "Costa Rica": {lat:9.9, lng:-84.1, r:38, iso:"CR"},
+  "Costa de Marfil": {lat:7.6, lng:-5.4, r:115, iso:"CI"},
+  "Croacia": {lat:45.55, lng:16.3, r:32, iso:"HR"},
+  "España": {lat:40.05, lng:-3.7, r:210, iso:"ES"},
+  "Francia": {lat:47.1, lng:2.4, r:260, iso:"FR"},
+  "Gales": {lat:52.3, lng:-3.6, r:28, iso:"GB-WLS"},
+  "Ghana": {lat:7.9, lng:-1.1, r:95, iso:"GH"},
+  "Hungría": {lat:47.15, lng:19.3, r:85, iso:"HU"},
+  "Inglaterra": {lat:52.5, lng:-1.6, r:95, iso:"GB-ENG"},
+  "Italia": {lat:42.9, lng:12.6, r:55, iso:"IT"},
+  "Malí": {lat:17.2, lng:-3.3, r:190, iso:"ML"},
+  "Marruecos": {lat:32.3, lng:-6.3, r:140, iso:"MA"},
+  "Montenegro": {lat:42.75, lng:19.3, r:22, iso:"ME"},
+  "México": {lat:23.6, lng:-102.3, r:320, iso:"MX"},
+  "Noruega": {lat:60.7, lng:9.2, r:42, iso:"NO"},
+  "Países Bajos": {lat:52.2, lng:5.4, r:42, iso:"NL"},
+  "Portugal": {lat:39.9, lng:-8.2, r:48, iso:"PT"},
+  "República Dominicana": {lat:18.9, lng:-70.1, r:48, iso:"DO"},
+  "Serbia": {lat:44.1, lng:20.9, r:78, iso:"RS"},
+  "Turquía": {lat:39.1, lng:34.5, r:240, iso:"TR"},
+  "Uruguay": {lat:-32.9, lng:-56.1, r:95, iso:"UY"},
+};
+
+// Nombre de cada país tal y como aparece en el dataset público de fronteras (world-atlas / Natural
+// Earth, en inglés) usado para colorear en el mapa los países con fichajes. Inglaterra y Gales
+// comparten la única frontera disponible para ambos ("United Kingdom"), ya que ese dataset no separa
+// las naciones del Reino Unido.
+const COUNTRY_GEOJSON_NAME = {
+  "Alemania":"Germany", "Argentina":"Argentina", "Austria":"Austria", "Brasil":"Brazil",
+  "Bélgica":"Belgium", "Colombia":"Colombia", "Costa Rica":"Costa Rica", "Costa de Marfil":"Côte d'Ivoire",
+  "Croacia":"Croatia", "España":"Spain", "Francia":"France", "Gales":"United Kingdom",
+  "Ghana":"Ghana", "Hungría":"Hungary", "Inglaterra":"United Kingdom", "Italia":"Italy",
+  "Malí":"Mali", "Marruecos":"Morocco", "Montenegro":"Montenegro", "México":"Mexico",
+  "Noruega":"Norway", "Países Bajos":"Netherlands", "Portugal":"Portugal",
+  "República Dominicana":"Dominican Rep.", "Serbia":"Serbia", "Turquía":"Turkey", "Uruguay":"Uruguay",
+};
+
+// Año real de salida del club para fichajes cuyo Excel original no registró una operación de venta
+// (retiros, finales de contrato, cesiones libres...). Dato nuevo, curado a mano igual que NATIONALITY;
+// ver nota en el panel de Timeline. Si un nombre no está aquí y tampoco tiene venta registrada,
+// se interpreta que sigue vinculado al club en la 2026/27.
+const DEPARTURE_YEAR = {
+  "Alfredo Di Stéfano": 1964,
+  "Asier Illarramendi": 2015,
+  "Bodo Illgner": 2000,
+  "Carlos Santillana": 1988,
+  "Chendo": 1994,
+  "Christian Panucci": 1997,
+  "Dani Carvajal": 2026,
+  "Dani Ceballos": 2026,
+  "Danilo": 2019,
+  "David Alaba": 2026,
+  "Davor Šuker": 1999,
+  "Eden Hazard": 2023,
+  "Emerson": 2008,
+  "Emilio Butragueño": 1995,
+  "Fabio Cannavaro": 2010,
+  "Ferenc Puskás": 1966,
+  "Fernando Hierro": 2003,
+  "Fernando Morientes": 2005,
+  "Francisco Gento": 1971,
+  "Fábio Coentrão": 2017,
+  "Gabriel Heinze": 2009,
+  "Gareth Bale": 2022,
+  "Guti": 2010,
+  "Hamit Altıntop": 2013,
+  "Hugo Sánchez": 1992,
+  "Iker Casillas": 2015,
+  "Isco": 2022,
+  "James Rodríguez": 2020,
+  "Jonathan Woodgate": 2007,
+  "Jorge Valdano": 1987,
+  "José Antonio Camacho": 1989,
+  "José Callejón": 2013,
+  "Julio Baptista": 2006,
+  "Kaká": 2013,
+  "Karim Benzema": 2023,
+  "Klaas-Jan Huntelaar": 2009,
+  "Lassana Diarra": 2012,
+  "Lucas Vázquez": 2025,
+  "Luis Figo": 2005,
+  "Luka Jović": 2022,
+  "Luka Modrić": 2025,
+  "Mahamadou Diarra": 2012,
+  "Manuel Sanchís": 2001,
+  "Marcelo Vieira": 2022,
+  "Mariano Díaz": 2023,
+  "Michael Essien": 2014,
+  "Michael Owen": 2005,
+  "Míchel": 1996,
+  "Míchel Salgado": 2009,
+  "Nacho Fernández": 2024,
+  "Nuri Şahin": 2012,
+  "Predrag Mijatović": 1999,
+  "Rafael van der Vaart": 2010,
+  "Raymond Kopa": 1959,
+  "Raúl González": 2010,
+  "Ricardo Carvalho": 2012,
+  "Roberto Carlos": 2007,
+  "Royston Drenthe": 2011,
+  "Ruud van Nistelrooy": 2010,
+  "Sami Khedira": 2015,
+  "Santiago Solari": 2005,
+  "Sergio Ramos": 2021,
+  "Steve McManaman": 2003,
+  "Toni Kroos": 2024,
+  "Uli Stielike": 1984,
+  "Walter Samuel": 2005,
+  "Xabi Alonso": 2014,
+  "Zinedine Zidane": 2006,
+  "Álvaro Odriozola": 2023,
+};
+
+// Ránking "mejor jugador por selección", por año. Dato editorial ajeno al libro de fichajes (no son
+// necesariamente ex-jugadores del Real Madrid); estructura pensada para poder añadir más años en el
+// futuro sumando otra clave a este objeto. rm: 'actual' (sigue en el Real Madrid), 'exjugador'
+// (jugó alguna vez en el Real Madrid) o null (sin relación con el club).
+const BEST_BY_COUNTRY = {
+  2026: [
+
+    {rank:1, flag:"🇫🇷", country:"Francia", player:"Kylian Mbappé", age:27, club:"Real Madrid", rm:"actual"},
+    {rank:2, flag:"🇧🇷", country:"Brasil", player:"Vinícius Júnior", age:26, club:"Real Madrid", rm:"actual"},
+    {rank:3, flag:"🇬🇧", country:"Inglaterra", player:"Jude Bellingham", age:23, club:"Real Madrid", rm:"actual"},
+    {rank:4, flag:"🇺🇾", country:"Uruguay", player:"Federico Valverde", age:27, club:"Real Madrid", rm:"actual"},
+    {rank:5, flag:"🇹🇷", country:"Turquía", player:"Arda Güler", age:21, club:"Real Madrid", rm:"actual"},
+    {rank:6, flag:"🇨🇮", country:"Costa de Marfil", player:"Yan Diomandé", age:19, club:"Real Madrid", rm:"actual"},
+    {rank:7, flag:"🇺🇦", country:"Ucrania", player:"Andriy Lunin", age:27, club:"Real Madrid", rm:"actual"},
+    {rank:8, flag:"🇵🇹", country:"Portugal", player:"Cristiano Ronaldo", age:41, club:"Al-Nassr", rm:"exjugador"},
+    {rank:9, flag:"🇭🇷", country:"Croacia", player:"Luka Modrić", age:40, club:"AC Milan", rm:"exjugador"},
+    {rank:10, flag:"🇲🇦", country:"Marruecos", player:"Achraf Hakimi", age:27, club:"PSG", rm:"exjugador"},
+    {rank:11, flag:"🇯🇵", country:"Japón", player:"Takefusa Kubo", age:25, club:"Real Sociedad", rm:"exjugador"},
+    {rank:12, flag:"🇦🇷", country:"Argentina", player:"Lionel Messi", age:39, club:"Inter Miami", rm:null},
+    {rank:13, flag:"🇪🇸", country:"España", player:"Lamine Yamal", age:19, club:"Barcelona", rm:null},
+    {rank:14, flag:"🇵🇱", country:"Polonia", player:"Robert Lewandowski", age:37, club:"Barcelona", rm:null},
+    {rank:15, flag:"🇬🇪", country:"Georgia", player:"Khvicha Kvaratskhelia", age:25, club:"PSG", rm:null},
+    {rank:16, flag:"🇳🇴", country:"Noruega", player:"Erling Haaland", age:26, club:"Manchester City", rm:null},
+    {rank:17, flag:"🇩🇪", country:"Alemania", player:"Florian Wirtz", age:23, club:"Liverpool", rm:null},
+    {rank:18, flag:"🇭🇺", country:"Hungría", player:"Dominik Szoboszlai", age:25, club:"Liverpool", rm:null},
+    {rank:19, flag:"🇳🇱", country:"Países Bajos", player:"Virgil van Dijk", age:35, club:"Liverpool", rm:null},
+    {rank:20, flag:"🇳🇬", country:"Nigeria", player:"Victor Osimhen", age:27, club:"Galatasaray", rm:null},
+    {rank:21, flag:"🇪🇬", country:"Egipto", player:"Mohamed Salah", age:34, club:"Trabzonspor", rm:null},
+    {rank:22, flag:"🇨🇴", country:"Colombia", player:"Luis Díaz", age:29, club:"Bayern Múnich", rm:null},
+    {rank:23, flag:"🇨🇦", country:"Canadá", player:"Alphonso Davies", age:25, club:"Bayern Múnich", rm:null},
+    {rank:24, flag:"🇦🇹", country:"Austria", player:"Konrad Laimer", age:29, club:"Bayern Múnich", rm:null},
+    {rank:25, flag:"🇸🇪", country:"Suecia", player:"Viktor Gyökeres", age:27, club:"Arsenal", rm:null},
+    {rank:26, flag:"🇬🇷", country:"Grecia", player:"Christos Tzolis", age:23, club:"Arsenal", rm:null},
+    {rank:27, flag:"🇧🇪", country:"Bélgica", player:"Kevin De Bruyne", age:35, club:"Napoli", rm:null},
+    {rank:28, flag:"🇩🇰", country:"Dinamarca", player:"Rasmus Højlund", age:23, club:"Napoli", rm:null},
+    {rank:29, flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", country:"Escocia", player:"Scott McTominay", age:29, club:"Napoli", rm:null},
+    {rank:30, flag:"🇸🇳", country:"Senegal", player:"Sadio Mané", age:34, club:"Al-Nassr", rm:null},
+    {rank:31, flag:"🇺🇸", country:"Estados Unidos", player:"Christian Pulisic", age:27, club:"AC Milan", rm:null},
+    {rank:32, flag:"🇰🇷", country:"Corea del Sur", player:"Kang-in Lee", age:25, club:"Atlético de Madrid", rm:null},
+    {rank:33, flag:"🇸🇮", country:"Eslovenia", player:"Jan Oblak", age:33, club:"Atlético de Madrid", rm:null},
+    {rank:34, flag:"🇯🇲", country:"Jamaica", player:"Leon Bailey", age:28, club:"Aston Villa", rm:null},
+    {rank:35, flag:"🇨🇲", country:"Camerún", player:"André Onana", age:30, club:"Manchester United", rm:null},
+    {rank:36, flag:"🇨🇿", country:"República Checa", player:"Patrik Schick", age:30, club:"Bayer Leverkusen", rm:null},
+    {rank:37, flag:"🇲🇽", country:"México", player:"Julián Quiñones", age:29, club:"Al-Qadsiah", rm:null},
+    {rank:38, flag:"🇨🇭", country:"Suiza", player:"Gregor Kobel", age:28, club:"Borussia Dortmund", rm:null},
+    {rank:39, flag:"🇷🇸", country:"Serbia", player:"Dušan Vlahović", age:26, club:"Juventus", rm:null},
+    {rank:40, flag:"🇪🇨", country:"Ecuador", player:"Moisés Caicedo", age:24, club:"Chelsea", rm:null},
+    {rank:41, flag:"🇵🇾", country:"Paraguay", player:"Julio Enciso", age:22, club:"Strasbourg", rm:null},
+    {rank:42, flag:"🇬🇭", country:"Ghana", player:"Mohammed Kudus", age:26, club:"Tottenham", rm:null},
+    {rank:43, flag:"🇮🇹", country:"Italia", player:"Gianluigi Donnarumma", age:27, club:"Manchester City", rm:null},
+    {rank:44, flag:"🇩🇿", country:"Argelia", player:"Rayan Cherki", age:22, club:"Manchester City", rm:null},
+    {rank:45, flag:"🇺🇿", country:"Uzbekistán", player:"Abdukodir Khusanov", age:22, club:"Manchester City", rm:null},
+    {rank:46, flag:"🇮🇷", country:"Irán", player:"Mehdi Taremi", age:34, club:"Inter", rm:null},
+    {rank:47, flag:"🇸🇦", country:"Arabia Saudí", player:"Salem Al-Dawsari", age:35, club:"Al-Hilal", rm:null},
+    {rank:48, flag:"🇿🇦", country:"Sudáfrica", player:"Teboho Mokoena", age:31, club:"Mamelodi Sundowns", rm:null},
+    {rank:49, flag:"🇵🇪", country:"Perú", player:"Renato Tapia", age:30, club:"Leganés", rm:null},
+    {rank:50, flag:"🇨🇱", country:"Chile", player:"Alexis Sánchez", age:37, club:"Udinese", rm:null},
+    {rank:51, flag:"🇨🇷", country:"Costa Rica", player:"Manfred Ugalde", age:24, club:"Spartak Moscú", rm:null},
+    {rank:52, flag:"🇳🇿", country:"Nueva Zelanda", player:"Chris Wood", age:34, club:"Nottingham Forest", rm:null},
+    {rank:53, flag:"🇵🇦", country:"Panamá", player:"Adalberto Carrasquilla", age:27, club:"Pumas UNAM", rm:null},
+    {rank:54, flag:"🇯🇴", country:"Jordania", player:"Mousa Al-Taamari", age:29, club:"Rennes", rm:null},
+    {rank:55, flag:"🇻🇪", country:"Venezuela", player:"Salomón Rondón", age:36, club:"Pachuca", rm:null},
+    {rank:56, flag:"🇭🇹", country:"Haití", player:"Duckens Nazon", age:32, club:"Kayserispor", rm:null},
+  ]
+};
+
+// Escudo de cada club (para la columna "Equipo" de Mejores por país). Se apunta al nombre del
+// archivo tal y como está subido en Wikipedia/Wikimedia Commons y se resuelve con Special:FilePath,
+// la redirección oficial de MediaWiki al archivo real: así no hace falta conocer ni mantener la ruta
+// interna (con hash) de cada imagen. Investigado club a club; si algún nombre de archivo cambiara o
+// no se encontrara, el escudo simplemente se oculta (ver clubCrestHTML) y el texto sigue intacto.
+const CLUB_CREST = {
+  "Real Madrid": "Real Madrid CF.svg",
+  "Al-Nassr": "Nassr FC Logo.svg",
+  "AC Milan": "Logo of AC Milan.svg",
+  "PSG": "Paris Saint-Germain F.C..svg",
+  "Real Sociedad": "Real Sociedad logo.svg",
+  "Inter Miami": "MLS crest logo RGB - Inter Miami CF.svg",
+  "Barcelona": "FC Barcelona (crest).svg",
+  "Manchester City": "Manchester City FC badge.svg",
+  "Liverpool": "Liverpool FC.svg",
+  "Napoli": "SSC Napoli 2025 (white and azure).svg",
+  "Bayern Múnich": "FC Bayern München logo (2017).svg",
+  "Borussia Dortmund": "Borussia Dortmund logo.svg",
+  "Juventus": "Juventus FC - logo black (Italy, 2020).svg",
+  "Chelsea": "Chelsea FC.svg",
+  "Strasbourg": "RC Strasbourg Alsace logo.svg",
+  "Tottenham": "Tottenham Hotspur.svg",
+  "Inter": "FC Internazionale Milano 2021.svg",
+  "Al-Hilal": "Al Hilal SFC Logo.svg",
+  "Mamelodi Sundowns": "Mamelodi Sundowns (logo).svg",
+  "Spartak Moscú": "FC Spartak Moscow.svg",
+  "Nottingham Forest": "Nottingham Forest F.C. logo.svg",
+  "Pumas UNAM": "Pumas UNAM logo.svg",
+  "Rennes": "Stade Rennais FC.svg",
+  "Kayserispor": "Kayserispor logo.svg",
+  "Al-Qadsiah": "Al Qadsiah FC logo.svg",
+  "Galatasaray": "Galatasaray Sports Club Logo.svg",
+  "Arsenal": "Arsenal FC logo (2001-2002).svg",
+  "Atlético de Madrid": "Atletico Madrid Logo 2024.svg",
+  "Aston Villa": "Logo Aston Villa FC 2023.svg",
+  "Manchester United": "Manchester United FC crest.svg",
+  "Leganés": "Club Deportivo Leganés logo.svg",
+  "Udinese": "Udinese Calcio logo.svg",
+  "Pachuca": "C.F. Pachuca.svg",
+  "Trabzonspor": "Trabzonspor logosu.svg",
+  "Bayer Leverkusen": "Bayer 04 Leverkusen logo.svg",
+};
+function clubCrestHTML(club){
+  const file = CLUB_CREST[club];
+  // sin escudo mapeado: hueco vacío del mismo tamaño, para que el nombre del club quede igual de
+  // alineado que en las filas que sí tienen imagen.
+  if(!file) return `<span class="club-crest" aria-hidden="true"></span>`;
+  const url = 'https://en.wikipedia.org/wiki/Special:FilePath/' + encodeURIComponent(file);
+  // si el nombre de archivo cambiara en Wikipedia, la imagen se vuelve invisible (visibility, no
+  // display) para que su hueco se mantenga reservado y los nombres de club sigan alineados en columna.
+  return `<img class="club-crest" src="${url}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">`;
+}
+
 /* ---------------- helpers ---------------- */
 function fmtM(v){
   if(v===null||v===undefined) return '<span class="nd">N/D</span>';
@@ -1177,10 +1719,11 @@ const state = {
   cats: new Set(Object.keys(CAT_LABEL)), // active categories (all on by default)
   open: new Set(),
   search: '',                    // texto de búsqueda
-  view: 'tabla',                 // vista activa: tabla | chart-season | chart-player | timeline | mapa | once
+  view: 'tabla',                 // vista activa: tabla | chart-season | chart-player | timeline | mapa | once | paises
   chartSort: 'year',             // gráfico por jugador: 'year' | 'price'
   chartNet: false,               // gráfico por jugador: descontar importe de venta
-  onceMode: 'historico'          // once: 'historico' | 'aleatorio'
+  onceMode: 'historico',         // once: 'historico' | 'aleatorio'
+  paisesYear: 2026               // año seleccionado en "Mejores por país"
 };
 
 // nombres/apellidos de 4 letras que existen en los datos (Kaká, Bale, Xabi, Raúl, Kopa...):
@@ -1477,21 +2020,100 @@ function getFilteredPlayers(){
   });
   return out;
 }
+// conjunto de nombres que sobreviven a los filtros activos (categoría + ocultar ventas + búsqueda).
+// Usado por timeline/mapa/once para decidir QUÉ jugadores se muestran; las fechas/importes de cada
+// uno se resuelven siempre contra PLAYER_INDEX (histórico completo, sin filtrar) para que un fichaje
+// no cambie de fecha de llegada/salida según los toggles activos.
+function visibleNameSet(){
+  return new Set(getFilteredPlayers().map(p=>p.n));
+}
+
+/* ---------------- índice único por jugador (histórico completo, sin filtrar) ----------------
+   Construido UNA VEZ a partir de SEASONS, recorridas en orden CRONOLÓGICO real (el array SEASONS
+   no está en ese orden: algunas temporadas se añadieron al final solo para ubicar debuts en cantera).
+   Reutilizado por Timeline, Mapa y Once para no repetir esta lógica ni duplicar datos. */
+const PLAYER_INDEX = (function(){
+  const idx = {};
+  const chrono = SEASONS.map(s=>({s, y:parseInt(s.t.split('/')[0],10)})).sort((a,b)=>a.y-b.y);
+  chrono.forEach(({s: season, y})=>{
+    season.ops.forEach(o=>{
+      if(!idx[o.n]) idx[o.n] = {cat:o.cat};
+      if(o.k==='c'){
+        if(!idx[o.n].compra){
+          idx[o.n].compra = Object.assign({compraSeason:season.t, season:season.t}, o);
+          idx[o.n].compraYear = y;
+        }
+        idx[o.n].cat = o.cat;
+      } else {
+        if(idx[o.n].compra && !idx[o.n].venta && y >= idx[o.n].compraYear){
+          idx[o.n].venta = Object.assign({season:season.t}, o);
+          idx[o.n].ventaYear = y;
+        } else if(!idx[o.n].compra && !idx[o.n].ventaOnly){
+          idx[o.n].ventaOnly = Object.assign({season:season.t}, o);
+          idx[o.n].cat = o.cat;
+        }
+      }
+    });
+  });
+  return idx;
+})();
+const CURRENT_YEAR = 2026; // "hoy", para dibujar como abiertas las etapas que siguen en curso
+
+/* ---------------- clasificación de posición → hueco de formación (para el Once) ----------------
+   A partir del texto libre de POSITION (p.ej. "Defensa (lateral der.)/Extremo"), determina el
+   hueco de formación con el que ese jugador puede encajar. Heurística simple, no pretende ser
+   exacta al 100%: es suficiente para repartir 126 jugadores en un 4-3-3 de forma razonable. */
+function classifyPosition(pos){
+  if(!pos || pos==='Entrenador') return null;
+  if(pos==='Portero') return 'POR';
+  if(/central/.test(pos)) return 'DFC';
+  if(/lateral der/.test(pos)) return 'LD';
+  if(/lateral izq/.test(pos)) return 'LI';
+  if(/lateral/.test(pos)) return 'LAT';
+  if(/Centrocampista/.test(pos)) return 'MC';
+  if(/Extremo/.test(pos) && /Delantero/.test(pos)) return 'EXTDEL';
+  if(/Extremo/.test(pos)) return 'EXT';
+  if(/Delantero/.test(pos)) return 'DEL';
+  if(pos.trim()==='Defensa') return 'DEF';
+  return null;
+}
+// once histórico curado a mano (ver mensaje del usuario: "decídelo tú"), 4-3-3 con caras sobre el
+// terreno de juego. x/y en % sobre el contenedor del campo (y=0 portería rival, y=100 portería propia).
+const FORMATION_SLOTS = [
+  {id:'POR',  label:'Portero',            bucket:['POR'],           x:50, y:91, historic:'Iker Casillas'},
+  {id:'LD',   label:'Lateral derecho',    bucket:['LD','LAT','DEF'],x:84, y:73, historic:'Dani Carvajal'},
+  {id:'DFC1', label:'Central',            bucket:['DFC','DEF'],     x:62, y:80, historic:'Sergio Ramos'},
+  {id:'DFC2', label:'Central',            bucket:['DFC','DEF'],     x:38, y:80, historic:'Fernando Hierro'},
+  {id:'LI',   label:'Lateral izquierdo',  bucket:['LI','LAT','DEF'],x:16, y:73, historic:'Roberto Carlos'},
+  {id:'MC1',  label:'Centrocampista',     bucket:['MC'],            x:74, y:53, historic:'Toni Kroos'},
+  {id:'MC2',  label:'Centrocampista',     bucket:['MC'],            x:50, y:47, historic:'Luka Modrić'},
+  {id:'MC3',  label:'Centrocampista',     bucket:['MC'],            x:26, y:53, historic:'Zinedine Zidane'},
+  {id:'EXTD', label:'Extremo derecho',    bucket:['EXT','EXTDEL'],  x:82, y:24, historic:'Cristiano Ronaldo'},
+  {id:'DEL',  label:'Delantero centro',   bucket:['DEL','EXTDEL'],  x:50, y:14, historic:'Alfredo Di Stéfano'},
+  {id:'EXTI', label:'Extremo izquierdo',  bucket:['EXT','EXTDEL'],  x:18, y:24, historic:'Francisco Gento'}
+];
 
 /* =====================================================================
    SELECTOR DE VISTAS
    ===================================================================== */
-const VIEWS = ['tabla','chart-season','chart-player','timeline','mapa','once'];
+const VIEWS = ['tabla','chart-season','chart-player','timeline','mapa','once','paises'];
 function switchView(view){
-  state.view = view;
-  // al entrar por primera vez en un gráfico de importes, si todas las categorías están activas
-  // (estado por defecto), se desactivan cantera/formación/leyendas: sus fichajes suelen tener
-  // importe nulo o simbólico y solo añaden ruido visual a estos gráficos.
-  if((view==='chart-season' || view==='chart-player') && state.cats.size===Object.keys(CAT_LABEL).length){
+  const prevView = state.view;
+  const ALL_CATS = Object.keys(CAT_LABEL);
+  const REDUCED_CATS = ['principal','fiasco','resto'];
+  const isChartView = v => (v==='chart-season' || v==='chart-player');
+  if(isChartView(view) && state.cats.size===ALL_CATS.length){
+    // al entrar en un gráfico de importes con todas las categorías activas: cantera/formación/leyendas
+    // suelen tener importe nulo o simbólico y solo añaden ruido visual a estos gráficos.
     state.cats.delete('cantera');
     state.cats.delete('formacion');
     state.cats.delete('leyenda');
+  } else if(isChartView(prevView) && !isChartView(view) && state.cats.size===REDUCED_CATS.length && REDUCED_CATS.every(c=>state.cats.has(c))){
+    // al salir de esos gráficos dejando activo justo ese subconjunto reducido (y no otra combinación
+    // elegida a mano por el usuario), se restauran todas las categorías al pasar a otra vista.
+    ALL_CATS.forEach(c=>state.cats.add(c));
   }
+  state.view = view;
   document.querySelectorAll('.viewtab').forEach(b=> b.classList.toggle('on', b.dataset.view===view));
   VIEWS.forEach(v=>{
     const el = document.getElementById('view-'+v);
@@ -1500,7 +2122,20 @@ function switchView(view){
   document.getElementById('tableOnlyActions').style.display = (view==='tabla') ? '' : 'none';
   document.getElementById('colGroupTabla').style.display = (view==='tabla') ? '' : 'none';
   document.getElementById('colGroupPlayerChart').style.display = (view==='chart-player') ? '' : 'none';
+  document.getElementById('colGroupOnce').style.display = (view==='once') ? '' : 'none';
+  document.getElementById('colGroupPaises').style.display = (view==='paises') ? '' : 'none';
+  // "Categorías de jugador" no aplica a "Mejores por país" (es un ránking editorial ajeno al libro
+  // de fichajes): se oculta entera, igual que el resto de bloques de esta toolbar que son propios
+  // de una sola vista.
+  document.getElementById('colGroupCats').style.display = (view==='paises') ? 'none' : '';
+  // "Ocultar ventas" no tiene ningún efecto en Timeline ni en Once (ambas solo usan operaciones de
+  // compra); se oculta con visibility (no display) para que su hueco quede reservado y los chips que
+  // le siguen en la misma fila no salten de sitio al cambiar de vista.
+  document.getElementById('hideVentasChip').style.visibility = (view==='timeline' || view==='once') ? 'hidden' : '';
   render();
+  // el mapa de Leaflet necesita conocer su tamaño DESPUÉS de que el panel sea visible (display:none
+  // da tamaño 0x0 al inicializar); se recalcula en cada entrada a la vista para que nunca quede cortado.
+  if(view==='mapa' && _leafletMap){ setTimeout(()=>_leafletMap.invalidateSize(), 0); }
 }
 document.querySelectorAll('.viewtab').forEach(btn=>{
   btn.addEventListener('click', ()=> switchView(btn.dataset.view));
@@ -1614,15 +2249,26 @@ function renderSeasonChart(){
 const seasonTip = document.getElementById('seasonTip');
 function showSeasonTip(d, e){
   const s = SEASONS.find(x=>x.t===d.t);
-  const protagonists = s ? s.ops.filter(o=>state.cats.has(o.cat) && !(state.hideVentas && o.k==='v'))
-                               .filter(o=>['principal','leyenda','fiasco'].includes(o.cat)).slice(0,6) : [];
-  const avatarsHtml = protagonists.map(o=>avatarHTML(o.n, o.cat, 'avatar', hoverAttr(o))).join('');
+  // respeta exactamente los mismos filtros activos que el resto del sitio (incluye cantera/formación
+  // si sus botones están marcados); compras y ventas se muestran en dos bloques separados (compras
+  // arriba, ventas abajo) y, dentro de cada uno, se prioriza a los más relevantes si hay muchos.
+  const visible = s ? s.ops.filter(o=>state.cats.has(o.cat) && !(state.hideVentas && o.k==='v')) : [];
+  const byRelevance = (a,b) => (CAT_RANK[b.cat]||0) - (CAT_RANK[a.cat]||0);
+  const compras = visible.filter(o=>o.k==='c').sort(byRelevance).slice(0,6);
+  const ventas = visible.filter(o=>o.k==='v').sort(byRelevance).slice(0,6);
+  const groupHtml = (list, label, cls) => list.length ? `
+    <div class="stip-group-label ${cls}">${label}</div>
+    <div class="stip-avatars">${list.map(o=>
+      `<div class="stip-player">${avatarHTML(o.n, o.cat, 'avatar', hoverAttr(o))}<span class="pname-mini">${o.n}</span></div>`
+    ).join('')}</div>
+  ` : '';
   seasonTip.innerHTML = `
     <div class="stip-title">${d.t}</div>
     <div class="stip-row"><span>Gasto</span><b class="g">${d.g.toFixed(1)} M€</b></div>
     <div class="stip-row"><span>Ventas</span><b class="v">${d.v.toFixed(1)} M€</b></div>
     <div class="stip-row"><span>Neto</span><b>${d.neto.toFixed(1)} M€</b></div>
-    ${avatarsHtml ? `<div class="stip-avatars">${avatarsHtml}</div>` : ''}
+    ${groupHtml(compras, 'Compras', 'buy')}
+    ${groupHtml(ventas, 'Ventas', 'sell')}
   `;
   // posicionar cerca del cursor, sin salirse de la ventana
   seasonTip.style.left = '-1000px'; seasonTip.style.top='-1000px'; seasonTip.classList.add('show');
@@ -1730,11 +2376,422 @@ function renderPlayerChart(){
   </svg>`;
 }
 
+/* =====================================================================
+   VISTA: TIMELINE
+   Una línea horizontal por jugador: empieza el año de su llegada (PLAYER_INDEX.compraYear) y
+   termina el año de salida (venta registrada, o DEPARTURE_YEAR investigado a mano, o "sigue en
+   el club" si no hay ninguna de las dos). El dominio del eje (mín/máx año) se calcula una sola
+   vez sobre TODO el histórico, sin filtrar, para que no salte al cambiar los toggles.
+   ===================================================================== */
+const TIMELINE = {rowH:24, yearW:13, padTop:34, padLeft:14, padRight:26};
+let _timelineDomainCache = null;
+function getTimelineDomain(){
+  if(_timelineDomainCache) return _timelineDomainCache;
+  let minY = CURRENT_YEAR;
+  Object.values(PLAYER_INDEX).forEach(p=>{ if(p.compraYear!=null) minY = Math.min(minY, p.compraYear); });
+  _timelineDomainCache = {minYear:minY, maxYear:CURRENT_YEAR+1};
+  return _timelineDomainCache;
+}
+function timelineData(){
+  const visible = visibleNameSet();
+  const out = [];
+  Object.keys(PLAYER_INDEX).forEach(n=>{
+    if(!visible.has(n)) return;
+    if(POSITION[n]==='Entrenador') return;
+    const p = PLAYER_INDEX[n];
+    if(p.compraYear==null) return; // sin año de llegada conocido: se omite (ver nota del panel)
+    let endYear, ongoing;
+    if(p.venta){ endYear = p.ventaYear; ongoing = false; }
+    else if(DEPARTURE_YEAR[n]){ endYear = DEPARTURE_YEAR[n]; ongoing = false; }
+    else { endYear = CURRENT_YEAR; ongoing = true; }
+    out.push({n, cat:p.cat, startYear:p.compraYear, endYear, ongoing, sample:p.compra});
+  });
+  out.sort((a,b)=> a.startYear-b.startYear || a.n.localeCompare(b.n,'es'));
+  return out;
+}
+function renderTimeline(){
+  const wrap = document.getElementById('timelineWrap');
+  if(!wrap) return;
+  const data = timelineData();
+  if(data.length===0){
+    wrap.innerHTML = `<div class="empty-season" style="padding:40px 0;">Ningún jugador visible con los filtros activos.</div>`;
+    return;
+  }
+  const T = TIMELINE;
+  const {minYear, maxYear} = getTimelineDomain();
+  const chartW = T.padLeft + (maxYear-minYear)*T.yearW + T.padRight;
+  const chartH = T.padTop + data.length*T.rowH + 8;
+  const xScale = yr => T.padLeft + (yr-minYear)*T.yearW;
+
+  let gridlines = '', labels = '';
+  for(let yr = Math.ceil(minYear/5)*5; yr<=maxYear; yr+=5){
+    const x = xScale(yr);
+    gridlines += `<line x1="${x}" y1="${T.padTop-8}" x2="${x}" y2="${chartH}" stroke="#E4E1D8" stroke-width="1"/>`;
+    labels += `<text x="${x}" y="${T.padTop-14}" text-anchor="middle" font-size="9.5" fill="#7A7F8A" font-family="IBM Plex Mono, monospace">${yr}</text>`;
+  }
+  const nowX = xScale(CURRENT_YEAR);
+  gridlines += `<line x1="${nowX}" y1="${T.padTop-8}" x2="${nowX}" y2="${chartH}" stroke="var(--gold)" stroke-width="1.3" stroke-dasharray="3,3"/>`;
+
+  let names = '', bars = '';
+  data.forEach((d,i)=>{
+    const y = T.padTop + i*T.rowH;
+    const cy = y + T.rowH/2;
+    names += `<div class="tl-name-row" style="height:${T.rowH}px;">${avatarHTML(d.n, d.cat, 'tl-avatar', d.sample?hoverAttr(d.sample):'')}<a class="tl-name-txt" href="${WIKI[d.n]||'#'}" target="_blank" rel="noopener noreferrer" ${d.sample?hoverAttr(d.sample):''} onclick="event.stopPropagation(); window.open(this.href,'_blank','noopener,noreferrer'); return false;">${d.n}</a></div>`;
+    const x1 = xScale(d.startYear), x2 = Math.max(xScale(d.endYear), x1+2);
+    const color = CAT_COLOR[d.cat] || CAT_COLOR.resto;
+    bars += `<line x1="${x1}" y1="${cy}" x2="${x2}" y2="${cy}" stroke="${color}" stroke-width="4" stroke-linecap="round"/>`;
+    bars += `<circle cx="${x1}" cy="${cy}" r="3" fill="${color}"/>`;
+    bars += d.ongoing
+      ? `<circle cx="${x2}" cy="${cy}" r="4" fill="var(--gold)" stroke="#fff" stroke-width="1"/>`
+      : `<circle cx="${x2}" cy="${cy}" r="3" fill="#fff" stroke="${color}" stroke-width="2"/>`;
+    // franja invisible más gruesa encima de la barra, solo para facilitar el hover con el ratón
+    bars += `<line class="tl-hit" x1="${x1}" y1="${cy}" x2="${x2}" y2="${cy}" stroke="transparent" stroke-width="16" ${d.sample?hoverAttr(d.sample):''}/>`;
+  });
+
+  wrap.innerHTML = `
+    <div class="timeline-names">${names}</div>
+    <div class="timeline-chart-scroll"><svg width="${chartW}" height="${chartH}" viewBox="0 0 ${chartW} ${chartH}">${gridlines}${labels}${bars}</svg></div>
+  `;
+}
+
+/* =====================================================================
+   VISTA: MAPA (Leaflet + OpenStreetMap, sin API key)
+   Una cara por jugador, colocada dentro del "círculo seguro" de su país (COUNTRY_INFO): un centro
+   y un radio en km curados a mano para que las caras no invadan visualmente un país vecino (sí
+   pueden asomar al mar). El número de caras que caben se recalcula en cada zoom/desplazamiento,
+   convirtiendo ese radio en píxeles con la fórmula estándar de resolución de Web Mercator.
+   Si no caben todas, se muestran las más relevantes y la última cara lleva una insignia "+N" que
+   abre un popup de Leaflet con el país completo.
+   ===================================================================== */
+const MAP_AVATAR_D = 30; // px — debe coincidir con el tamaño real de .map-avatar en CSS
+// países cuyo "+N" crece hacia la izquierda al hacer hover en vez de hacia la derecha (el hueco
+// libre alrededor de su clúster de caras queda de ese lado); ver countryShadingStyle/badge más abajo.
+const GROW_LEFT_COUNTRIES = new Set(["Bélgica", "Países Bajos"]);
+const CAT_RANK = {leyenda:4, principal:3, fiasco:2, cantera:1, formacion:1, resto:0};
+function playerImportance(p){ return (CAT_RANK[p.cat]||0)*1000 + (p.f||0); }
+
+function mapPlayersData(){
+  const visible = visibleNameSet();
+  const out = [];
+  visible.forEach(n=>{
+    if(POSITION[n]==='Entrenador') return;
+    const country = NATIONALITY[n];
+    if(!country || !COUNTRY_INFO[country]) return;
+    const idx = PLAYER_INDEX[n];
+    if(!idx) return;
+    const sample = idx.compra || idx.venta || idx.ventaOnly;
+    const f = sample ? sample.f : null;
+    out.push({n, cat:idx.cat, f, country, sample});
+  });
+  return out;
+}
+function groupByCountry(players){
+  const byCountry = {};
+  players.forEach(p=>{ (byCountry[p.country] = byCountry[p.country]||[]).push(p); });
+  Object.values(byCountry).forEach(arr=> arr.sort((a,b)=> playerImportance(b)-playerImportance(a)));
+  return byCountry;
+}
+// distribuye posiciones en anillos concéntricos alrededor del centro (en píxeles, offset x/y);
+// cuantos más anillos caben dentro de pixelRadius, más caras se podrán colocar.
+function packCircleSlots(pixelRadius, d){
+  const slots = [{x:0, y:0}];
+  let ring = 1;
+  while(ring<=16){
+    const ringRadius = ring*d*0.94;
+    if(ringRadius > pixelRadius) break;
+    const count = Math.max(6, Math.floor((2*Math.PI*ringRadius)/d));
+    const stagger = (ring%2) ? Math.PI/count : 0;
+    for(let i=0;i<count;i++){
+      const angle = (i/count)*2*Math.PI + stagger;
+      slots.push({x: ringRadius*Math.cos(angle), y: ringRadius*Math.sin(angle)});
+    }
+    ring++;
+  }
+  return slots;
+}
+function metersPerPixel(lat, zoom){
+  return 156543.03392 * Math.cos(lat*Math.PI/180) / Math.pow(2, zoom);
+}
+function flagEmoji(iso){
+  const special = {'GB-ENG':'🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'GB-WLS':'🏴󠁧󠁢󠁷󠁬󠁳󠁿'};
+  if(special[iso]) return special[iso];
+  return iso.toUpperCase().replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt(0)));
+}
+function countryPopupHtml(country, iso, players){
+  const items = players.map(p=>
+    `<div class="map-popup-item">${avatarHTML(p.n, p.cat, 'avatar', p.sample?hoverAttr(p.sample):'')}<span class="pname-mini">${p.n}</span></div>`
+  ).join('');
+  return `<div class="map-popup-title">${flagEmoji(iso)} ${country} · ${players.length} fichaje${players.length===1?'':'s'}</div><div class="map-popup-grid">${items}</div>`;
+}
+
+let _leafletMap = null, _mapaLayer = null;
+function initMapaLeaflet(){
+  if(_leafletMap) return;
+  _leafletMap = L.map('mapaLeaflet', {worldCopyJump:true, minZoom:2, maxZoom:12}).setView([15,-10], 2);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom:19,
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
+  }).addTo(_leafletMap);
+  _mapaLayer = L.layerGroup().addTo(_leafletMap);
+  // el radio "seguro" de cada país solo depende del ZOOM (no de hacia dónde esté centrado el mapa),
+  // así que basta con recalcular en zoomend. Escuchar también "moveend" rompía los popups: Leaflet
+  // hace un autoPan (que dispara moveend) al abrir uno cerca del borde, y volver a pintar los
+  // marcadores en ese instante destruía el propio marcador cuyo popup se estaba abriendo.
+  _leafletMap.on('zoomend', ()=>{ if(state.view==='mapa') renderMapaMarkers(); });
+  loadCountryShading();
+}
+// ---- sombreado de países con fichajes: fronteras reales vía world-atlas (Natural Earth), no un
+// rectángulo aproximado. Se carga una única vez de forma asíncrona y se re-estiliza (sin volver a
+// descargar nada) cada vez que cambian los filtros/búsqueda activos.
+let _countriesLayer = null;
+let _activeCountriesEN = new Set();
+function countryShadingStyle(feature){
+  const on = _activeCountriesEN.has(feature.properties.name);
+  return on
+    ? {fillColor:'#B8892B', fillOpacity:0.22, color:'#B8892B', weight:1.1, opacity:0.55}
+    : {fillOpacity:0, opacity:0, weight:0};
+}
+function loadCountryShading(){
+  if(typeof topojson==='undefined') return; // si el script del CDN no llegó a cargar, el mapa sigue funcionando igual, solo sin sombreado
+  fetch('https://unpkg.com/world-atlas@2/countries-110m.json')
+    .then(r=>r.json())
+    .then(topology=>{
+      const geo = topojson.feature(topology, topology.objects.countries);
+      _countriesLayer = L.geoJSON(geo, {interactive:false, style:countryShadingStyle}).addTo(_leafletMap);
+      updateCountryShading();
+    })
+    .catch(()=>{ /* sin conexión al CDN de datos geográficos: se omite el sombreado, el resto del mapa no se ve afectado */ });
+}
+function updateCountryShading(){
+  if(!_countriesLayer) return;
+  const grouped = groupByCountry(mapPlayersData());
+  _activeCountriesEN = new Set(Object.keys(grouped).map(c=>COUNTRY_GEOJSON_NAME[c]).filter(Boolean));
+  _countriesLayer.setStyle(countryShadingStyle);
+}
+function renderMapa(){
+  const el = document.getElementById('mapaLeaflet');
+  if(!el) return;
+  initMapaLeaflet();
+  setTimeout(()=>{ _leafletMap.invalidateSize(); renderMapaMarkers(); maybeCenterMapOnSearch(); }, 0);
+}
+// recuerda para qué búsqueda ya se hizo un auto-centrado, para no repetir el paneo en cada render()
+// (p.ej. al tocar un chip de categoría sin cambiar el texto de búsqueda) y para no pelearse con un
+// desplazamiento manual posterior del usuario.
+let _mapAutoCenterKey = null;
+function maybeCenterMapOnSearch(){
+  if(!_leafletMap) return;
+  if(!searchActive()){ _mapAutoCenterKey = null; return; }
+  const players = mapPlayersData();
+  if(players.length !== 1) return; // solo centra cuando la búsqueda deja un único jugador visible
+  const info = COUNTRY_INFO[players[0].country];
+  if(!info) return;
+  const key = norm(state.search.trim()) + '|' + players[0].n;
+  if(_mapAutoCenterKey === key) return;
+  _mapAutoCenterKey = key;
+  const target = L.latLng(info.lat, info.lng);
+  // solo se mueve el mapa si el jugador realmente queda fuera de la zona visible actual
+  if(!_leafletMap.getBounds().contains(target)){
+    _leafletMap.panTo(target, {animate:true, duration:1.1});
+  }
+}
+function renderMapaMarkers(){
+  if(!_leafletMap || !_mapaLayer) return;
+  _mapaLayer.clearLayers();
+  updateCountryShading();
+  const grouped = groupByCountry(mapPlayersData());
+  const zoom = _leafletMap.getZoom();
+  Object.keys(grouped).forEach(country=>{
+    const info = COUNTRY_INFO[country];
+    const players = grouped[country];
+    const mpp = metersPerPixel(info.lat, zoom);
+    const pixelRadius = (info.r*1000) / mpp;
+    const slots = packCircleSlots(pixelRadius, MAP_AVATAR_D);
+    const capacity = slots.length;
+    const centerPoint = _leafletMap.project([info.lat, info.lng], zoom);
+    const showCount = Math.min(players.length, capacity);
+    const overflow = players.length - showCount;
+    for(let i=0;i<showCount;i++){
+      const p = players[i];
+      const isLastWithOverflow = (i===showCount-1) && overflow>0;
+      const pt = centerPoint.add(L.point(slots[i].x, slots[i].y));
+      const ll = _leafletMap.unproject(pt, zoom);
+      // el "+N" crece hacia la derecha por defecto (hay sitio libre ahí en la mayoría de casos);
+      // en Bélgica y Países Bajos el hueco libre está al otro lado, así que esos dos crecen a la
+      // izquierda para no acabar tapados por las caras vecinas.
+      const growLeft = GROW_LEFT_COUNTRIES.has(country);
+      const badge = isLastWithOverflow ? `<span class="map-more-badge${growLeft?' grow-left':''}">+${overflow}</span>` : '';
+      const marker = L.marker(ll, {
+        keyboard:false,
+        icon: L.divIcon({
+          html: avatarHTML(p.n, p.cat, 'map-avatar', p.sample?hoverAttr(p.sample):'') + badge,
+          className:'map-avatar-wrap', iconSize:[MAP_AVATAR_D,MAP_AVATAR_D], iconAnchor:[MAP_AVATAR_D/2,MAP_AVATAR_D/2]
+        })
+      }).addTo(_mapaLayer);
+      if(isLastWithOverflow) marker.bindPopup(countryPopupHtml(country, info.iso, players), {maxWidth:270, className:'map-popup'});
+    }
+  });
+}
+
+/* =====================================================================
+   VISTA: ONCE HISTÓRICO / ALEATORIO
+   Histórico: 4-3-3 curado a mano en FORMATION_SLOTS. Aleatorio: un fichaje al azar por hueco de
+   formación (bucket de classifyPosition), sorteado entre los fichajes visibles con los filtros
+   activos; se puede repetir el sorteo con el botón "🎲 Repetir".
+   ===================================================================== */
+function randomOnce(){
+  const visible = visibleNameSet();
+  const pool = [];
+  visible.forEach(n=>{
+    const idx = PLAYER_INDEX[n];
+    if(!idx || !idx.compra) return; // solo fichajes (compras), no ventas sueltas sin llegada conocida
+    const bucket = classifyPosition(POSITION[n]);
+    if(!bucket) return;
+    pool.push({n, cat:idx.cat, bucket, sample:idx.compra});
+  });
+  const used = new Set();
+  const picks = {};
+  // los huecos con bucket más restringido (p.ej. POR) se rellenan primero, para no quedarnos sin
+  // candidatos válidos por haberlos gastado ya en huecos más flexibles (MC, EXT...).
+  [...FORMATION_SLOTS].sort((a,b)=> a.bucket.length - b.bucket.length).forEach(slot=>{
+    const candidates = pool.filter(p=> !used.has(p.n) && slot.bucket.includes(p.bucket));
+    // si no hay ningún candidato cuya posición real encaje en este hueco (típico cuando la búsqueda
+    // deja el grupo visible muy reducido), el hueco se deja vacío: nunca se coloca a un jugador en
+    // una posición del campo que no es la suya.
+    if(candidates.length===0) return;
+    const chosen = candidates[Math.floor(Math.random()*candidates.length)];
+    used.add(chosen.n);
+    picks[slot.id] = chosen;
+  });
+  return picks;
+}
+function renderOnce(){
+  const wrap = document.getElementById('onceWrap');
+  if(!wrap) return;
+  const isHist = state.onceMode === 'historico';
+  document.getElementById('onceHistChip').classList.toggle('on', isHist);
+  document.getElementById('onceRandChip').classList.toggle('on', !isHist);
+  document.getElementById('onceRerollBtn').style.display = isHist ? 'none' : '';
+  document.getElementById('onceDesc').textContent = isHist
+    ? 'El mejor once de la historia del club, a nuestro juicio, en un 4-3-3.'
+    : 'Un fichaje al azar por posición, entre todos los visibles con los filtros activos arriba. Pulsa "Repetir" para sortear otro once.';
+
+  let picks;
+  if(isHist){
+    picks = {};
+    FORMATION_SLOTS.forEach(slot=>{
+      const idx = PLAYER_INDEX[slot.historic];
+      picks[slot.id] = {n:slot.historic, cat: idx?idx.cat:'principal', sample: idx?idx.compra:null};
+    });
+  } else {
+    picks = randomOnce();
+  }
+
+  const slotsHtml = FORMATION_SLOTS.map(slot=>{
+    const p = picks[slot.id];
+    if(!p) return `<div class="pitch-slot" style="left:${slot.x}%; top:${slot.y}%;"><div class="pitch-empty" title="${slot.label}">—</div></div>`;
+    return `<div class="pitch-slot" style="left:${slot.x}%; top:${slot.y}%;">
+      ${avatarHTML(p.n, p.cat, 'once-avatar', p.sample?hoverAttr(p.sample):'')}
+      <span class="pname">${p.n}</span>
+    </div>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div class="pitch">
+      <svg class="pitch-lines" viewBox="0 0 68 100" preserveAspectRatio="none">
+        <rect x="2" y="2" width="64" height="96" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="0.6"/>
+        <line x1="2" y1="50" x2="66" y2="50" stroke="rgba(255,255,255,.35)" stroke-width="0.6"/>
+        <circle cx="34" cy="50" r="9" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="0.6"/>
+        <rect x="15" y="2" width="38" height="16" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="0.6"/>
+        <rect x="15" y="82" width="38" height="16" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="0.6"/>
+        <rect x="24" y="2" width="20" height="6" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="0.6"/>
+        <rect x="24" y="92" width="20" height="6" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="0.6"/>
+      </svg>
+      ${slotsHtml}
+    </div>
+  `;
+}
+document.getElementById('onceHistChip').addEventListener('click', function(){
+  if(state.onceMode==='historico') return;
+  state.onceMode = 'historico';
+  render();
+});
+document.getElementById('onceRandChip').addEventListener('click', function(){
+  state.onceMode = 'aleatorio';
+  render();
+});
+document.getElementById('onceRerollBtn').addEventListener('click', render);
+
+/* =====================================================================
+   VISTA: MEJORES POR PAÍS
+   Ránking editorial independiente del libro de fichajes, con un desplegable de año (por ahora solo
+   2026, pero BEST_BY_COUNTRY admite añadir más años sin tocar esta función). Reutiliza avatarHTML/
+   PHOTOS/WIKI/PLAYER_INDEX para los jugadores que también son (o fueron) fichajes del Real Madrid,
+   sin duplicar esos datos; el resto cae en el mismo sistema de iniciales de siempre.
+   ===================================================================== */
+function rmAvatarCat(row){
+  if(row.rm==='actual') return 'rmactual';
+  if(row.rm==='exjugador') return 'rmex';
+  return 'rmnone';
+}
+function initPaisesYearSelect(){
+  const sel = document.getElementById('paisesYearSelect');
+  if(!sel || sel.options.length) return; // ya inicializado
+  const years = Object.keys(BEST_BY_COUNTRY).map(Number).sort((a,b)=>b-a);
+  sel.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  if(years.length && !years.includes(state.paisesYear)) state.paisesYear = years[0];
+  sel.value = state.paisesYear;
+}
+function renderPaises(){
+  const wrap = document.getElementById('paisesWrap');
+  if(!wrap) return;
+  initPaisesYearSelect();
+  const rows = BEST_BY_COUNTRY[state.paisesYear] || [];
+  const q = searchActive() ? norm(state.search.trim()) : null;
+  const filtered = q ? rows.filter(r=> norm(r.player).includes(q) || norm(r.country).includes(q) || norm(r.club).includes(q)) : rows;
+
+  if(filtered.length===0){
+    wrap.innerHTML = `<div class="empty-season" style="padding:40px 0;">Ningún resultado con la búsqueda activa.</div>`;
+    return;
+  }
+
+  const itemsHtml = filtered.map(r=>{
+    const idx = PLAYER_INDEX[r.player]; // por si también es (o fue) un fichaje del Real Madrid
+    const sample = idx ? (idx.compra || idx.venta || idx.ventaOnly) : null;
+    const hover = sample ? hoverAttr(sample) : '';
+    const wikiHref = WIKI[r.player];
+    const nameHtml = wikiHref
+      ? `<a class="pais-name" href="${wikiHref}" target="_blank" rel="noopener noreferrer" ${hover} onclick="event.stopPropagation(); window.open(this.href,'_blank','noopener,noreferrer'); return false;">${r.player}</a>`
+      : `<span class="pais-name" ${hover}>${r.player}</span>`;
+    const rmBadge = r.rm==='exjugador' ? ' <span class="pais-rmbadge ex">Ex&#8209;Real&nbsp;Madrid</span>' : '';
+    return `<div class="pais-row">
+      <div class="pais-rank">${r.rank}</div>
+      <div class="pais-flag">${r.flag}</div>
+      <div class="pais-country">${r.country}</div>
+      ${avatarHTML(r.player, rmAvatarCat(r), 'pais-avatar', hover)}
+      <div class="pais-info">
+        ${nameHtml}
+        <div class="pais-meta">${r.age} años${rmBadge}</div>
+      </div>
+      <div class="pais-club">${clubCrestHTML(r.club)}<span class="pais-club-name">${r.club}</span></div>
+    </div>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="pais-list">${itemsHtml}</div>`;
+}
+document.getElementById('paisesYearSelect').addEventListener('change', function(){
+  state.paisesYear = parseInt(this.value, 10);
+  render();
+});
+
 /* ---------------- dispatcher: refresca la tabla (siempre) + la vista activa ---------------- */
 function render(){
   renderTabla(); // los toggles son transversales: se mantiene sincronizada aunque esté oculta
   if(state.view==='chart-season') renderSeasonChart();
   if(state.view==='chart-player') renderPlayerChart();
+  if(state.view==='timeline') renderTimeline();
+  if(state.view==='mapa') renderMapa();
+  if(state.view==='once') renderOnce();
+  if(state.view==='paises') renderPaises();
 }
 
 document.querySelectorAll('#colToggles .chip').forEach(chip=>{
