@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Pensadores</title>
+<style>
+  :root {
+    --gutter: 118px;
+    --ink: #1f2933;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --card-bg: #ffffff;
+    --page-bg: #faf9f6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    background: var(--page-bg);
+    color: var(--ink);
+    margin: 0;
+    padding: 28px 16px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    padding: 30px 34px 26px;
+    max-width: 1180px;
+    width: 100%;
+    min-height: calc(100vh - 56px);
+    display: flex;
+    flex-direction: column;
+  }
+  h1 {
+    font-size: 21px;
+    margin: 0 0 4px 0;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  p.subtitle {
+    margin: 0 0 22px 0;
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    max-width: 720px;
+    line-height: 1.5;
+  }
+
+  /* --- Toggle buttons --- */
+  .toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 22px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  .toggle-btn {
+    border: 1.5px solid #d1d5db;
+    background: #fff;
+    color: var(--ink);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .toggle-btn .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #d1d5db;
+    transition: background 0.15s ease;
+  }
+  .toggle-btn:hover { border-color: #9ca3af; }
+  .toggle-btn.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .toggle-btn.active .dot { background: #fff; }
+
+  /* --- Chart panel --- */
+  .chart-panel {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+  .chart-inner {
+    min-width: 640px;
+    position: relative;
+  }
+  .gridline-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+  }
+  .gridline {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 0;
+    border-left: 1px dashed #e1e4e8;
+  }
+  .gridline .glabel {
+    position: absolute;
+    top: -2px;
+    left: 4px;
+    font-size: 10px;
+    color: #b0b7c0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .layer { position: relative; margin-bottom: 18px; }
+  .layer-title {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #8892a0;
+    margin-bottom: 6px;
+    padding-left: var(--gutter);
+  }
+  .layer-flex { display: flex; align-items: stretch; }
+  .layer-gutter {
+    flex: 0 0 var(--gutter);
+    width: var(--gutter);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  .layer-plot { flex: 1 1 auto; min-width: 0; position: relative; }
+
+  /* Gantt */
+  .gantt-row { position: relative; height: 13px; margin-bottom: 3px; }
+  .gantt-bar {
+    position: absolute;
+    top: 1.5px;
+    height: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .gantt-bar.alive {
+    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.55) 0, rgba(255,255,255,0.55) 3px, transparent 3px, transparent 6px);
+  }
+
+  /* Heatmap */
+  .heat-row-label {
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    font-size: 10.5px;
+    color: var(--muted);
+    line-height: 1.15;
+    text-align: right;
+  }
+
+  /* Axis */
+  .axis-plot { height: 26px; position: relative; }
+  .axis-tick { position: absolute; top: 0; font-size: 11px; color: var(--muted); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; transform: translateX(-50%); }
+
+  .empty-state {
+    padding: 60px var(--gutter) 60px 0;
+    padding-left: var(--gutter);
+    text-align: left;
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13.5px;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 12px;
+    color: var(--ink);
+    transition: opacity 0.15s ease, background 0.15s ease;
+  }
+  .legend-item:hover { background: #f2f3f5; }
+  .legend-item.inactive { opacity: 0.32; }
+  .legend-item.inactive .swatch { background: #c3c8cf !important; }
+  .swatch { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+
+  /* Range slider */
+  .range-slider-block { margin: -6px 0 22px; }
+  .range-track {
+    position: relative;
+    height: 4px;
+    background: #e1e4e8;
+    border-radius: 2px;
+    margin: 14px 0 8px;
+  }
+  .range-fill {
+    position: absolute;
+    top: 0; height: 4px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+  .range-handle {
+    position: absolute;
+    top: 50%;
+    width: 16px; height: 16px;
+    background: #fff;
+    border: 2.5px solid var(--ink);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    cursor: grab;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .range-handle:active { cursor: grabbing; }
+  .range-readout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .range-reset {
+    border: none;
+    background: none;
+    color: var(--muted);
+    text-decoration: underline;
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+  }
+  .range-reset:hover { color: var(--ink); }
+
+  /* Tooltip */
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: #1f2933;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 12px;
+    line-height: 1.45;
+    padding: 8px 11px;
+    border-radius: 7px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.28);
+    opacity: 0;
+    transform: translate(-50%, -100%);
+    transition: opacity 0.1s ease;
+    z-index: 50;
+    max-width: 240px;
+  }
+  .tooltip .tt-title { font-weight: 700; display: block; }
+  .tooltip .tt-sub { color: #cbd2d9; display: block; margin-top: 1px; }
+  .tooltip.visible { opacity: 1; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Pensadores</h1>
+    <p class="subtitle">Cuatro formas de leer la misma línea de tiempo sobre <span id="peopleCount"></span>. Activa una o varias vistas — comparten el mismo eje de años. Usa la leyenda para mostrar u ocultar categorías.</p>
+
+    <div class="toggles" id="toggles">
+      <button class="toggle-btn" data-layer="gantt"><span class="dot"></span>Gantt timeline</button>
+      <button class="toggle-btn" data-layer="stream"><span class="dot"></span>Streamgraph</button>
+      <button class="toggle-btn" data-layer="heatmap"><span class="dot"></span>Heatmap</button>
+      <button class="toggle-btn" data-layer="swarm"><span class="dot"></span>Swarm</button>
+    </div>
+
+    <div class="range-slider-block" id="rangeSliderBlock">
+      <div class="range-track" id="rangeTrack">
+        <div class="range-fill" id="rangeFill"></div>
+        <div class="range-handle" id="handleMin"></div>
+        <div class="range-handle" id="handleMax"></div>
+      </div>
+      <div class="range-readout">
+        <span id="rangeReadoutText"></span>
+        <button type="button" id="rangeReset" class="range-reset">Restablecer</button>
+      </div>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-inner" id="chartInner">
+        <div class="gridline-overlay" id="gridlineOverlay"></div>
+
+        <div class="layer" id="layer-axis-top" style="display:none;">
+          <div class="layer-flex">
+            <div class="layer-gutter"></div>
+            <div class="layer-plot axis-plot" id="plot-axis-top"></div>
+          </div>
+        </div>
+
+        <div class="layer" id="layer-gantt" style="display:none;">
+          <div class="layer-title">Gantt timeline — de nacimiento a muerte</div>
+          <div class="layer-flex">
+            <div class="layer-gutter"></div>
+            <div class="layer-plot" id="plot-gantt"></div>
+          </div>
+        </div>
+
+        <div class="layer" id="layer-stream" style="display:none;">
+          <div class="layer-title">Streamgraph — nº con vida cada año, apilado por categoría</div>
+          <div class="layer-flex">
+            <div class="layer-gutter"></div>
+            <div class="layer-plot" id="plot-stream"></div>
+          </div>
+        </div>
+
+        <div class="layer" id="layer-heatmap" style="display:none;">
+          <div class="layer-title">Heatmap — intensidad = nº de personas activas por década</div>
+          <div class="layer-flex">
+            <div class="layer-gutter" id="gutter-heatmap"></div>
+            <div class="layer-plot" id="plot-heatmap"></div>
+          </div>
+        </div>
+
+        <div class="layer" id="layer-swarm" style="display:none;">
+          <div class="layer-title">Swarm — año de nacimiento (dispersión para evitar solapes)</div>
+          <div class="layer-flex">
+            <div class="layer-gutter"></div>
+            <div class="layer-plot" id="plot-swarm"></div>
+          </div>
+        </div>
+
+        <div class="empty-state" id="emptyState">Activa al menos una vista arriba para empezar ↑</div>
+
+        <div class="layer" id="layer-axis" style="display:none;">
+          <div class="layer-flex">
+            <div class="layer-gutter"></div>
+            <div class="layer-plot axis-plot" id="plot-axis"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend-wrap" id="legendWrap" style="position:relative; margin-top:auto;">
+      <div class="legend" id="legend"></div>
+      <p class="legend-hint" id="legendHint" style="margin:8px 0 0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; font-size:11.5px; color:var(--muted);">Toca una categoría para mostrarla u ocultarla en todas las vistas.</p>
+      <button class="toggle-btn" id="toggleAllCats" type="button" style="position:absolute; bottom:0; right:0;"></button>
+    </div>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+<script>
+/* ---------------- Datos ---------------- */
+const CURRENT_YEAR = 2026;
+const DOMAIN_MIN = 1630;
+const DOMAIN_MAX = 2030;
+
+// filterMin/filterMax: selección fija del slider (siempre sobre el dominio completo)
+// viewMin/viewMax: lo que las gráficas usan para pintarse (= filtro actual, hace de "zoom")
+let filterMin = 1700, filterMax = DOMAIN_MAX;
+let viewMin = 1700, viewMax = DOMAIN_MAX;
+
+const CATEGORY_ORDER = ["Filosofía","Literatura","Ciencia","Economía","Psicología","Sociología",
+  "Matemáticas / Lógica","Lingüística","Derecho","Historia / Antropología","Política / Activismo"];
+
+const CATEGORY_COLORS = {
+  "Filosofía": "#E63946",
+  "Literatura": "#F4A261",
+  "Ciencia": "#2A9D8F",
+  "Economía": "#264653",
+  "Psicología": "#8E44AD",
+  "Sociología": "#E9C46A",
+  "Matemáticas / Lógica": "#457B9D",
+  "Lingüística": "#A8DADC",
+  "Derecho": "#6D6875",
+  "Historia / Antropología": "#B5838D",
+  "Política / Activismo": "#495057"
+};
+
+// name, categoría, nacimiento, muerte (null = con vida)
+const PEOPLE = [
+  ["Montesquieu","Filosofía",1689,1755],
+  ["Voltaire","Filosofía",1694,1778],
+  ["David Hume","Filosofía",1711,1776],
+  ["Jean-Jacques Rousseau","Filosofía",1712,1778],
+  ["Immanuel Kant","Filosofía",1724,1804],
+  ["Georg Wilhelm Friedrich Hegel","Filosofía",1770,1831],
+  ["Arthur Schopenhauer","Filosofía",1788,1860],
+  ["John Stuart Mill","Filosofía",1806,1873],
+  ["Søren Kierkegaard","Filosofía",1813,1855],
+  ["Friedrich Nietzsche","Filosofía",1844,1900],
+  ["Miguel de Unamuno","Filosofía",1864,1936],
+  ["Bertrand Russell","Filosofía",1872,1970],
+  ["Ludwig Wittgenstein","Filosofía",1889,1951],
+  ["José Ortega y Gasset","Filosofía",1883,1955],
+  ["Hannah Arendt","Filosofía",1906,1975],
+  ["Simone de Beauvoir","Filosofía",1908,1986],
+  ["Karl Popper","Filosofía",1902,1994],
+  ["Jean-Paul Sartre","Filosofía",1905,1980],
+  ["Michel Foucault","Filosofía",1926,1984],
+  ["Albert Camus","Filosofía",1913,1960],
+  ["Slavoj Žižek","Filosofía",1949,null],
+  ["Johann Wolfgang von Goethe","Literatura",1749,1832],
+  ["Jane Austen","Literatura",1775,1817],
+  ["Fiódor Dostoievski","Literatura",1821,1881],
+  ["León Tolstói","Literatura",1828,1910],
+  ["Franz Kafka","Literatura",1883,1924],
+  ["Marcel Proust","Literatura",1871,1922],
+  ["Virginia Woolf","Literatura",1882,1941],
+  ["James Joyce","Literatura",1882,1941],
+  ["Jorge Luis Borges","Literatura",1899,1986],
+  ["Nikos Kazantzakis","Literatura",1883,1957],
+  ["Gabriel García Márquez","Literatura",1927,2014],
+  ["Mark Twain","Literatura",1835,1910],
+  ["Charles Dickens","Literatura",1812,1870],
+  ["Victor Hugo","Literatura",1802,1885],
+  ["Isaac Newton","Ciencia",1643,1727],
+  ["Carl Linnaeus","Ciencia",1707,1778],
+  ["Antoine Lavoisier","Ciencia",1743,1794],
+  ["Alessandro Volta","Ciencia",1745,1827],
+  ["Pierre-Simon Laplace","Ciencia",1749,1827],
+  ["Carl Friedrich Gauss","Ciencia",1777,1855],
+  ["Michael Faraday","Ciencia",1791,1867],
+  ["Ada Lovelace","Ciencia",1815,1852],
+  ["Charles Darwin","Ciencia",1809,1882],
+  ["Louis Pasteur","Ciencia",1822,1895],
+  ["James Clerk Maxwell","Ciencia",1831,1879],
+  ["Thomas Alva Edison","Ciencia",1847,1931],
+  ["Albert Einstein","Ciencia",1879,1955],
+  ["Marie Curie","Ciencia",1867,1934],
+  ["Niels Bohr","Ciencia",1885,1962],
+  ["Werner Heisenberg","Ciencia",1901,1976],
+  ["Alan Turing","Ciencia",1912,1954],
+  ["Rosalind Franklin","Ciencia",1920,1958],
+  ["Alexander Fleming","Ciencia",1881,1955],
+  ["Stephen Hawking","Ciencia",1942,2018],
+  ["Adam Smith","Economía",1723,1790],
+  ["David Ricardo","Economía",1772,1823],
+  ["Karl Marx","Economía",1818,1883],
+  ["Rosa Luxemburgo","Economía",1871,1919],
+  ["John Maynard Keynes","Economía",1883,1946],
+  ["Friedrich Hayek","Economía",1899,1992],
+  ["Milton Friedman","Economía",1912,2006],
+  ["Joseph Stiglitz","Economía",1943,null],
+  ["Thomas Piketty","Economía",1971,null],
+  ["Sigmund Freud","Psicología",1856,1939],
+  ["Carl Jung","Psicología",1875,1961],
+  ["Max Weber","Sociología",1864,1920],
+  ["Émile Durkheim","Sociología",1858,1917],
+  ["Antonio Gramsci","Sociología",1891,1937],
+  ["Gottfried Leibniz","Matemáticas / Lógica",1646,1716],
+  ["Kurt Gödel","Matemáticas / Lógica",1906,1978],
+  ["John von Neumann","Matemáticas / Lógica",1903,1957],
+  ["John Nash","Matemáticas / Lógica",1928,2015],
+  ["Ferdinand de Saussure","Lingüística",1857,1913],
+  ["Noam Chomsky","Lingüística",1928,null],
+  ["Cesare Beccaria","Derecho",1738,1794],
+  ["Hans Kelsen","Derecho",1881,1973],
+  ["Ronald Dworkin","Derecho",1931,2013],
+  ["Alexander von Humboldt","Historia / Antropología",1769,1859],
+  ["Claude Lévi-Strauss","Historia / Antropología",1908,2009],
+  ["Eric Hobsbawm","Historia / Antropología",1917,2012],
+  ["Yuval Noah Harari","Historia / Antropología",1976,null],
+  ["Benjamin Franklin","Política / Activismo",1706,1790],
+  ["Mahatma Gandhi","Política / Activismo",1869,1948],
+  ["Henry Dunant","Política / Activismo",1828,1910],
+  ["Bertha von Suttner","Política / Activismo",1843,1914],
+  ["Martin Luther King Jr.","Política / Activismo",1929,1968],
+  ["Desmond Tutu","Política / Activismo",1931,2021],
+  ["Nelson Mandela","Política / Activismo",1918,2013],
+  ["Winston Churchill","Política / Activismo",1874,1965],
+  ["Rigoberta Menchú","Política / Activismo",1959,null],
+  ["Malala Yousafzai","Política / Activismo",1997,null]
+].map(p => ({ name:p[0], cat:p[1], birth:p[2], death:p[3], end: p[3]===null ? CURRENT_YEAR : p[3], alive: p[3]===null }));
+
+/* ---------------- Estado ---------------- */
+const state = { gantt: false, stream: true, heatmap: true, swarm: true };
+const categoryVisible = {};
+CATEGORY_ORDER.forEach(cat => categoryVisible[cat] = true);
+function visibleCats() { return CATEGORY_ORDER.filter(cat => categoryVisible[cat]); }
+function visiblePeople() { return PEOPLE.filter(p => categoryVisible[p.cat]); }
+function inViewRange(p) { return p.birth <= viewMax && p.end >= viewMin; }
+function visiblePeopleInRange() { return visiblePeople().filter(inViewRange); }
+
+/* ---------------- Utilidades ---------------- */
+const GUTTER = 118;
+let chartWidth = 600;
+
+function xPos(year) {
+  return (year - viewMin) / (viewMax - viewMin) * chartWidth;
+}
+function niceTicks(min, max, targetCount) {
+  const span = Math.max(1, max - min);
+  const steps = [1,2,5,10,20,25,50,100,200];
+  let step = steps[steps.length-1];
+  for (const s of steps) { if (span / s <= targetCount) { step = s; break; } }
+  const start = Math.ceil(min/step)*step;
+  const ticks = [];
+  for (let y = start; y <= max; y += step) ticks.push(y);
+  return ticks;
+}
+function lifeLabel(p) {
+  return p.birth + '–' + (p.alive ? 'presente' : p.death);
+}
+function aliveIn(p, year) {
+  return p.birth <= year && year <= p.end;
+}
+
+const tooltip = document.getElementById('tooltip');
+function showTip(evt, html) {
+  tooltip.innerHTML = html;
+  tooltip.classList.add('visible');
+  moveTip(evt);
+}
+function moveTip(evt) {
+  tooltip.style.left = evt.clientX + 'px';
+  tooltip.style.top = (evt.clientY - 12) + 'px';
+}
+function hideTip() { tooltip.classList.remove('visible'); }
+
+/* ---------------- Render: Gantt ---------------- */
+function renderGantt() {
+  const plot = document.getElementById('plot-gantt');
+  plot.innerHTML = '';
+  const sorted = visiblePeopleInRange().sort((a,b) => a.birth - b.birth);
+  sorted.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'gantt-row';
+    const bar = document.createElement('div');
+    bar.className = 'gantt-bar' + (p.alive ? ' alive' : '');
+    const clipBirth = Math.max(p.birth, viewMin);
+    const clipEnd = Math.min(p.end, viewMax);
+    const truncLeft = p.birth < viewMin;
+    const truncRight = p.end > viewMax;
+    const x0 = xPos(clipBirth), x1 = xPos(clipEnd);
+    bar.style.left = x0 + 'px';
+    bar.style.width = Math.max(2, x1 - x0) + 'px';
+    bar.style.background = CATEGORY_COLORS[p.cat];
+    if (truncLeft) { bar.style.borderTopLeftRadius = '0'; bar.style.borderBottomLeftRadius = '0'; }
+    if (truncRight) { bar.style.borderTopRightRadius = '0'; bar.style.borderBottomRightRadius = '0'; }
+    bar.addEventListener('mouseenter', e => showTip(e,
+      '<span class="tt-title">' + p.name + '</span><span class="tt-sub">' + p.cat + ' · ' + lifeLabel(p) + '</span>'));
+    bar.addEventListener('mousemove', moveTip);
+    bar.addEventListener('mouseleave', hideTip);
+    row.appendChild(bar);
+    plot.appendChild(row);
+  });
+}
+
+/* ---------------- Render: Streamgraph ---------------- */
+function renderStream() {
+  const plot = document.getElementById('plot-stream');
+  plot.innerHTML = '';
+  const H = 170;
+  const years = [];
+  for (let y = viewMin; y <= viewMax; y++) years.push(y);
+
+  // conteo vivo por categoría y año (solo categorías visibles)
+  const cats = visibleCats();
+  const rawCounts = {};
+  cats.forEach(cat => rawCounts[cat] = years.map(y =>
+    PEOPLE.filter(p => p.cat === cat && aliveIn(p, y)).length));
+
+  // media móvil para suavizar los escalones abruptos (nacimientos/muertes puntuales)
+  const SMOOTH_RADIUS = 6; // ventana de ~13 años
+  function movingAverage(arr, radius) {
+    const out = new Array(arr.length);
+    for (let i = 0; i < arr.length; i++) {
+      let sum = 0, n = 0;
+      for (let j = Math.max(0, i-radius); j <= Math.min(arr.length-1, i+radius); j++) { sum += arr[j]; n++; }
+      out[i] = sum / n;
+    }
+    return out;
+  }
+  const counts = {}; // cat -> [count suavizado por año]
+  cats.forEach(cat => counts[cat] = movingAverage(rawCounts[cat], SMOOTH_RADIUS));
+
+  const totals = years.map((_, i) => cats.reduce((s, cat) => s + counts[cat][i], 0));
+  const maxTotal = Math.max(1, ...totals);
+  const scaleY = (H * 0.42) / (maxTotal / 2);
+  const centerY = H / 2;
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', '0 0 ' + chartWidth + ' ' + H);
+  svg.style.display = 'block';
+
+  // baseline offset (silueta centrada)
+  const offset = totals.map(t => -t / 2);
+  let runningBefore = years.map(() => 0);
+
+  // suaviza una polilínea con curvas bezier cuadráticas por puntos medios
+  function smoothPathFrom(points) {
+    let d = '';
+    for (let i = 1; i < points.length - 1; i++) {
+      const midX = (points[i].x + points[i+1].x) / 2;
+      const midY = (points[i].y + points[i+1].y) / 2;
+      d += ' Q ' + points[i].x + ' ' + points[i].y + ' ' + midX + ' ' + midY;
+    }
+    d += ' L ' + points[points.length-1].x + ' ' + points[points.length-1].y;
+    return d;
+  }
+
+  cats.forEach(cat => {
+    const top = [], bottom = [];
+    years.forEach((y, i) => {
+      const before = runningBefore[i];
+      const after = before + counts[cat][i];
+      bottom.push(offset[i] + before);
+      top.push(offset[i] + after);
+      runningBefore[i] = after;
+    });
+    const topPts = years.map((y,i) => ({ x: xPos(y), y: centerY - top[i]*scaleY }));
+    const bottomPts = years.map((y,i) => ({ x: xPos(y), y: centerY - bottom[i]*scaleY })).reverse();
+
+    let d = 'M ' + topPts[0].x + ' ' + topPts[0].y;
+    d += smoothPathFrom(topPts);
+    d += ' L ' + bottomPts[0].x + ' ' + bottomPts[0].y;
+    d += smoothPathFrom(bottomPts);
+    d += ' Z';
+
+    const path = document.createElementNS(svgNS,'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', CATEGORY_COLORS[cat]);
+    path.setAttribute('fill-opacity', '0.92');
+    path.style.cursor = 'pointer';
+    path.addEventListener('mousemove', e => {
+      const rect = svg.getBoundingClientRect();
+      const relX = e.clientX - rect.left;
+      const year = Math.round(DOMAIN_MIN + (relX/rect.width) * (DOMAIN_MAX-DOMAIN_MIN));
+      const alive = PEOPLE.filter(p => p.cat===cat && aliveIn(p, year)).map(p=>p.name);
+      showTip(e, '<span class="tt-title">' + cat + ' — ' + year + '</span><span class="tt-sub">' +
+        (alive.length ? alive.join(', ') : 'sin representantes vivos') + '</span>');
+    });
+    path.addEventListener('mouseleave', hideTip);
+    svg.appendChild(path);
+  });
+
+  plot.appendChild(svg);
+}
+
+/* ---------------- Render: Heatmap ---------------- */
+function renderHeatmap() {
+  const plot = document.getElementById('plot-heatmap');
+  const gutter = document.getElementById('gutter-heatmap');
+  plot.innerHTML = '';
+  gutter.innerHTML = '';
+
+  const rowH = 24;
+  const decades = [];
+  for (let d = Math.floor(viewMin/10)*10; d < viewMax; d += 10) decades.push(d);
+  const cats = visibleCats();
+
+  // máximo global para normalizar intensidad
+  let maxCount = 1;
+  const grid = cats.map(cat => decades.map(d => {
+    const names = PEOPLE.filter(p => p.cat===cat && p.birth < d+10 && p.end >= d).map(p=>p.name);
+    maxCount = Math.max(maxCount, names.length);
+    return names;
+  }));
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const H = rowH * cats.length;
+  const svg = document.createElementNS(svgNS,'svg');
+  svg.setAttribute('width','100%');
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', '0 0 ' + chartWidth + ' ' + H);
+  svg.style.display = 'block';
+
+  cats.forEach((cat, ri) => {
+    const lbl = document.createElement('div');
+    lbl.className = 'heat-row-label';
+    lbl.style.height = rowH + 'px';
+    lbl.textContent = cat;
+    gutter.appendChild(lbl);
+
+    decades.forEach((d, ci) => {
+      const names = grid[ri][ci];
+      const count = names.length;
+      const x0 = xPos(d), x1 = xPos(d+10);
+      const rect = document.createElementNS(svgNS,'rect');
+      rect.setAttribute('x', x0);
+      rect.setAttribute('y', ri*rowH + 1);
+      rect.setAttribute('width', Math.max(0, x1-x0-1));
+      rect.setAttribute('height', rowH - 2);
+      rect.setAttribute('rx', 2);
+      rect.setAttribute('fill', CATEGORY_COLORS[cat]);
+      const MIN_OP = 0.16, MAX_OP = 1.0;
+      let op;
+      if (count === 0) op = 0;
+      else if (maxCount <= 1) op = MIN_OP;
+      else op = MIN_OP + (MAX_OP - MIN_OP) * ((count - 1) / (maxCount - 1));
+      rect.setAttribute('fill-opacity', op);
+      if (count === 0) {
+        rect.setAttribute('stroke', '#eef0f2');
+        rect.setAttribute('stroke-width', '1');
+      }
+      rect.style.cursor = 'pointer';
+      rect.addEventListener('mouseenter', e => showTip(e,
+        '<span class="tt-title">' + cat + ' — ' + d + 's</span><span class="tt-sub">' +
+        (count ? names.join(', ') : 'sin datos') + '</span>'));
+      rect.addEventListener('mousemove', moveTip);
+      rect.addEventListener('mouseleave', hideTip);
+      svg.appendChild(rect);
+    });
+  });
+
+  plot.appendChild(svg);
+}
+
+/* ---------------- Render: Swarm ---------------- */
+function layoutBeeswarm(points, minDist) {
+  points.sort((a,b) => a.x - b.x);
+  const placed = [];
+  points.forEach(p => {
+    const nearby = placed.filter(q => Math.abs(q.x - p.x) < minDist * 3);
+    let y = 0;
+    if (nearby.some(q => Math.abs(q.x-p.x) < minDist && Math.abs(q.y-y) < minDist)) {
+      let k = 1, found = false, candidate = 0;
+      while (!found && k < 400) {
+        candidate = (k % 2 === 1) ? Math.ceil(k/2)*minDist*0.85 : -Math.ceil(k/2)*minDist*0.85;
+        found = !nearby.some(q => Math.hypot(q.x-p.x, q.y-candidate) < minDist);
+        k++;
+      }
+      y = candidate;
+    }
+    p.y = y;
+    placed.push(p);
+  });
+}
+
+function renderSwarm() {
+  const plot = document.getElementById('plot-swarm');
+  plot.innerHTML = '';
+  const r = 6.5;
+  const points = visiblePeopleInRange().map(p => ({ x: xPos(Math.max(p.birth, viewMin)), person: p, y: 0 }));
+  layoutBeeswarm(points, r*2 + 3);
+  const maxAbsY = Math.max(20, ...points.map(p => Math.abs(p.y)));
+  const H = maxAbsY*2 + r*2 + 16;
+  const centerY = H/2;
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS,'svg');
+  svg.setAttribute('width','100%');
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', '0 0 ' + chartWidth + ' ' + H);
+  svg.style.display = 'block';
+
+  points.forEach(pt => {
+    const p = pt.person;
+    const c = document.createElementNS(svgNS, 'circle');
+    c.setAttribute('cx', pt.x);
+    c.setAttribute('cy', centerY + pt.y);
+    c.setAttribute('r', r);
+    c.setAttribute('fill', p.alive ? '#ffffff' : CATEGORY_COLORS[p.cat]);
+    c.setAttribute('stroke', CATEGORY_COLORS[p.cat]);
+    c.setAttribute('stroke-width', p.alive ? 2.5 : 0);
+    c.style.cursor = 'pointer';
+    c.addEventListener('mouseenter', e => showTip(e,
+      '<span class="tt-title">' + p.name + '</span><span class="tt-sub">' + p.cat + ' · nace ' + p.birth + ' · ' + lifeLabel(p) + '</span>'));
+    c.addEventListener('mousemove', moveTip);
+    c.addEventListener('mouseleave', hideTip);
+    svg.appendChild(c);
+  });
+
+  plot.appendChild(svg);
+}
+
+/* ---------------- Eje y gridlines compartidos ---------------- */
+function currentTicks() { return niceTicks(viewMin, viewMax, 11); }
+
+function renderAxisInto(plot) {
+  plot.innerHTML = '';
+  currentTicks().forEach(y => {
+    const t = document.createElement('div');
+    t.className = 'axis-tick';
+    t.style.left = xPos(y) + 'px';
+    t.textContent = y;
+    plot.appendChild(t);
+  });
+}
+
+function renderGridlines() {
+  const overlay = document.getElementById('gridlineOverlay');
+  overlay.innerHTML = '';
+  overlay.style.left = GUTTER + 'px';
+  overlay.style.right = '0';
+  currentTicks().forEach(y => {
+    const g = document.createElement('div');
+    g.className = 'gridline';
+    g.style.left = xPos(y) + 'px';
+    overlay.appendChild(g);
+  });
+}
+
+/* ---------------- Orquestación ---------------- */
+function anyActive() { return state.gantt || state.stream || state.heatmap || state.swarm; }
+
+function renderAll() {
+  const inner = document.getElementById('chartInner');
+  chartWidth = Math.max(400, inner.clientWidth - GUTTER);
+
+  document.getElementById('layer-gantt').style.display = state.gantt ? '' : 'none';
+  document.getElementById('layer-stream').style.display = state.stream ? '' : 'none';
+  document.getElementById('layer-heatmap').style.display = state.heatmap ? '' : 'none';
+  document.getElementById('layer-swarm').style.display = state.swarm ? '' : 'none';
+  document.getElementById('layer-axis').style.display = anyActive() ? '' : 'none';
+  document.getElementById('layer-axis-top').style.display = state.gantt ? '' : 'none';
+  document.getElementById('emptyState').style.display = anyActive() ? 'none' : '';
+
+  if (state.gantt) renderGantt();
+  if (state.stream) renderStream();
+  if (state.heatmap) renderHeatmap();
+  if (state.swarm) renderSwarm();
+  if (anyActive()) renderAxisInto(document.getElementById('plot-axis'));
+  if (state.gantt) renderAxisInto(document.getElementById('plot-axis-top'));
+  updateSliderVisual();
+
+  // gridlines detrás de todo, medidos tras el resto del layout
+  const overlay = document.getElementById('gridlineOverlay');
+  overlay.style.height = '0px'; // reset ANTES de medir, si no el propio overlay infla el scrollHeight
+  requestAnimationFrame(() => {
+    if (!anyActive()) { overlay.innerHTML = ''; overlay.style.height = '0px'; return; }
+    const h = inner.scrollHeight;
+    overlay.style.height = h + 'px';
+    renderGridlines();
+  });
+}
+
+/* ---------------- Preservar scroll al fondo tras cambios de altura ---------------- */
+function isScrolledToBottom() {
+  return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+}
+function preserveBottomScroll(action) {
+  const wasAtBottom = isScrolledToBottom();
+  action();
+  if (wasAtBottom) {
+    requestAnimationFrame(() => {
+      window.scrollTo(0, document.documentElement.scrollHeight);
+    });
+  }
+}
+
+/* ---------------- Interacción ---------------- */
+document.querySelectorAll('#toggles .toggle-btn').forEach(btn => {
+  const key = btn.dataset.layer;
+  if (state[key]) btn.classList.add('active');
+  btn.addEventListener('click', () => {
+    preserveBottomScroll(() => {
+      state[key] = !state[key];
+      btn.classList.toggle('active', state[key]);
+      renderAll();
+    });
+  });
+});
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(renderAll, 120);
+});
+
+/* ---------------- Leyenda (toggles por categoría) ---------------- */
+const legend = document.getElementById('legend');
+const legendButtons = {};
+CATEGORY_ORDER.forEach(cat => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'legend-item';
+  const sw = document.createElement('span');
+  sw.className = 'swatch';
+  sw.style.background = CATEGORY_COLORS[cat];
+  btn.appendChild(sw);
+  btn.appendChild(document.createTextNode(cat));
+  btn.addEventListener('click', () => {
+    preserveBottomScroll(() => {
+      categoryVisible[cat] = !categoryVisible[cat];
+      btn.classList.toggle('inactive', !categoryVisible[cat]);
+      updateToggleAllLabel();
+      renderAll();
+    });
+  });
+  legendButtons[cat] = btn;
+  legend.appendChild(btn);
+});
+
+/* ---------------- Botón maestro: todas / ninguna categoría ---------------- */
+const toggleAllBtn = document.getElementById('toggleAllCats');
+function allCategoriesVisible() { return CATEGORY_ORDER.every(cat => categoryVisible[cat]); }
+function updateToggleAllLabel() {
+  toggleAllBtn.textContent = allCategoriesVisible() ? 'Ocultar todas' : 'Mostrar todas';
+}
+toggleAllBtn.addEventListener('click', () => {
+  preserveBottomScroll(() => {
+    const showAll = !allCategoriesVisible();
+    CATEGORY_ORDER.forEach(cat => {
+      categoryVisible[cat] = showAll;
+      legendButtons[cat].classList.toggle('inactive', !showAll);
+    });
+    updateToggleAllLabel();
+    renderAll();
+  });
+});
+updateToggleAllLabel();
+
+/* ---------------- Contador dinámico ---------------- */
+const livingCount = PEOPLE.filter(p => p.alive).length;
+document.getElementById('peopleCount').textContent =
+  PEOPLE.length + ' figuras (' + livingCount + ' con vida), ' + DOMAIN_MIN + '–' + CURRENT_YEAR;
+
+/* ---------------- Slider de rango (filtro de fechas) ---------------- */
+const HANDLE_R = 8;
+const MIN_GAP_YEARS = 5;
+const trackEl = document.getElementById('rangeTrack');
+const fillEl = document.getElementById('rangeFill');
+const handleMinEl = document.getElementById('handleMin');
+const handleMaxEl = document.getElementById('handleMax');
+const rangeReadoutEl = document.getElementById('rangeReadoutText');
+const rangeResetEl = document.getElementById('rangeReset');
+
+// El slider SIEMPRE representa el dominio completo (fijo), independientemente del zoom actual
+function sliderPx(year) {
+  const usable = Math.max(1, trackEl.clientWidth - HANDLE_R*2);
+  return HANDLE_R + (year - DOMAIN_MIN) / (DOMAIN_MAX - DOMAIN_MIN) * usable;
+}
+function sliderYearFromClientX(clientX) {
+  const rect = trackEl.getBoundingClientRect();
+  const usable = Math.max(1, rect.width - HANDLE_R*2);
+  let px = clientX - rect.left - HANDLE_R;
+  px = Math.max(0, Math.min(usable, px));
+  return Math.round(DOMAIN_MIN + (px / usable) * (DOMAIN_MAX - DOMAIN_MIN));
+}
+
+function updateSliderVisual() {
+  const pMin = sliderPx(filterMin), pMax = sliderPx(filterMax);
+  handleMinEl.style.left = (pMin - HANDLE_R) + 'px';
+  handleMaxEl.style.left = (pMax - HANDLE_R) + 'px';
+  fillEl.style.left = pMin + 'px';
+  fillEl.style.width = Math.max(0, pMax - pMin) + 'px';
+  rangeReadoutEl.textContent = filterMin + ' – ' + filterMax;
+  rangeResetEl.style.visibility = (filterMin === DOMAIN_MIN && filterMax === DOMAIN_MAX) ? 'hidden' : 'visible';
+}
+
+function applyFilterAndRender() {
+  viewMin = filterMin;
+  viewMax = filterMax;
+  renderAll();
+}
+
+let dragging = null; // 'min' | 'max' | null
+let dragRenderScheduled = false;
+function scheduleDragRender() {
+  if (dragRenderScheduled) return;
+  dragRenderScheduled = true;
+  requestAnimationFrame(() => { dragRenderScheduled = false; applyFilterAndRender(); });
+}
+function onSliderMove(clientX) {
+  if (!dragging) return;
+  const y = sliderYearFromClientX(clientX);
+  if (dragging === 'min') filterMin = Math.max(DOMAIN_MIN, Math.min(y, filterMax - MIN_GAP_YEARS));
+  else filterMax = Math.min(DOMAIN_MAX, Math.max(y, filterMin + MIN_GAP_YEARS));
+  updateSliderVisual();
+  scheduleDragRender();
+}
+handleMinEl.addEventListener('mousedown', e => { dragging = 'min'; e.preventDefault(); });
+handleMaxEl.addEventListener('mousedown', e => { dragging = 'max'; e.preventDefault(); });
+handleMinEl.addEventListener('touchstart', e => { dragging = 'min'; }, { passive: true });
+handleMaxEl.addEventListener('touchstart', e => { dragging = 'max'; }, { passive: true });
+document.addEventListener('mousemove', e => onSliderMove(e.clientX));
+document.addEventListener('touchmove', e => { if (dragging) { onSliderMove(e.touches[0].clientX); } }, { passive: true });
+let sliderWasAtBottom = false;
+function endDrag() {
+  if (dragging) window.requestAnimationFrame(() => {
+    if (sliderWasAtBottom) window.scrollTo(0, document.documentElement.scrollHeight);
+  });
+  dragging = null;
+}
+document.addEventListener('mousedown', e => { if (e.target === handleMinEl || e.target === handleMaxEl) sliderWasAtBottom = isScrolledToBottom(); });
+document.addEventListener('mouseup', endDrag);
+document.addEventListener('touchend', endDrag);
+rangeResetEl.addEventListener('click', () => {
+  preserveBottomScroll(() => {
+    filterMin = DOMAIN_MIN; filterMax = DOMAIN_MAX;
+    updateSliderVisual();
+    applyFilterAndRender();
+  });
+});
+
+renderAll();
+</script>
+</body>
+</html>
