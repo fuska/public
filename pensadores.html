@@ -159,6 +159,23 @@
     text-align: right;
   }
 
+  /* Gantt: etiquetas de nombre a la izquierda, mismo tono/tamaño/posición que el heatmap */
+  .gantt-row-label {
+    height: 13px;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    font-size: 10.5px;
+    color: var(--muted);
+    line-height: 1.15;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   /* Axis */
   .axis-plot { height: 26px; position: relative; }
   .axis-tick { position: absolute; top: 0; font-size: 11px; color: var(--muted); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; transform: translateX(-50%); }
@@ -308,7 +325,7 @@
         <div class="layer" id="layer-gantt" style="display:none;">
           <div class="layer-title">Gantt timeline — de nacimiento a muerte</div>
           <div class="layer-flex">
-            <div class="layer-gutter"></div>
+            <div class="layer-gutter" id="gutter-gantt"></div>
             <div class="layer-plot" id="plot-gantt"></div>
           </div>
         </div>
@@ -387,6 +404,8 @@ const CATEGORY_COLORS = {
 
 // name, categoría, nacimiento, muerte (null = con vida)
 const PEOPLE = [
+  ["John Locke","Filosofía",1632,1704],
+  ["George Berkeley","Filosofía",1685,1753],
   ["Montesquieu","Filosofía",1689,1755],
   ["Voltaire","Filosofía",1694,1778],
   ["David Hume","Filosofía",1711,1776],
@@ -459,7 +478,9 @@ const PEOPLE = [
   ["Gottfried Leibniz","Matemáticas / Lógica",1646,1716],
   ["Kurt Gödel","Matemáticas / Lógica",1906,1978],
   ["John von Neumann","Matemáticas / Lógica",1903,1957],
+  ["Paul Erdős","Matemáticas / Lógica",1913,1996],
   ["John Nash","Matemáticas / Lógica",1928,2015],
+  ["Terence Tao","Matemáticas / Lógica",1975,null],
   ["Ferdinand de Saussure","Lingüística",1857,1913],
   ["Noam Chomsky","Lingüística",1928,null],
   ["Cesare Beccaria","Derecho",1738,1794],
@@ -529,9 +550,16 @@ function hideTip() { tooltip.classList.remove('visible'); }
 /* ---------------- Render: Gantt ---------------- */
 function renderGantt() {
   const plot = document.getElementById('plot-gantt');
+  const gutter = document.getElementById('gutter-gantt');
   plot.innerHTML = '';
+  gutter.innerHTML = '';
   const sorted = visiblePeopleInRange().sort((a,b) => a.birth - b.birth);
   sorted.forEach(p => {
+    const label = document.createElement('div');
+    label.className = 'gantt-row-label';
+    label.textContent = p.name;
+    gutter.appendChild(label);
+
     const row = document.createElement('div');
     row.className = 'gantt-row';
     const bar = document.createElement('div');
